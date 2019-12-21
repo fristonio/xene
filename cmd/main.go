@@ -28,4 +28,5 @@ func init() {
 	log.SetLevel(log.DebugLevel)
 
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(apiServerCmd)
 }
