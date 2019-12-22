@@ -8,8 +8,18 @@ notifications:
   email: false
 
 before_script:
-    - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)
+  - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)
+
+before_install:
+  - wget http://ftp.gnu.org/gnu/make/make-4.2.tar.gz
+  - tar xvf make-4.2.tar.gz && cd make-4.2/ && ./configure && make && sudo make install && cd .. && rm -rf make-4.2.tar.gz make-4.2
+  - /usr/local/bin/make -v
+
+addons:
+  apt:
+    update: true
 
 script:
-    - make check_format
-    - make build
+  - /usr/local/bin/make check_format
+  - /usr/local/bin/make build
+
