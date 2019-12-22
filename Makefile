@@ -44,4 +44,9 @@ govet:
 > @echo "[*] Vetting code, checking for mistakes"
 > @$(GO) vet $(pkgs)
 
-.PHONY: build format check_format govet help
+docs:
+> @echo "[*] Building docs.."
+> @rm -rf site/
+> @mkdocs build
+
+.PHONY: build format check_format govet help docs
