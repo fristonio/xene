@@ -1,9 +1,11 @@
 package apiserver
 
 import (
+	"context"
 	"fmt"
-	"os"
+	"net/http"
 
+	"github.com/fristonio/xene/pkg/defaults"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -19,11 +21,10 @@ const (
 // APIServer is the standard type which is used to manage the
 // API exposed by xene.
 type APIServer struct {
-	shutdown  chan struct{}
-	interrupt chan os.Signal
+	router *gin.Engine
+	server *http.Server
 
 	shuttingDown bool
-	interrupted  bool
 
 	scheme         serverScheme
 	unixDomainPath string
@@ -38,14 +39,11 @@ type APIServer struct {
 // HTTP API server.
 func NewHTTPServer(host string, port uint32) *APIServer {
 	return &APIServer{
-		scheme:    schemeHTTP,
-		host:      host,
-		port:      port,
-		shutdown:  make(chan struct{}),
-		interrupt: make(chan os.Signal, 1),
+		scheme: schemeHTTP,
+		host:   host,
+		port:   port,
 
 		shuttingDown: false,
-		interrupted:  false,
 	}
 }
 
@@ -55,11 +53,8 @@ func NewUnixSocketServer(file string) *APIServer {
 	return &APIServer{
 		scheme:         schemeUnix,
 		unixDomainPath: file,
-		shutdown:       make(chan struct{}),
-		interrupt:      make(chan os.Signal, 1),
 
 		shuttingDown: false,
-		interrupted:  false,
 	}
 }
 
@@ -67,36 +62,50 @@ func NewUnixSocketServer(file string) *APIServer {
 // on the specified port.
 func NewHTTPSServer(host string, port uint32, keyFile, certFile string) *APIServer {
 	return &APIServer{
-		scheme:    schemeHTTPS,
-		host:      host,
-		port:      port,
-		certFile:  certFile,
-		keyFile:   keyFile,
-		shutdown:  make(chan struct{}),
-		interrupt: make(chan os.Signal, 1),
+		scheme:   schemeHTTPS,
+		host:     host,
+		port:     port,
+		certFile: certFile,
+		keyFile:  keyFile,
 
 		shuttingDown: false,
-		interrupted:  false,
 	}
 }
 
 // RunServer runs the server configured for the API.
 func (s *APIServer) RunServer() error {
-	r := gin.New()
-	r.Use(NewXeneLoggerMiddleware(log.New()))
-	r.Use(gin.Recovery())
-
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(200, "pong")
-	})
+	log.Info(defaults.XeneBanner)
+	s.router = NewAPIServerRouter(true)
 
 	switch s.scheme {
 	case schemeHTTP:
 		hostPort := fmt.Sprintf("%s:%d", s.host, s.port)
-		return r.Run(hostPort)
+		s.server = &http.Server{
+			Addr:    hostPort,
+			Handler: s.router,
+		}
+		log.Infof("Xene API server is listening on: %s", hostPort)
+		return s.server.ListenAndServe()
 	case schemeUnix, schemeHTTPS:
 		log.Warnf("the api server scheme %s is not suppported yet", s.scheme)
 	}
 
 	return nil
+}
+
+// Shutdown shuts down the api server running.
+func (s *APIServer) Shutdown() {
+	s.shuttingDown = true
+
+	ctx, cancel := context.WithTimeout(context.Background(), defaults.APIServerTimeout)
+	defer cancel()
+
+	if err := s.server.Shutdown(ctx); err != nil {
+		log.Errorf("error while trying to shut down the apiserver: %s", err)
+		s.shuttingDown = false
+		return
+	}
+
+	s.shuttingDown = false
+	log.Info("server shutdown successful.")
 }
