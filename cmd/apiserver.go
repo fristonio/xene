@@ -64,5 +64,4 @@ func initAPIServerConfig() {
 	if err = viper.ReadInConfig(); err == nil {
 		log.Infof("using config file: %s", viper.ConfigFileUsed())
 	}
-	log.Debugf("Error while reading config file for viper: %s", err)
 }

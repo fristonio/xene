@@ -30,6 +30,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(cmdrefCmd)
 	rootCmd.AddCommand(apiServerCmd)
 }
 
