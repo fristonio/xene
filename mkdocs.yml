@@ -1,0 +1,9 @@
+site_name: Xene
+
+nav:
+  - Home: README.md
+  - CmdRef: cmdref/xene.md
+  - Design: design/README.md
+
+theme: cosmo
+
