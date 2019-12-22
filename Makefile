@@ -32,7 +32,7 @@ build:
 # Check go formatting
 check_format:
 > @echo "[*] Checking for formatting errors using gofmt"
-> @./scripts/build/check_gofmt.sh
+> @./scripts/build/check_fmt.sh
 
 # Format code using gofmt
 format:

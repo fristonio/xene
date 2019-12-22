@@ -27,5 +27,13 @@ func init() {
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.DebugLevel)
 
+	cobra.OnInitialize(initConfig)
+
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(cmdrefCmd)
+	rootCmd.AddCommand(apiServerCmd)
+}
+
+func initConfig() {
+	initAPIServerConfig()
 }
