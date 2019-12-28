@@ -4,7 +4,7 @@ Basic building blocks of xene workflow are:
 
 * Workflow
 * Pipeline
-* Activity
+* Task
 
 ## Workflow
 
@@ -23,9 +23,9 @@ A pipeline is a logical building block of xene. A pipeline consists of activitie
 ordering defined the connecters between activities. Each pipeline execution is handled by a `Trigger` associated with
 it.
 
-## Activity
+## Task
 
-An activity is the basic execution unit managed by xene. Each activity is associated with a context which helps xene to
+A task is the basic execution unit managed by xene. Each task is associated with a context which helps xene to
 group activities in the same environment. If no context is specified then xene assigns it a randomly generated isolated
 context. Activites under same context share the same execution environment and thus can affect the execution of each
 other.
@@ -35,7 +35,7 @@ other.
 Connects different activites in a pipeline with each other provide a logical ordering, these connectors also allow us
 to build a sort of dependency graph for defining execution order.
 
-* BasicConnector - Simple connector for pointing the execution pointer from one activity to another.
+* BasicConnector - Simple connector for pointing the execution pointer from one task to another.
 
 ## Triggers
 
