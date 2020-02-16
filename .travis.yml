@@ -1,7 +1,10 @@
 language: go
 
+os:
+  - linux
+
 sudo: false
-dist: trusty
+dist: bionic
 go: 1.13.x
 
 notifications:
@@ -10,16 +13,10 @@ notifications:
 before_script:
   - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)
 
-before_install:
-  - wget http://ftp.gnu.org/gnu/make/make-4.2.tar.gz
-  - tar xvf make-4.2.tar.gz && cd make-4.2/ && ./configure && make && sudo make install && cd .. && rm -rf make-4.2.tar.gz make-4.2
-  - /usr/local/bin/make -v
-
 addons:
   apt:
     update: true
 
 script:
-  - /usr/local/bin/make check_format
-  - /usr/local/bin/make build
-
+  - make check-lint
+  - make build
