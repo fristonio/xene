@@ -41,12 +41,12 @@ help:
 # Build status
 build:
 > @echo "Building xene..."
-> @./scripts/build/build.sh
+> @./contrib/scripts/build.sh
 
 # Check go formatting
 check-lint:
 > @echo "[*] Checking for formatting and linting errors"
-> @./scripts/build/check_fmt.sh
+> @./contrib/scripts/check_fmt.sh
 > @golangci-lint run ./...
 
 fix-lint:
