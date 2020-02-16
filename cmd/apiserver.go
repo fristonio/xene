@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/fristonio/xene/pkg/apiserver"
 	"github.com/fristonio/xene/pkg/defaults"
@@ -20,6 +22,19 @@ var apiServerCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		server := apiserver.NewHTTPServer(option.APIServer.Host, option.APIServer.Port)
+
+		sigc := make(chan os.Signal, 1)
+		signal.Notify(sigc,
+			syscall.SIGHUP,
+			syscall.SIGINT,
+			syscall.SIGTERM,
+			syscall.SIGQUIT)
+		go func() {
+			_ = <-sigc
+			log.Info("Signal recieved, shutting down api server.")
+			server.Shutdown()
+			os.Exit(0)
+		}()
 
 		err := server.RunServer()
 		if err != nil {
