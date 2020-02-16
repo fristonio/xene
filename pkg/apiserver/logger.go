@@ -14,7 +14,7 @@ import (
 // NewXeneLoggerMiddleware a gin middleware which can be used a logger,
 // this is used mostly to have a standard logger implementation throughout.
 // We are using logrus logger to log any information in xene.
-func NewXeneLoggerMiddleware(logger logrus.FieldLogger) gin.HandlerFunc {
+func NewXeneLoggerMiddleware(logger logrus.FieldLogger, verboseLogs bool) gin.HandlerFunc {
 	hostname, err := os.Hostname()
 	if err != nil {
 		hostname = "xene-unknown"
@@ -35,31 +35,37 @@ func NewXeneLoggerMiddleware(logger logrus.FieldLogger) gin.HandlerFunc {
 			dataLength = 0
 		}
 
-		entry := logger.WithFields(logrus.Fields{
-			"hostname":   hostname,
-			"statusCode": statusCode,
-			"latency":    latency,
-			"clientIP":   clientIP,
-			"method":     c.Request.Method,
-			"path":       path,
-			"referer":    referer,
-			"dataLength": dataLength,
-			"userAgent":  clientUserAgent,
-		})
+		var entry *logrus.Entry
+
+		if verboseLogs {
+			entry = logger.WithFields(logrus.Fields{
+				"hostname":   hostname,
+				"statusCode": statusCode,
+				"latency":    latency,
+				"clientIP":   clientIP,
+				"method":     c.Request.Method,
+				"path":       path,
+				"referer":    referer,
+				"dataLength": dataLength,
+				"userAgent":  clientUserAgent,
+			})
+		} else {
+			entry = logger.WithFields(logrus.Fields{
+				"path":    path,
+				"latency": latency,
+			})
+		}
 
 		if len(c.Errors) > 0 {
 			entry.Error(c.Errors.ByType(gin.ErrorTypePrivate).String())
 		} else {
-			msg := fmt.Sprintf("%s - %s [%s] \"%s %s\" %d %d \"%s\" \"%s\" (%dms)",
+			msg := fmt.Sprintf("%s - %s [%s] \"%s %s\" %d (%dms)",
 				clientIP,
 				hostname,
 				time.Now().Format(defaults.TimeFormat),
 				c.Request.Method,
 				path,
 				statusCode,
-				dataLength,
-				referer,
-				clientUserAgent,
 				latency)
 
 			if statusCode > 499 {

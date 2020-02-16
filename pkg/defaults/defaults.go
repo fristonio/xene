@@ -31,4 +31,16 @@ $$  /\$$\ \$$$$$$$\ $$ |  $$ |\$$$$$$$\
 
 	// TimeFormat is the default format of time we use within xene.
 	TimeFormat string = "01-Jan-1970:15:04:05 -0700"
+
+	// JWTExpireInterval is the default value of the duration for the issued
+	// JWT token to expire.
+	// The default for this is 48 Hours ie: 2 days
+	JWTExpireInterval time.Duration = 48 * time.Hour
+
+	// JWTAuthType is the default type of authentication we support.
+	JWTAuthType string = "Bearer"
+
+	// ContextBucketKey is the key which is set in the context after JWT has been
+	// verified from the Authentication header.
+	ContextBucketKey string = "user"
 )

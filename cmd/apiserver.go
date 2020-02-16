@@ -21,7 +21,15 @@ var apiServerCmd = &cobra.Command{
 	Long:  "Run xene apiserver which can then be used to communicate to user facing interface of xene.",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		server := apiserver.NewHTTPServer(option.APIServer.Host, option.APIServer.Port)
+		if !option.APIServer.DisableAuth && option.APIServer.JWTSecret == "" {
+			log.Error("Either specify disable-auth flag or provide a JWT secret to use for authentication.")
+			os.Exit(1)
+		}
+		server := apiserver.NewHTTPServer(option.APIServer.Host,
+			option.APIServer.Port,
+			option.APIServer.DisableAuth,
+			option.APIServer.VerboseLogs,
+			option.APIServer.JWTSecret)
 
 		sigc := make(chan os.Signal, 1)
 		signal.Notify(sigc,
@@ -30,7 +38,7 @@ var apiServerCmd = &cobra.Command{
 			syscall.SIGTERM,
 			syscall.SIGQUIT)
 		go func() {
-			_ = <-sigc
+			<-sigc
 			log.Info("Signal recieved, shutting down api server.")
 			server.Shutdown()
 			os.Exit(0)
@@ -46,15 +54,28 @@ var apiServerCmd = &cobra.Command{
 func init() {
 	apiServerFlags := apiServerCmd.Flags()
 
-	apiServerFlags.StringVarP(&option.APIServer.ConfigFile, "config", "c", "", "Config file for API server.")
-	apiServerFlags.StringVarP(&option.APIServer.Host, "host", "b", defaults.APIServerHost, "Host to bind the api server to.")
-	apiServerFlags.Uint32VarP(&option.APIServer.Port, "port", "p", defaults.APIServerPort, "Port to bind the xene api server on.")
-	apiServerFlags.StringVarP(&option.APIServer.Scheme, "scheme", "s", defaults.APIServerScheme, "Scheme to use for the api server.")
-	apiServerFlags.StringVarP(&option.APIServer.UnixSocketPath, "unix-socket", "u", defaults.APIServerUnixSocketPath, "Default path for the unix domain socket, when using unix scheme")
-	apiServerFlags.StringVarP(&option.APIServer.KeyFile, "key-file", "k", "", "Key to use when using HTTPS scheme for the server.")
-	apiServerFlags.StringVarP(&option.APIServer.CertFile, "cert-file", "l", "", "Certificate to use for the API Server when running under HTTPS scheme.")
+	apiServerFlags.StringVarP(&option.APIServer.ConfigFile, "config", "c",
+		"", "Config file for API server.")
+	apiServerFlags.StringVarP(&option.APIServer.Host, "host", "b",
+		defaults.APIServerHost, "Host to bind the api server to.")
+	apiServerFlags.Uint32VarP(&option.APIServer.Port, "port", "p",
+		defaults.APIServerPort, "Port to bind the xene api server on.")
+	apiServerFlags.StringVarP(&option.APIServer.Scheme, "scheme", "s",
+		defaults.APIServerScheme, "Scheme to use for the api server.")
+	apiServerFlags.BoolVarP(&option.APIServer.DisableAuth, "disable-auth", "n",
+		false, "If the authentication should be disabled for the API server.")
+	apiServerFlags.StringVarP(&option.APIServer.UnixSocketPath, "unix-socket", "u",
+		defaults.APIServerUnixSocketPath, "Default path for the unix domain socket, when using unix scheme")
+	apiServerFlags.StringVarP(&option.APIServer.KeyFile, "key-file", "k",
+		"", "Key to use when using HTTPS scheme for the server.")
+	apiServerFlags.StringVarP(&option.APIServer.CertFile, "cert-file", "l",
+		"", "Certificate to use for the API Server when running under HTTPS scheme.")
+	apiServerFlags.StringVarP(&option.APIServer.JWTSecret, "jwt-secret", "j",
+		"", "JWT secret for authentication purposes, make sure it is secure and non bruteforcable.")
+	apiServerFlags.BoolVarP(&option.APIServer.VerboseLogs, "verbose-logs", "v",
+		false, "Print verbose APIServer request logs.")
 
-	viper.BindPFlags(apiServerFlags)
+	_ = viper.BindPFlags(apiServerFlags)
 }
 
 func initAPIServerConfig() {

@@ -12,7 +12,7 @@ var rootCmd = &cobra.Command{
 	Use:   "xene",
 	Short: "xene is an open source workflow builder and executor tool.",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 

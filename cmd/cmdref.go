@@ -11,7 +11,8 @@ var cmdrefDir string
 var cmdrefCmd = &cobra.Command{
 	Use:   "cmdref",
 	Short: "Run xene cmdref command to generate command line reference.",
-	Long:  "Run xene cmdref command to generate command line reference documentaiton in the specified directory, by default docs/cmdref/.",
+	Long: "Run xene cmdref command to generate command line reference " +
+		"documentaiton in the specified directory, by default docs/cmdref/.",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Infof("generating command line reference documentation in directory %s", cmdrefDir)
@@ -23,5 +24,6 @@ var cmdrefCmd = &cobra.Command{
 }
 
 func init() {
-	cmdrefCmd.Flags().StringVarP(&cmdrefDir, "directory", "d", "docs/cmdref/", "Directory to use for creating cmd reference docs")
+	cmdrefCmd.Flags().StringVarP(&cmdrefDir, "directory", "d",
+		"docs/cmdref/", "Directory to use for creating cmd reference docs")
 }

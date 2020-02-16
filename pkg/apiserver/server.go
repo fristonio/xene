@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/fristonio/xene/pkg/auth/jwt"
 	"github.com/fristonio/xene/pkg/defaults"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -25,6 +26,8 @@ type APIServer struct {
 	server *http.Server
 
 	shuttingDown bool
+	disableAuth  bool
+	verboseLogs  bool
 
 	scheme         serverScheme
 	unixDomainPath string
@@ -33,17 +36,23 @@ type APIServer struct {
 
 	certFile string
 	keyFile  string
+
+	authProvider *jwt.AuthProvider
 }
 
 // NewHTTPServer returns the ApiServer configured for running
 // HTTP API server.
-func NewHTTPServer(host string, port uint32) *APIServer {
+func NewHTTPServer(host string, port uint32, disableAuth, verboseLogs bool, jwtSecret string) *APIServer {
 	return &APIServer{
 		scheme: schemeHTTP,
 		host:   host,
 		port:   port,
 
 		shuttingDown: false,
+		disableAuth:  disableAuth,
+		verboseLogs:  verboseLogs,
+
+		authProvider: jwt.NewJWTAuthProvider(jwtSecret),
 	}
 }
 
@@ -60,7 +69,8 @@ func NewUnixSocketServer(file string) *APIServer {
 
 // NewHTTPSServer returns a new ApiServer capable of running HTTPs server
 // on the specified port.
-func NewHTTPSServer(host string, port uint32, keyFile, certFile string) *APIServer {
+func NewHTTPSServer(host string, port uint32, keyFile, certFile, jwtSecret string,
+	disableAuth, verboseLogs bool) *APIServer {
 	return &APIServer{
 		scheme:   schemeHTTPS,
 		host:     host,
@@ -69,13 +79,17 @@ func NewHTTPSServer(host string, port uint32, keyFile, certFile string) *APIServ
 		keyFile:  keyFile,
 
 		shuttingDown: false,
+		disableAuth:  disableAuth,
+		verboseLogs:  verboseLogs,
+
+		authProvider: jwt.NewJWTAuthProvider(jwtSecret),
 	}
 }
 
 // RunServer runs the server configured for the API.
 func (s *APIServer) RunServer() error {
 	log.Info(defaults.XeneBanner)
-	s.router = NewAPIServerRouter(true)
+	s.router = s.NewAPIServerRouter(true)
 
 	switch s.scheme {
 	case schemeHTTP:
