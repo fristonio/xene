@@ -10,7 +10,7 @@ $ go get -u github.com/swaggo/swag/cmd/swag
 To build the docs run the following command from the current directory.
 
 ```
-$ swag init
+$ swag init --generatedTime=false
 ```
 
 To view the built API documentation, run xene's api server and open [localhost:6060/docs/api/v1/index.html](localhost:6060/docs/api/v1/index.html)

@@ -23,3 +23,4 @@ addons:
 script:
   - make check-lint
   - make build
+  - make check-api-docs

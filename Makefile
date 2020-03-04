@@ -46,7 +46,7 @@ build:
 # Check go formatting
 check-lint:
 > @echo "[*] Checking for formatting and linting errors"
-> @./contrib/scripts/check_fmt.sh
+> @./contrib/scripts/check-fmt.sh
 > @golangci-lint run ./...
 
 fix-lint:
@@ -67,5 +67,10 @@ docs:
 > @echo "[*] Building docs.."
 > @rm -rf site/
 > @mkdocs build
+> @python contrib/scripts/swagger-docs.py
+
+check-api-docs:
+> @echo "[*] Checking API docs integrity"
+> @./contrib/scripts/check-api-docs.sh
 
 .PHONY: build format check-lint fix-lint govet help docs

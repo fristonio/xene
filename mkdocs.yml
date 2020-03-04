@@ -4,6 +4,7 @@ nav:
   - Home: README.md
   - CmdRef: cmdref/xene.md
   - Design: design/README.md
+  - APIDocs: /apidocs.html
 
 theme: cosmo
 
