@@ -1,0 +1,43 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Xene is the workflow creator and manager tool",
+        "title": "Xene API server",
+        "contact": {
+            "name": "Deepesh Pathak",
+            "url": "https://dpathak.co",
+            "email": "deepeshpathak09@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "0.1.0"
+    },
+    "host": "xene.io",
+    "basePath": "/",
+    "paths": {
+        "/auth/refresh/": {
+            "post": {
+                "description": "Handles authentication token refresh",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Handle authentication token refresh for the oauth provider."
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -9,7 +8,6 @@ import (
 	"github.com/fristonio/xene/pkg/apiserver"
 	"github.com/fristonio/xene/pkg/defaults"
 	"github.com/fristonio/xene/pkg/option"
-	homedir "github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -21,15 +19,15 @@ var apiServerCmd = &cobra.Command{
 	Long:  "Run xene apiserver which can then be used to communicate to user facing interface of xene.",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		if !option.APIServer.DisableAuth && option.APIServer.JWTSecret == "" {
+		if !option.Config.APIServer.DisableAuth && option.Config.APIServer.JWTSecret == "" {
 			log.Error("Either specify disable-auth flag or provide a JWT secret to use for authentication.")
 			os.Exit(1)
 		}
-		server := apiserver.NewHTTPServer(option.APIServer.Host,
-			option.APIServer.Port,
-			option.APIServer.DisableAuth,
-			option.APIServer.VerboseLogs,
-			option.APIServer.JWTSecret)
+		server := apiserver.NewHTTPServer(option.Config.APIServer.Host,
+			option.Config.APIServer.Port,
+			option.Config.APIServer.DisableAuth,
+			option.Config.APIServer.VerboseLogs,
+			option.Config.APIServer.JWTSecret)
 
 		sigc := make(chan os.Signal, 1)
 		signal.Notify(sigc,
@@ -54,50 +52,26 @@ var apiServerCmd = &cobra.Command{
 func init() {
 	apiServerFlags := apiServerCmd.Flags()
 
-	apiServerFlags.StringVarP(&option.APIServer.ConfigFile, "config", "c",
-		"", "Config file for API server.")
-	apiServerFlags.StringVarP(&option.APIServer.Host, "host", "b",
+	apiServerFlags.StringVarP(&option.Config.APIServer.Host, "host", "b",
 		defaults.APIServerHost, "Host to bind the api server to.")
-	apiServerFlags.Uint32VarP(&option.APIServer.Port, "port", "p",
+	apiServerFlags.Uint32VarP(&option.Config.APIServer.Port, "port", "p",
 		defaults.APIServerPort, "Port to bind the xene api server on.")
-	apiServerFlags.StringVarP(&option.APIServer.Scheme, "scheme", "s",
+	apiServerFlags.StringVarP(&option.Config.APIServer.Scheme, "scheme", "s",
 		defaults.APIServerScheme, "Scheme to use for the api server.")
-	apiServerFlags.BoolVarP(&option.APIServer.DisableAuth, "disable-auth", "n",
+	apiServerFlags.BoolVarP(&option.Config.APIServer.DisableAuth, "disable-auth", "n",
 		false, "If the authentication should be disabled for the API server.")
-	apiServerFlags.StringVarP(&option.APIServer.UnixSocketPath, "unix-socket", "u",
+	apiServerFlags.StringVarP(&option.Config.APIServer.UnixSocketPath, "unix-socket", "u",
 		defaults.APIServerUnixSocketPath, "Default path for the unix domain socket, when using unix scheme")
-	apiServerFlags.StringVarP(&option.APIServer.KeyFile, "key-file", "k",
+	apiServerFlags.StringVarP(&option.Config.APIServer.KeyFile, "key-file", "k",
 		"", "Key to use when using HTTPS scheme for the server.")
-	apiServerFlags.StringVarP(&option.APIServer.CertFile, "cert-file", "l",
+	apiServerFlags.StringVarP(&option.Config.APIServer.CertFile, "cert-file", "l",
 		"", "Certificate to use for the API Server when running under HTTPS scheme.")
-	apiServerFlags.StringVarP(&option.APIServer.JWTSecret, "jwt-secret", "j",
+	apiServerFlags.StringVarP(&option.Config.APIServer.JWTSecret, "jwt-secret", "j",
 		"", "JWT secret for authentication purposes, make sure it is secure and non bruteforcable.")
-	apiServerFlags.BoolVarP(&option.APIServer.VerboseLogs, "verbose-logs", "v",
+	apiServerFlags.BoolVarP(&option.Config.APIServer.VerboseLogs, "verbose-logs", "v",
 		false, "Print verbose APIServer request logs.")
-
-	_ = viper.BindPFlags(apiServerFlags)
-}
-
-func initAPIServerConfig() {
-	fmt.Println(option.APIServer.ConfigFile)
-	if option.APIServer.ConfigFile != "" {
-		viper.SetConfigFile(option.APIServer.ConfigFile)
-	} else {
-		home, err := homedir.Dir()
-		if err != nil {
-			log.Errorf("error while getting home directory: %s", err)
-			os.Exit(1)
-		}
-
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".xene.conf")
-	}
 
 	viper.SetEnvPrefix("XENE_APISERVER")
 	viper.AutomaticEnv()
-
-	var err error
-	if err = viper.ReadInConfig(); err == nil {
-		log.Infof("using config file: %s", viper.ConfigFileUsed())
-	}
+	_ = viper.BindPFlags(apiServerFlags)
 }

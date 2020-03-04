@@ -1,0 +1,30 @@
+basePath: /
+host: xene.io
+info:
+  contact:
+    email: deepeshpathak09@gmail.com
+    name: Deepesh Pathak
+    url: https://dpathak.co
+  description: Xene is the workflow creator and manager tool
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Xene API server
+  version: 0.1.0
+paths:
+  /auth/refresh/:
+    post:
+      consumes:
+      - application/json
+      description: Handles authentication token refresh
+      produces:
+      - application/json
+      summary: Handle authentication token refresh for the oauth provider.
+      tags:
+      - auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

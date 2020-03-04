@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	// Swagger docs
+	_ "github.com/fristonio/xene/pkg/apiserver/docs"
 	"github.com/fristonio/xene/pkg/auth/jwt"
 	"github.com/fristonio/xene/pkg/defaults"
 	"github.com/gin-gonic/gin"
@@ -87,6 +89,23 @@ func NewHTTPSServer(host string, port uint32, keyFile, certFile, jwtSecret strin
 }
 
 // RunServer runs the server configured for the API.
+// @title Xene API server
+// @version 0.1.0
+// @description Xene is the workflow creator and manager tool
+
+// @contact.name Deepesh Pathak
+// @contact.url https://dpathak.co
+// @contact.email deepeshpathak09@gmail.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host xene.io
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func (s *APIServer) RunServer() error {
 	log.Info(defaults.XeneBanner)
 	s.router = s.NewAPIServerRouter(true)

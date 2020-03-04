@@ -12,6 +12,9 @@ $$\   $$\  $$$$$$\  $$$$$$$\   $$$$$$\
 $$  /\$$\ \$$$$$$$\ $$ |  $$ |\$$$$$$$\
 \__/  \__| \_______|\__|  \__| \_______|`
 
+	// XeneConfigFile is the file name for xene config.
+	XeneConfigFile string = "/etc/xene/xene.yaml"
+
 	// APIServerHost is the default host to bind the API Server to.
 	APIServerHost string = "0.0.0.0"
 

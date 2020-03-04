@@ -1,21 +1,27 @@
 package option
 
-// APIServer is the type used for configuration option of xene apiserver.
+// APIServerOpts is the type used for configuration option of xene apiserver.
 type APIServerOpts struct {
-	Host string
-	Port uint32
+	// Host is the host to bind the apiserver on.
+	Host string `json:"host"`
 
-	Scheme      string
-	DisableAuth bool
-	VerboseLogs bool
+	// Port is the port to run the apiserver on.
+	Port uint32 `json:"port"`
 
-	KeyFile        string
-	CertFile       string
-	ConfigFile     string
-	UnixSocketPath string
+	// Scheme to user for APIServer, it can be one of http, https or unix
+	Scheme string `json:"scheme"`
+	// DisableAuth disables authentication for apiserver api routes.
+	DisableAuth bool `json:"disableAuth"`
+	// VerboseLogs enables verbose logging for the apiserver.
+	VerboseLogs bool `json:"verboseLogs"`
 
-	JWTSecret string
+	// KeyFile is the key file to use for apiserver HTTPS scheme.
+	KeyFile string `json:"keyFile"`
+	// CertFile contains the certificate for apiserver HTTPS scheme.
+	CertFile string `json:"certFile"`
+	// UnixSocketPath is the unix socket for apiserver unix socket scheme.
+	UnixSocketPath string `json:"unixSocketPath"`
+
+	// JWTSecret is the secret to use for issuing JWT tokens by the API server.
+	JWTSecret string `json:"jwtSecret"`
 }
-
-// APIServer is the configuration option for running the xene api server.
-var APIServer = &APIServerOpts{}

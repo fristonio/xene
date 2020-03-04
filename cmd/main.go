@@ -2,10 +2,15 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
+	"github.com/fristonio/xene/pkg/defaults"
+	"github.com/fristonio/xene/pkg/option"
+	"github.com/fristonio/xene/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
 
 var rootCmd = &cobra.Command{
@@ -29,11 +34,29 @@ func init() {
 
 	cobra.OnInitialize(initConfig)
 
+	rootCmd.Flags().StringVarP(&option.ConfigFile, "config", "c",
+		"", "Config file for xene to use.")
+
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(cmdrefCmd)
 	rootCmd.AddCommand(apiServerCmd)
 }
 
 func initConfig() {
-	initAPIServerConfig()
+	if option.ConfigFile == "" {
+		option.ConfigFile = defaults.XeneConfigFile
+	}
+	if utils.FileExists(defaults.XeneConfigFile) {
+		y, err := ioutil.ReadFile(defaults.XeneConfigFile)
+		if err != nil {
+			log.Errorf("error while reading the file: %s", err)
+			return
+		}
+		err = yaml.Unmarshal(y, option.Config)
+		if err != nil {
+			log.Errorf("error while unmarshling xene config file: %s", err)
+		}
+	} else {
+		log.Infof("No xene config file found")
+	}
 }
