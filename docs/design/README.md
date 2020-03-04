@@ -5,6 +5,8 @@ Basic building blocks of xene workflow are:
 * Workflow
 * Pipeline
 * Task
+* Connectors
+* Triggers
 
 ## Workflow
 
