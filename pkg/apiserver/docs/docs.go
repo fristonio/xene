@@ -32,8 +32,101 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/authok": {
+            "get": {
+                "description": "auth OK handler handles the ping to api routes which are",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api"
+                ],
+                "summary": "Handles ping event for api routes.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPMessage"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/:provider": {
+            "get": {
+                "description": "Log in to xene using the configured oauth providers that xene supports.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Handles login for xene",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provider for oauth login",
+                        "name": "provider",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.OauthLogin"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/:provider/redirect": {
+            "get": {
+                "description": "redirectHandler handles the redirect from the Oauth provider after the authentication process has",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Handles redirect from the login oauth provider.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provider for the oauth redirect",
+                        "name": "provider",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.JWTAuth"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/refresh/": {
-            "post": {
+            "get": {
                 "description": "Handles authentication token refresh",
                 "consumes": [
                     "application/json"
@@ -44,7 +137,72 @@ var doc = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Handle authentication token refresh for the oauth provider."
+                "summary": "Handle authentication token refresh for the oauth provider.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.JWTAuth"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "response.HTTPError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Invalid authentication type provided."
+                }
+            }
+        },
+        "response.HTTPMessage": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Messsage in response to your request"
+                }
+            }
+        },
+        "response.JWTAuth": {
+            "type": "object",
+            "properties": {
+                "expiresIn": {
+                    "type": "string",
+                    "example": "3600"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+                },
+                "userEmail": {
+                    "type": "string",
+                    "example": "example@example.com"
+                },
+                "userName": {
+                    "type": "string",
+                    "example": "fristonio"
+                }
+            }
+        },
+        "response.OauthLogin": {
+            "type": "object",
+            "properties": {
+                "loginURL": {
+                    "description": "LoginURL is the URL to be used for logging in.",
+                    "type": "string",
+                    "example": "https://xxxx.io/login"
+                }
             }
         }
     },

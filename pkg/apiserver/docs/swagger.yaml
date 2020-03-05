@@ -1,4 +1,39 @@
 basePath: /
+definitions:
+  response.HTTPError:
+    properties:
+      error:
+        example: Invalid authentication type provided.
+        type: string
+    type: object
+  response.HTTPMessage:
+    properties:
+      message:
+        example: Messsage in response to your request
+        type: string
+    type: object
+  response.JWTAuth:
+    properties:
+      expiresIn:
+        example: "3600"
+        type: string
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+        type: string
+      userEmail:
+        example: example@example.com
+        type: string
+      userName:
+        example: fristonio
+        type: string
+    type: object
+  response.OauthLogin:
+    properties:
+      loginURL:
+        description: LoginURL is the URL to be used for logging in.
+        example: https://xxxx.io/login
+        type: string
+    type: object
 host: xene.io
 info:
   contact:
@@ -12,13 +47,84 @@ info:
   title: Xene API server
   version: 0.1.0
 paths:
+  /api/v1/authok:
+    get:
+      consumes:
+      - application/json
+      description: auth OK handler handles the ping to api routes which are
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPMessage'
+      summary: Handles ping event for api routes.
+      tags:
+      - api
+  /auth/:provider:
+    get:
+      consumes:
+      - application/json
+      description: Log in to xene using the configured oauth providers that xene supports.
+      parameters:
+      - description: Provider for oauth login
+        in: query
+        name: provider
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.OauthLogin'
+      summary: Handles login for xene
+      tags:
+      - auth
+  /auth/:provider/redirect:
+    get:
+      consumes:
+      - application/json
+      description: redirectHandler handles the redirect from the Oauth provider after
+        the authentication process has
+      parameters:
+      - description: Provider for the oauth redirect
+        in: query
+        name: provider
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JWTAuth'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Handles redirect from the login oauth provider.
+      tags:
+      - auth
   /auth/refresh/:
-    post:
+    get:
       consumes:
       - application/json
       description: Handles authentication token refresh
       produces:
       - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JWTAuth'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
       summary: Handle authentication token refresh for the oauth provider.
       tags:
       - auth

@@ -95,7 +95,7 @@ func refreshToken(ap *jwt.AuthProvider) func(*gin.Context) {
 // @Tags auth
 // @Accept  json
 // @Produce json
-// @Success 200 {object} response.Login
+// @Success 200 {object} response.OauthLogin
 // @Param provider query string true "Provider for oauth login"
 // @Router /auth/:provider [get]
 func loginHandler(provider oauth.Provider) func(*gin.Context) {
