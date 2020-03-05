@@ -1,4 +1,4 @@
-mkdocs==1.1
+mkdocs==1.0.4
 mkdocs-bootswatch
 PyYAML
 
