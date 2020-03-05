@@ -33,7 +33,7 @@ func (s *APIServer) NewAPIServerRouter(includeLogger bool) *gin.Engine {
 		c.String(200, "pong")
 	})
 
-	routes.AuthGroupRouter(authGroup)
+	routes.AuthGroupRouter(authGroup, s.authProvider)
 	routes.APIGroupRouter(apiV1Group)
 
 	return r

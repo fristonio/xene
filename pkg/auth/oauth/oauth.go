@@ -17,8 +17,11 @@ type Provider interface {
 	// Type returns the type of provider.
 	Type() ProviderType
 
-	// Setup enables us to initialize any variables or setup requirements.
-	Setup() error
+	// Configured checks if the provider is configured or not.
+	Configured() bool
+
+	// Configure helps us to initialize any variables or setup requirements.
+	Configure()
 
 	// GetLoginURL returns the URL which redirects user to the providers login page.
 	GetLoginURL() string
@@ -26,4 +29,20 @@ type Provider interface {
 	// GetUser gets the user after requesting the OAuth provider.
 	// Returns the user, status code and error if any.
 	GetUser(*gin.Context) (*User, int, error)
+}
+
+var (
+	// ProvidersList is the list of all the providers configured for the API
+	// server, this is populated by ConfigureProviders function.
+	ProvidersList []Provider
+)
+
+// ConfigureProviders configures all the provider available and registers them
+// in the ProvidersList.
+func ConfigureProviders() {
+	// Configure google provider
+	Google.Configure()
+	if Google.Configured() {
+		ProvidersList = append(ProvidersList, Google)
+	}
 }

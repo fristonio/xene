@@ -7,7 +7,10 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/fristonio/xene/pkg/option"
+
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -18,8 +21,9 @@ const (
 )
 
 type googleProvider struct {
-	config *oauth2.Config
-	state  string
+	config     *oauth2.Config
+	state      string
+	configured bool
 }
 
 var setup sync.Once
@@ -27,12 +31,24 @@ var setup sync.Once
 // Google is the google auth Provider.
 var Google = &googleProvider{}
 
-func (g *googleProvider) Type() oauth.ProviderType {
+// Type returns the type of provider represented by google provider.
+func (g *googleProvider) Type() ProviderType {
 	return ProviderType(googleProviderType)
 }
 
-func (g *googleProvider) Setup() {
-	setup.Once(func() {
+// Configured returns true if the google oauth provider has been configured.
+func (g *googleProvider) Configured() bool {
+	return g.configured
+}
+
+// Configure sets up the google oauth provider for xene.
+func (g *googleProvider) Configure() {
+	conf, ok := option.Config.APIServer.Oauth["googleProviderType"]
+	if !ok {
+		log.Warnf("google provider not configured, no config provided")
+		return
+	}
+	setup.Do(func() {
 		g.config = &oauth2.Config{
 			ClientID:     conf.ClientID,
 			ClientSecret: conf.ClientSecret,
@@ -40,9 +56,11 @@ func (g *googleProvider) Setup() {
 			Scopes:       conf.Scopes,
 			Endpoint:     google.Endpoint,
 		}
+		g.configured = true
 	})
 }
 
+// GetLoginURL returns the login URL for a client.
 func (g *googleProvider) GetLoginURL() string {
 	g.state = randToken(32)
 	return g.config.AuthCodeURL(g.state)

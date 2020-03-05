@@ -41,6 +41,10 @@ $$  /\$$\ \$$$$$$$\ $$ |  $$ |\$$$$$$$\
 	// The default for this is 48 Hours ie: 2 days
 	JWTExpireInterval time.Duration = 48 * time.Hour
 
+	// JWTRefreshInterval is the default value of the duration for the issued
+	// token to be refreshed before.
+	JWTRefreshInterval time.Duration = 64 * time.Hour
+
 	// JWTAuthType is the default type of authentication we support.
 	JWTAuthType string = "Bearer"
 

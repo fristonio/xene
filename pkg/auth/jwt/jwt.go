@@ -8,11 +8,17 @@ import (
 	"github.com/fristonio/xene/pkg/defaults"
 )
 
+var (
+	// ErrTokenExpired represents the error if the JWT token is expired.
+	ErrTokenExpired = errors.New("Token is either expired or not active yet")
+)
+
 // Claims are the claims that are verified in the jwt token.
 // Email is the email of the user associated with the claim.
 // The Claim type also includes default jwt standard claims.
 type Claims struct {
 	Email string `json:"email"`
+	Name  string `json:"name"`
 
 	jwt.StandardClaims
 }
@@ -37,10 +43,11 @@ func NewJWTAuthProvider(secret string) *AuthProvider {
 
 // NewAuthToken issues a new JWT authentication token to be used for the provided
 // user email.
-func (j *AuthProvider) NewAuthToken(email string) (string, error) {
+func (j *AuthProvider) NewAuthToken(email, name string) (string, error) {
 	expirationTime := time.Now().Add(j.expireInterval)
 	c := &Claims{
 		Email: email,
+		Name:  name,
 
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
@@ -68,7 +75,7 @@ func (j *AuthProvider) GetClaimsFromToken(token string) (*Claims, error) {
 		if ve.Errors&jwt.ValidationErrorMalformed != 0 {
 			return c, errors.New("Malformed token")
 		} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
-			return c, errors.New("Token is either expired or not active yet")
+			return c, ErrTokenExpired
 		}
 	}
 
