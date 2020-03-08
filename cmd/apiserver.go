@@ -70,6 +70,10 @@ func init() {
 		"", "JWT secret for authentication purposes, make sure it is secure and non bruteforcable.")
 	apiServerFlags.BoolVarP(&option.Config.APIServer.VerboseLogs, "verbose-logs", "v",
 		false, "Print verbose APIServer request logs.")
+	apiServerFlags.StringVarP(&option.Config.Store.Engine, "storage-engine", "e",
+		defaults.StorageEngineBadger, "Storage engine to use for the API server")
+	apiServerFlags.StringVarP(&option.Config.Store.StorageDirectory, "storage-directory", "d",
+		defaults.StorageDir, "Storage directory to use for xene apiserver.")
 
 	viper.SetEnvPrefix("XENE_APISERVER")
 	viper.AutomaticEnv()

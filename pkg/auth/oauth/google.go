@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"sync"
 
 	"github.com/fristonio/xene/pkg/option"
+	"github.com/fristonio/xene/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -25,8 +25,6 @@ type googleProvider struct {
 	state      string
 	configured bool
 }
-
-var setup sync.Once
 
 // Google is the google auth Provider.
 var Google = &googleProvider{}
@@ -62,7 +60,7 @@ func (g *googleProvider) Configure() {
 
 // GetLoginURL returns the login URL for a client.
 func (g *googleProvider) GetLoginURL() string {
-	g.state = randToken(32)
+	g.state = utils.RandToken(32)
 	return g.config.AuthCodeURL(g.state)
 }
 

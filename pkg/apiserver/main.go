@@ -94,11 +94,14 @@ func NewHTTPSServer(host string, port uint32, keyFile, certFile, jwtSecret strin
 // @title Xene API server
 // @version 0.1.0
 // @description Xene is the workflow creator and manager tool
+//
 // @contact.name Deepesh Pathak
 // @contact.url https://dpathak.co
 // @contact.email deepeshpathak09@gmail.com
+//
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+//
 // @host xene.io
 // @BasePath /
 // @securityDefinitions.apikey ApiKeyAuth

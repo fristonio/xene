@@ -1,12 +1,15 @@
 package utils
 
-import "os"
+import (
+	"crypto/rand"
+	"encoding/base64"
+)
 
-// FileExists checks if the file in the arguments exists or not
-func FileExists(file string) bool {
-	if _, err := os.Stat(file); err == nil {
-		return true
+// RandToken generates a random toke string of the provided size
+func RandToken(size uint32) string {
+	b := make([]byte, size)
+	if _, err := rand.Read(b); err != nil {
+		return ""
 	}
-
-	return false
+	return base64.StdEncoding.EncodeToString(b)
 }

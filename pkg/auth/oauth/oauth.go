@@ -1,6 +1,12 @@
 package oauth
 
-import "github.com/gin-gonic/gin"
+import (
+	"sync"
+
+	"github.com/gin-gonic/gin"
+)
+
+var setup sync.Once
 
 // User represents the user details required from the oauth provider.
 type User struct {
