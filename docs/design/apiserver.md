@@ -20,3 +20,7 @@ done using GRPC protocol, this communication includes:
 
 API Server also issues the required secrets to the agent based on the label that are associated with it.
 
+## API Routes
+
+GET - /api/v1/namespaces/{namespace}/workflow/{name}
+

@@ -25,6 +25,7 @@ apiVersion: v1alpha1
 kind: workflow
 name: ci-workflow
 description: CI Workflow using xene
+namespace: default
 
 metadata:
   revision: 1

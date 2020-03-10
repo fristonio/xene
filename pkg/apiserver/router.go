@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"github.com/fristonio/xene/pkg/apiserver/routes"
+	"github.com/fristonio/xene/pkg/store"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -14,6 +15,12 @@ import (
 func (s *APIServer) NewAPIServerRouter(includeLogger bool) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
+
+	// Initialize store for xene apiserver.
+	err := store.Setup()
+	if err != nil {
+		log.Fatalf("error while initializing xene store: %s", err)
+	}
 
 	if includeLogger {
 		r.Use(NewXeneLoggerMiddleware(log.New(), s.verboseLogs))

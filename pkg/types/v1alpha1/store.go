@@ -6,11 +6,15 @@ type Value struct {
 	// Data is data represented by the value.
 	Data []byte
 
-	// ModRevision is the revision of the modified key.
-	ModRevision uint64
+	// Version is the revision of the modified key.
+	Version uint64
 
-	// LeaseID is the ID of the lease associated with the key
-	LeaseID int64
+	// ExpiresAt is the time at which key will expire.
+	ExpiresAt uint64
+
+	// DeletedOrExpired checks if the key associated with the value is deleted
+	// or expired.
+	DeletedOrExpired bool
 }
 
 // KeyValuePairs is a map of key=value pairs
