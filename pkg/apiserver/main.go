@@ -102,7 +102,7 @@ func NewHTTPSServer(host string, port uint32, keyFile, certFile, jwtSecret strin
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 //
-// @host xene.io
+// @host localhost:6060
 // @BasePath /
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header

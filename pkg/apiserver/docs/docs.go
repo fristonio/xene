@@ -55,6 +55,170 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/registry/workflow": {
+            "get": {
+                "description": "If a name is provided return the corresponding workflow object, if prefix  is set to some value",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "Returns the specified workflow object from the store.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Prefix based get for workflow.",
+                        "name": "prefix",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the workflow to get.",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Workflow"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "This route creates a new workflow for xene to operate on, if the workflow already exists",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "Creates a new workflow in the store.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workflow manifest to be created.",
+                        "name": "workflow",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/registry/workflow/{name}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "Returns the specified workflow object from the store with the name in params.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the workflow to get.",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Workflow"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes the workflow specified by the name parameter, if the workflow is not",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "Deletes the specified workflow from the store.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the workflow to be deleted.",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/:provider": {
             "get": {
                 "description": "Log in to xene using the configured oauth providers that xene supports.",
@@ -204,6 +368,27 @@ var doc = `{
                     "example": "https://xxxx.io/login"
                 }
             }
+        },
+        "response.Workflow": {
+            "type": "object",
+            "properties": {
+                "workflow": {
+                    "type": "string",
+                    "example": "Workflow Document"
+                }
+            }
+        },
+        "response.WorkflowsFromPrefix": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "workflows": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -227,7 +412,7 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "0.1.0",
-	Host:        "xene.io",
+	Host:        "localhost:6060",
 	BasePath:    "/",
 	Schemes:     []string{},
 	Title:       "Xene API server",

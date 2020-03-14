@@ -22,5 +22,5 @@ API Server also issues the required secrets to the agent based on the label that
 
 ## API Routes
 
-GET - /api/v1/namespaces/{namespace}/workflow/{name}
+GET, POST, DELETE, PATCH - /api/v1/workflow/{name}
 

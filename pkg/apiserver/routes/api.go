@@ -8,6 +8,9 @@ import (
 // APIGroupRouter sets up the router for /api group
 func APIGroupRouter(r *gin.RouterGroup) {
 	r.GET("authok", authOKHandler)
+
+	registryGroup := r.Group("registry")
+	RegistryGroupRoutes(registryGroup)
 }
 
 // @Summary Handles ping event for api routes.

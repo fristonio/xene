@@ -19,3 +19,14 @@ type Value struct {
 
 // KeyValuePairs is a map of key=value pairs
 type KeyValuePairs map[string]Value
+
+// KVPairStruct is the representation of Key value pair in golang structure
+// This is used when we serialize KeyValue to string.
+type KVPairStruct struct {
+	Key   string `json:"key" example:"registry/workflow/xxdfdihdfai=="`
+	Value string `json:"workflow" example:"Workflow Document"`
+
+	Version          uint64 `json:"version"`
+	ExpiresAt        uint64 `json:"expiresAt"`
+	DeletedOrExpired bool   `json:"deletedOrExpired"`
+}

@@ -34,7 +34,21 @@ definitions:
         example: https://xxxx.io/login
         type: string
     type: object
-host: xene.io
+  response.Workflow:
+    properties:
+      workflow:
+        example: Workflow Document
+        type: string
+    type: object
+  response.WorkflowsFromPrefix:
+    properties:
+      count:
+        example: 2
+        type: integer
+      workflows:
+        type: string
+    type: object
+host: localhost:6060
 info:
   contact:
     email: deepeshpathak09@gmail.com
@@ -62,6 +76,118 @@ paths:
       summary: Handles ping event for api routes.
       tags:
       - api
+  /api/v1/registry/workflow:
+    get:
+      consumes:
+      - application/json
+      description: If a name is provided return the corresponding workflow object,
+        if prefix  is set to some value
+      parameters:
+      - description: Prefix based get for workflow.
+        in: query
+        name: prefix
+        type: string
+      - description: name of the workflow to get.
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Workflow'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Returns the specified workflow object from the store.
+      tags:
+      - registry
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: This route creates a new workflow for xene to operate on, if the
+        workflow already exists
+      parameters:
+      - description: Workflow manifest to be created.
+        in: formData
+        name: workflow
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPMessage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Creates a new workflow in the store.
+      tags:
+      - registry
+  /api/v1/registry/workflow/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the workflow specified by the name parameter, if the workflow
+        is not
+      parameters:
+      - description: Name of the workflow to be deleted.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPMessage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Deletes the specified workflow from the store.
+      tags:
+      - registry
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: name of the workflow to get.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Workflow'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Returns the specified workflow object from the store with the name
+        in params.
+      tags:
+      - registry
   /auth/:provider:
     get:
       consumes:
