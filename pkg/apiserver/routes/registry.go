@@ -190,8 +190,17 @@ func workflowCreateHandler(ctx *gin.Context) {
 	})
 }
 
+// @Summary Patches the specified workflow from the store.
+// @Tags registry
+// @Accept json
+// @Produce json
+// @Param name path string true "Name of the workflow to be patched."
+// @Failure 400 {object} response.HTTPError
+// @Router /api/v1/registry/workflow/{name} [patch]
 func workflowPatchHandler(ctx *gin.Context) {
-
+	ctx.JSON(http.StatusBadRequest, response.HTTPError{
+		Error: "route not implemented yet",
+	})
 }
 
 // @Summary Deletes the specified workflow from the store.

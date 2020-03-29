@@ -1,6 +1,9 @@
 package apiserver
 
 import (
+	"net/http"
+
+	"github.com/fristonio/xene/pkg/apiserver/response"
 	"github.com/fristonio/xene/pkg/apiserver/routes"
 	"github.com/fristonio/xene/pkg/store"
 
@@ -36,12 +39,25 @@ func (s *APIServer) NewAPIServerRouter(includeLogger bool) *gin.Engine {
 
 	r.GET("/docs/api/v1/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(200, "pong")
-	})
+	s.setupHealthRoute(r)
 
 	routes.AuthGroupRouter(authGroup, s.authProvider)
 	routes.APIGroupRouter(apiV1Group)
 
 	return r
+}
+
+// @Summary Health route for Xene API server.
+// @Description Returns the health status of the API server.
+// @Tags health
+// @Accept  json
+// @Produce json
+// @Success 200 {object} response.HTTPMessage
+// @Router /health [get]
+func (s *APIServer) setupHealthRoute(r *gin.Engine) {
+	r.GET("/health", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, response.HTTPMessage{
+			Message: "Healthy",
+		})
+	})
 }

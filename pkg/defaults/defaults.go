@@ -51,4 +51,15 @@ $$  /\$$\ \$$$$$$$\ $$ |  $$ |\$$$$$$$\
 	// ContextBucketKey is the key which is set in the context after JWT has been
 	// verified from the Authentication header.
 	ContextBucketKey string = "user"
+
+	// ControllerType is the default controller type we are assigning to the created
+	// controller.
+	ControllerType string = "Default"
+
+	// ControllerRetryInterval is the interval for controller function execution retry.
+	ControllerRetryInterval time.Duration = 1 * time.Second
+
+	// ControllerInvalidDuration is the placeholder time duration for the execution
+	// of the function when there is some error in exeuction.
+	ControllerInvalidDuration time.Duration = 1000 * time.Second
 )

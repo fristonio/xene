@@ -188,6 +188,25 @@ paths:
         in params.
       tags:
       - registry
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Name of the workflow to be patched.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Patches the specified workflow from the store.
+      tags:
+      - registry
   /auth/:provider:
     get:
       consumes:
@@ -254,6 +273,21 @@ paths:
       summary: Handle authentication token refresh for the oauth provider.
       tags:
       - auth
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Returns the health status of the API server.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPMessage'
+      summary: Health route for Xene API server.
+      tags:
+      - health
 securityDefinitions:
   ApiKeyAuth:
     in: header

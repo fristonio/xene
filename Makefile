@@ -38,6 +38,7 @@ help:
 > @echo "* govet: Run govet on the code to check for any mistakes."
 > @echo "* docs: Build docs site using mkdocs in site/ directory"
 > @echo "* check-api-docs: checks the integrity of API docs for xene."
+> @echo ""
 
 # Build status
 build:
