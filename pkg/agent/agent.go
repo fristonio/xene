@@ -54,6 +54,8 @@ func (s *Server) RunServer() error {
 	}
 	log.Infof("Xene API server is listening on: %s", hostPort)
 
+	// TODO: Implement GRPC server with MTLs rather then using JWT tokens
+	// for request authentication.
 	var grpcServer *grpc.Server
 	if !s.insecureMode {
 		creds, err := credentials.NewServerTLSFromFile(s.certFile, s.keyFile)

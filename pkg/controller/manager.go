@@ -110,7 +110,8 @@ func (m *Manager) removeController(ctrl *Controller) {
 	ctrl.getLogger().Debug("Removed controller")
 }
 
-func (m *Manager) lookup(name string) *Controller {
+// Lookup looks up for the controller with the provided name.
+func (m *Manager) Lookup(name string) *Controller {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 

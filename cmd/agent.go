@@ -59,7 +59,7 @@ func init() {
 	agentFlags.Uint32VarP(&option.Config.Agent.Port, "port", "p",
 		defaults.AgentPort, "Port to bind the xene agent grpc server on.")
 	agentFlags.StringVarP(&option.Config.Agent.APIServer, "api-server", "s",
-		fmt.Sprintf("%s:%s", defaults.APIServerHost, defaults.APIServerPort),
+		fmt.Sprintf("%s:%d", defaults.APIServerHost, defaults.APIServerPort),
 		"api server address to connect to")
 	agentFlags.StringVarP(&option.Config.Agent.APIAuthToken, "api-auth-token", "a",
 		"", "Authentication token to use while joining api server.")
@@ -73,8 +73,8 @@ func init() {
 		"", "Own address of the agent, for the API server to communmicate")
 	agentFlags.StringVarP(&option.Config.Agent.JWTSecret, "jwt-secret", "j",
 		"", "JWT secret to use for authentication purpose for GRPC server")
-	agentCmd.MarkPersistentFlagRequired("address")
-	agentCmd.MarkPersistentFlagRequired("api-server")
+	_ = agentCmd.MarkPersistentFlagRequired("address")
+	_ = agentCmd.MarkPersistentFlagRequired("api-server")
 
 	viper.SetEnvPrefix("XENE_AGENT")
 	viper.AutomaticEnv()

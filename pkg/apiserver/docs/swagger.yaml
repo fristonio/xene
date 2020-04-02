@@ -34,18 +34,18 @@ definitions:
         example: https://xxxx.io/login
         type: string
     type: object
-  response.Workflow:
+  response.RegistryItem:
     properties:
-      workflow:
+      item:
         example: Workflow Document
         type: string
     type: object
-  response.WorkflowsFromPrefix:
+  response.RegistryItemsFromPrefix:
     properties:
       count:
         example: 2
         type: integer
-      workflows:
+      items:
         type: string
     type: object
 host: localhost:6060
@@ -76,6 +76,135 @@ paths:
       summary: Handles ping event for api routes.
       tags:
       - api
+  /api/v1/registry/agent:
+    get:
+      consumes:
+      - application/json
+      description: If a name is provided return the corresponding agent object, if
+        prefix is set to some value
+      parameters:
+      - description: Prefix based get for agent.
+        in: query
+        name: prefix
+        type: string
+      - description: name of the agent to get.
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RegistryItem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Returns the specified agent object from the store.
+      tags:
+      - registry
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - description: Agent manifest to be created.
+        in: formData
+        name: agent
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPMessage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Creates a new agent in the store.
+      tags:
+      - registry
+  /api/v1/registry/agent/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the agent specified by the name parameter, if the agent
+        is not
+      parameters:
+      - description: Name of the agent to be deleted.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPMessage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Deletes the specified agent from the store.
+      tags:
+      - registry
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: name of the agent to get.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RegistryItem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Returns the specified agent object from the store with the name in
+        params.
+      tags:
+      - registry
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Name of the agent to be patched.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Patches the specified agent from the store.
+      tags:
+      - registry
   /api/v1/registry/workflow:
     get:
       consumes:
@@ -97,7 +226,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Workflow'
+            $ref: '#/definitions/response.RegistryItem'
         "500":
           description: Internal Server Error
           schema:
@@ -179,7 +308,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Workflow'
+            $ref: '#/definitions/response.RegistryItem'
         "500":
           description: Internal Server Error
           schema:

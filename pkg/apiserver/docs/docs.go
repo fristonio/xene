@@ -55,6 +55,198 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/registry/agent": {
+            "get": {
+                "description": "If a name is provided return the corresponding agent object, if prefix is set to some value",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "Returns the specified agent object from the store.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Prefix based get for agent.",
+                        "name": "prefix",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the agent to get.",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.RegistryItem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "Creates a new agent in the store.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Agent manifest to be created.",
+                        "name": "agent",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/registry/agent/{name}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "Returns the specified agent object from the store with the name in params.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the agent to get.",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.RegistryItem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes the agent specified by the name parameter, if the agent is not",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "Deletes the specified agent from the store.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the agent to be deleted.",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "Patches the specified agent from the store.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the agent to be patched.",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/registry/workflow": {
             "get": {
                 "description": "If a name is provided return the corresponding workflow object, if prefix  is set to some value",
@@ -86,7 +278,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Workflow"
+                            "$ref": "#/definitions/response.RegistryItem"
                         }
                     },
                     "500": {
@@ -165,7 +357,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Workflow"
+                            "$ref": "#/definitions/response.RegistryItem"
                         }
                     },
                     "500": {
@@ -421,23 +613,23 @@ var doc = `{
                 }
             }
         },
-        "response.Workflow": {
+        "response.RegistryItem": {
             "type": "object",
             "properties": {
-                "workflow": {
+                "item": {
                     "type": "string",
                     "example": "Workflow Document"
                 }
             }
         },
-        "response.WorkflowsFromPrefix": {
+        "response.RegistryItemsFromPrefix": {
             "type": "object",
             "properties": {
                 "count": {
                     "type": "integer",
                     "example": 2
                 },
-                "workflows": {
+                "items": {
                     "type": "string"
                 }
             }
