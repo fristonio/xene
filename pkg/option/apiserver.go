@@ -2,6 +2,10 @@ package option
 
 // APIServerOpts is the type used for configuration option of xene apiserver.
 type APIServerOpts struct {
+	// Standalone is the boolean value which represents if xene apiserver is running
+	// in a standalone mode and thus the agent is running locally.
+	Standalone bool `json:"standalone"`
+
 	// Host is the host to bind the apiserver on.
 	Host string `json:"host"`
 

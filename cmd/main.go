@@ -40,6 +40,7 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(cmdrefCmd)
 	rootCmd.AddCommand(apiServerCmd)
+	rootCmd.AddCommand(agentCmd)
 }
 
 func initConfig() {

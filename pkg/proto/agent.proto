@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package proto;
+
+// Generate file by the following command
+//     protoc --proto_path=pkg --go_out=plugins=grpc:pkg pkg/agent/proto/agent.proto
+
+service AgentService {
+}

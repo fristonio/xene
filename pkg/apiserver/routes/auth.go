@@ -53,7 +53,7 @@ func refreshToken(ap *jwt.AuthProvider) func(*gin.Context) {
 			})
 			return
 		}
-		claims, err := ap.GetClaimsFromToken(token)
+		claims, err := ap.GetUserClaimsFromToken(token)
 		// Since we're refreshing token, we don't care if the previous token
 		// claims are valid or invalid
 		if err != nil && err != jwt.ErrTokenExpired {

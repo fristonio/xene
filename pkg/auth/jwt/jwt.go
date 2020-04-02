@@ -13,12 +13,21 @@ var (
 	ErrTokenExpired = errors.New("Token is either expired or not active yet")
 )
 
-// Claims are the claims that are verified in the jwt token.
+// UserClaims are the claims that are verified in the jwt token.
 // Email is the email of the user associated with the claim.
 // The Claim type also includes default jwt standard claims.
-type Claims struct {
+type UserClaims struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
+
+	jwt.StandardClaims
+}
+
+// ServerClaims are the claims that a server uses to establish its identity
+// while communication with a peer server.
+type ServerClaims struct {
+	Address string `json:"address"`
+	Name    string `json:"name"`
 
 	jwt.StandardClaims
 }
@@ -45,7 +54,7 @@ func NewJWTAuthProvider(secret string) *AuthProvider {
 // user email.
 func (j *AuthProvider) NewAuthToken(email, name string) (string, error) {
 	expirationTime := time.Now().Add(j.expireInterval)
-	c := &Claims{
+	c := &UserClaims{
 		Email: email,
 		Name:  name,
 
@@ -58,11 +67,35 @@ func (j *AuthProvider) NewAuthToken(email, name string) (string, error) {
 	return token.SignedString(j.Secret)
 }
 
-// GetClaimsFromToken parses the token provided in the string, returns an error if there
+// GetUserClaimsFromToken parses the token provided in the string, returns an error if there
 // is any issue with the token else populate the claim object with the provided
 // fields.
-func (j *AuthProvider) GetClaimsFromToken(token string) (*Claims, error) {
-	c := &Claims{}
+func (j *AuthProvider) GetUserClaimsFromToken(token string) (*UserClaims, error) {
+	c := &UserClaims{}
+	t, err := jwt.ParseWithClaims(token, c, func(token *jwt.Token) (interface{}, error) {
+		return j.Secret, nil
+	})
+
+	if t.Valid {
+		return c, nil
+	}
+
+	if ve, ok := err.(*jwt.ValidationError); ok {
+		if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+			return c, errors.New("Malformed token")
+		} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+			return c, ErrTokenExpired
+		}
+	}
+
+	return c, errors.New("Clould not handle the token")
+}
+
+// GetServerClaimsFromToken parses the token against a server claims provided in the string, returns an error if there
+// is any issue with the token else populate the claim object with the provided
+// fields.
+func (j *AuthProvider) GetServerClaimsFromToken(token string) (*ServerClaims, error) {
+	c := &ServerClaims{}
 	t, err := jwt.ParseWithClaims(token, c, func(token *jwt.Token) (interface{}, error) {
 		return j.Secret, nil
 	})

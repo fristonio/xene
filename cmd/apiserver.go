@@ -52,6 +52,8 @@ var apiServerCmd = &cobra.Command{
 func init() {
 	apiServerFlags := apiServerCmd.Flags()
 
+	apiServerFlags.BoolVarP(&option.Config.APIServer.Standalone, "standalone", "z",
+		false, "Run xene apiserver in standalone mode.")
 	apiServerFlags.StringVarP(&option.Config.APIServer.Host, "host", "b",
 		defaults.APIServerHost, "Host to bind the api server to.")
 	apiServerFlags.Uint32VarP(&option.Config.APIServer.Port, "port", "p",

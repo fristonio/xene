@@ -20,7 +20,7 @@ func (s *APIServer) JWTVerficationMiddleware(ctx *gin.Context) {
 		return
 	}
 
-	claims, err := s.authProvider.GetClaimsFromToken(token)
+	claims, err := s.authProvider.GetUserClaimsFromToken(token)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.HTTPError{
 			Error: err.Error(),

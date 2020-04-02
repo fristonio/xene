@@ -5,6 +5,9 @@ type XeneConfig struct {
 	// APIServer contains the options for api server
 	APIServer APIServerOpts `json:"apiserver"`
 
+	// Agent contains configuration for xene agent.
+	Agent AgentOpts `json:"agent"`
+
 	// Store is the store configuration that xene is configured with.
 	Store Store `json:"store"`
 }
