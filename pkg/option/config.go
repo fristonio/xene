@@ -3,13 +3,13 @@ package option
 // XeneConfig is the global config structure for xene.
 type XeneConfig struct {
 	// APIServer contains the options for api server
-	APIServer APIServerOpts `json:"apiserver"`
+	APIServer APIServerOpts `yaml:"apiserver"`
 
 	// Agent contains configuration for xene agent.
-	Agent AgentOpts `json:"agent"`
+	Agent AgentOpts `yaml:"agent"`
 
 	// Store is the store configuration that xene is configured with.
-	Store Store `json:"store"`
+	Store Store `yaml:"store"`
 }
 
 var (

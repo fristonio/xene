@@ -17,11 +17,11 @@ import (
 
 // AuthGroupRouter sets up the routes for auth group api endpoints.
 // This includes the following endpoints:
-// * /auth/refresh
-// * /auth/{provider}
-// * /auth/{provider}/refresh
+// * /oauth/refresh
+// * /oauth/{provider}
+// * /oauth/{provider}/refresh
 func AuthGroupRouter(r *gin.RouterGroup, ap *jwt.AuthProvider) {
-	r.GET("refresh", refreshToken(ap))
+	r.GET("/refresh", refreshToken(ap))
 
 	oauth.ConfigureProviders()
 	for _, provider := range oauth.ProvidersList {
@@ -43,7 +43,7 @@ func AuthGroupRouter(r *gin.RouterGroup, ap *jwt.AuthProvider) {
 // @Produce json
 // @Success 200 {object} response.JWTAuth
 // @Failure 500 {object} response.HTTPError
-// @Router /auth/refresh/ [get]
+// @Router /oauth/refresh/ [get]
 func refreshToken(ap *jwt.AuthProvider) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		token, err := auth.GetTokenFromCtx(ctx)
@@ -97,7 +97,7 @@ func refreshToken(ap *jwt.AuthProvider) func(*gin.Context) {
 // @Produce json
 // @Success 200 {object} response.OauthLogin
 // @Param provider query string true "Provider for oauth login"
-// @Router /auth/:provider [get]
+// @Router /oauth/:provider [get]
 func loginHandler(provider oauth.Provider) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		ctx.JSON(200, response.OauthLogin{
@@ -118,7 +118,7 @@ func loginHandler(provider oauth.Provider) func(*gin.Context) {
 // @Param provider query string true "Provider for the oauth redirect"
 // @Success 200 {object} response.JWTAuth
 // @Failure 500 {object} response.HTTPError
-// @Router /auth/:provider/redirect [get]
+// @Router /oauth/:provider/redirect [get]
 func redirectHandler(provider oauth.Provider, ap *jwt.AuthProvider) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		u, code, err := provider.GetUser(ctx)
@@ -131,7 +131,7 @@ func redirectHandler(provider oauth.Provider, ap *jwt.AuthProvider) func(*gin.Co
 
 		// Commit the user here to the database so that we can refresh
 		// the token later and have the user info in our database.
-		tok, err := ap.NewAuthToken(u.Email, u.Name)
+		tok, err := ap.NewAuthToken(u.Email, u.Profile)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, response.HTTPError{
 				Error: err.Error(),
@@ -143,7 +143,7 @@ func redirectHandler(provider oauth.Provider, ap *jwt.AuthProvider) func(*gin.Co
 			Token:     tok,
 			ExpiresIn: defaults.JWTExpireInterval / time.Hour,
 			UserEmail: u.Email,
-			UserName:  u.Name,
+			UserName:  u.Profile,
 		})
 	}
 }

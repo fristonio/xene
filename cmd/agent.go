@@ -15,6 +15,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var agentName string
+
 var agentCmd = &cobra.Command{
 	Use:   "agent",
 	Short: "Run xene agent.",
@@ -48,6 +50,15 @@ var agentCmd = &cobra.Command{
 		if err != nil {
 			os.Exit(1)
 		}
+
+		agentName = utils.RandToken(24)
+		log.Infof("Registered agent name is: %s", agentName)
+		// Join the agent pool in the API server
+		server.JoinAPIServer(
+			option.Config.Agent.APIServer,
+			agentName,
+			option.Config.Agent.Address,
+			option.Config.Agent.APIAuthToken)
 	},
 }
 

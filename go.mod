@@ -9,6 +9,7 @@ require (
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-openapi/spec v0.19.6 // indirect
 	github.com/go-openapi/swag v0.19.7 // indirect
+	github.com/golang/protobuf v1.3.5
 	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5

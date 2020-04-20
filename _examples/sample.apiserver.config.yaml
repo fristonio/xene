@@ -1,0 +1,13 @@
+apiserver:
+    host: "127.0.0.1"
+    verboseLogs: true
+    jwtSecret: xxxxxxxx
+    oauth:
+        google:
+            name: google
+            clientID: xxxxxx
+            clientSecret: xxxxxxx
+            redirectURL: "http://localhost:6060/oauth/google/redirect"
+            scopes:
+                - profile
+                - email

@@ -5,6 +5,7 @@ import (
 
 	"github.com/fristonio/xene/pkg/apiserver/response"
 	"github.com/fristonio/xene/pkg/auth"
+	"github.com/fristonio/xene/pkg/auth/rbac"
 	"github.com/fristonio/xene/pkg/defaults"
 	"github.com/gin-gonic/gin"
 )
@@ -27,6 +28,16 @@ func (s *APIServer) JWTVerficationMiddleware(ctx *gin.Context) {
 		})
 		return
 	}
+
+	// Check if the roles assumed by the user accessing the API allows him to perform
+	// the required action and then only let it pass.
+	if !rbac.APIServerRBACMap.ValidateAccessI(claims.Roles, ctx.Request.Method, ctx.FullPath()) {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.HTTPError{
+			Error: err.Error(),
+		})
+		return
+	}
+
 	ctx.Set(defaults.ContextBucketKey, claims)
 	ctx.Next()
 }

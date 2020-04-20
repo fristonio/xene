@@ -4,9 +4,9 @@ package option
 // data to be configured for xene.
 type Store struct {
 	// Engine is the storage engine to use for xene, it can be any of the previously configured store.
-	Engine string `json:"engine"`
+	Engine string `yaml:"engine"`
 
 	// StorageDirectory is the directory to use for the storage engine configured
 	// for xene.
-	StorageDirectory string `json:"storageDirectory"`
+	StorageDirectory string `yaml:"storageDirectory"`
 }

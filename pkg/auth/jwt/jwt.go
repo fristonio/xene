@@ -20,6 +20,9 @@ type UserClaims struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
 
+	// Roles contains the roles assumed by the user.
+	Roles []string `json:"roles"`
+
 	jwt.StandardClaims
 }
 
@@ -57,6 +60,25 @@ func (j *AuthProvider) NewAuthToken(email, name string) (string, error) {
 	c := &UserClaims{
 		Email: email,
 		Name:  name,
+
+		Roles: []string{"user"},
+
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
+	return token.SignedString(j.Secret)
+}
+
+// NewServerAuthToken issues a new JWT authentication token to be used for the provided
+// server name and address.
+func (j *AuthProvider) NewServerAuthToken(address, name string) (string, error) {
+	expirationTime := time.Now().Add(j.expireInterval)
+	c := &ServerClaims{
+		Address: address,
+		Name:    name,
 
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),

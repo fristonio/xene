@@ -41,7 +41,7 @@ func (g *googleProvider) Configured() bool {
 
 // Configure sets up the google oauth provider for xene.
 func (g *googleProvider) Configure() {
-	conf, ok := option.Config.APIServer.Oauth["googleProviderType"]
+	conf, ok := option.Config.APIServer.Oauth["google"]
 	if !ok {
 		log.Warnf("google provider not configured, no config provided")
 		return

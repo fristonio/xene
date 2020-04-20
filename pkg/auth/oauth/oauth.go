@@ -10,8 +10,8 @@ var setup sync.Once
 
 // User represents the user details required from the oauth provider.
 type User struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Profile string `json:"profile"`
+	Email   string `json:"email"`
 }
 
 // ProviderType for different OAuth Providers supported in xene
