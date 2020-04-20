@@ -22,9 +22,15 @@ var agentCmd = &cobra.Command{
 	Short: "Run xene agent.",
 	Long:  "Run xene agent to deploy executor for running configured workflows.",
 	Run: func(cmd *cobra.Command, args []string) {
+		if option.Config.Agent.Address == "" || option.Config.Agent.APIServer == "" {
+			log.Error("--address and --api-server are required flags for agent.")
+			os.Exit(1)
+		}
+
 		if option.Config.Agent.JWTSecret == "" {
 			option.Config.Agent.JWTSecret = utils.RandToken(40)
 		}
+
 		server := agent.NewServer(option.Config.Agent.Host,
 			option.Config.Agent.Port,
 			option.Config.Agent.Address,
@@ -46,19 +52,23 @@ var agentCmd = &cobra.Command{
 			os.Exit(0)
 		}()
 
-		err := server.RunServer()
-		if err != nil {
-			os.Exit(1)
-		}
-
 		agentName = utils.RandToken(24)
 		log.Infof("Registered agent name is: %s", agentName)
 		// Join the agent pool in the API server
-		server.JoinAPIServer(
+		err := server.JoinAPIServer(
 			option.Config.Agent.APIServer,
 			agentName,
 			option.Config.Agent.Address,
 			option.Config.Agent.APIAuthToken)
+		if err != nil {
+			log.Errorf("error while joining API server: %s", err)
+			os.Exit(1)
+		}
+
+		err = server.RunServer()
+		if err != nil {
+			os.Exit(1)
+		}
 	},
 }
 

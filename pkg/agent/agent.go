@@ -52,7 +52,7 @@ func (s *Server) RunServer() error {
 	if err != nil {
 		return fmt.Errorf("failed to listen: %v", err)
 	}
-	log.Infof("Xene API server is listening on: %s", hostPort)
+	log.Infof("Xene agent server is listening on: %s", hostPort)
 
 	// TODO: Implement GRPC server with MTLs rather then using JWT tokens
 	// for request authentication.

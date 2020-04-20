@@ -440,7 +440,30 @@ var doc = `{
                 }
             }
         },
-        "/auth/:provider": {
+        "/health": {
+            "get": {
+                "description": "Returns the health status of the API server.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health route for Xene API server.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPMessage"
+                        }
+                    }
+                }
+            }
+        },
+        "/oauth/:provider": {
             "get": {
                 "description": "Log in to xene using the configured oauth providers that xene supports.",
                 "consumes": [
@@ -472,7 +495,7 @@ var doc = `{
                 }
             }
         },
-        "/auth/:provider/redirect": {
+        "/oauth/:provider/redirect": {
             "get": {
                 "description": "redirectHandler handles the redirect from the Oauth provider after the authentication process has",
                 "consumes": [
@@ -510,7 +533,7 @@ var doc = `{
                 }
             }
         },
-        "/auth/refresh/": {
+        "/oauth/refresh/": {
             "get": {
                 "description": "Handles authentication token refresh",
                 "consumes": [
@@ -534,29 +557,6 @@ var doc = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/response.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/health": {
-            "get": {
-                "description": "Returns the health status of the API server.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "health"
-                ],
-                "summary": "Health route for Xene API server.",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPMessage"
                         }
                     }
                 }
@@ -636,7 +636,7 @@ var doc = `{
         }
     },
     "securityDefinitions": {
-        "ApiKeyAuth": {
+        "BasicAuth": {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

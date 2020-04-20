@@ -1,0 +1,7 @@
+agent:
+    host: "127.0.0.1"
+    apiServer: "http://localhost:6060"
+    apiAuthToken: xxxxxxxxxxx
+    address: "http://127.0.0.1:6061"
+    insecure: true
+    jwtSecret: xxxxxxxxxxx

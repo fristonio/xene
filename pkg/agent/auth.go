@@ -94,6 +94,6 @@ func (s *Server) JoinAPIServer(apiServerAddr, agentName, agentAddr, authToken st
 		return fmt.Errorf("invalid request: %s", string(respBody))
 	}
 
-	log.Debug("response from API server while registering: %v", string(respBody))
+	log.Debugf("response from API server while registering: %v", string(respBody))
 	return nil
 }

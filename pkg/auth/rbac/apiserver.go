@@ -1,6 +1,9 @@
 package rbac
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 type regex struct {
 	Error error
@@ -33,16 +36,16 @@ var APIServerRBACMap RBACMapT = RBACMapT{
 	"manager": {
 		"get": []regex{getRegex(".*")},
 		"post": []regex{
-			getRegex(`api\/v1\/registry\/.*`),
+			getRegex(`/api/v1/registry/.*`),
 		},
 		"put": []regex{
-			getRegex(`api\/v1\/registry\/.*`),
+			getRegex(`/api/v1/registry/.*`),
 		},
 		"delete": []regex{
-			getRegex(`api\/v1\/registry\/.*`),
+			getRegex(`/api/v1/registry/.*`),
 		},
 		"patch": []regex{
-			getRegex(`api\/v1\/registry\/.*`),
+			getRegex(`/api/v1/registry/.*`),
 		},
 	},
 }
@@ -84,7 +87,7 @@ func (r RBACMapT) Verbs() []string {
 func (r RBACMapT) ValidateAccessI(roles []string, verb, apiEndpoint string) bool {
 	avRoles := r.filterNonAvailableRoles(roles)
 	for _, role := range avRoles {
-		if apiEndpoints, ok := r[role][verb]; ok {
+		if apiEndpoints, ok := r[role][strings.ToLower(verb)]; ok {
 			for i := range apiEndpoints {
 				if apiEndpoints[i].Error != nil {
 					continue

@@ -336,7 +336,22 @@ paths:
       summary: Patches the specified workflow from the store.
       tags:
       - registry
-  /auth/:provider:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Returns the health status of the API server.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPMessage'
+      summary: Health route for Xene API server.
+      tags:
+      - health
+  /oauth/:provider:
     get:
       consumes:
       - application/json
@@ -357,7 +372,7 @@ paths:
       summary: Handles login for xene
       tags:
       - auth
-  /auth/:provider/redirect:
+  /oauth/:provider/redirect:
     get:
       consumes:
       - application/json
@@ -383,7 +398,7 @@ paths:
       summary: Handles redirect from the login oauth provider.
       tags:
       - auth
-  /auth/refresh/:
+  /oauth/refresh/:
     get:
       consumes:
       - application/json
@@ -402,23 +417,8 @@ paths:
       summary: Handle authentication token refresh for the oauth provider.
       tags:
       - auth
-  /health:
-    get:
-      consumes:
-      - application/json
-      description: Returns the health status of the API server.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.HTTPMessage'
-      summary: Health route for Xene API server.
-      tags:
-      - health
 securityDefinitions:
-  ApiKeyAuth:
+  BasicAuth:
     in: header
     name: Authorization
     type: apiKey

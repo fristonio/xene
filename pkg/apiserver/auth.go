@@ -33,7 +33,7 @@ func (s *APIServer) JWTVerficationMiddleware(ctx *gin.Context) {
 	// the required action and then only let it pass.
 	if !rbac.APIServerRBACMap.ValidateAccessI(claims.Roles, ctx.Request.Method, ctx.FullPath()) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.HTTPError{
-			Error: err.Error(),
+			Error: "Role not valid for the provided API endpoint",
 		})
 		return
 	}

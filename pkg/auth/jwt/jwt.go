@@ -61,7 +61,7 @@ func (j *AuthProvider) NewAuthToken(email, name string) (string, error) {
 		Email: email,
 		Name:  name,
 
-		Roles: []string{"user"},
+		Roles: []string{"manager"},
 
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
