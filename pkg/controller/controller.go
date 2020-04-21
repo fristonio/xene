@@ -35,14 +35,6 @@ type Func struct {
 	Params   []FuncParam
 }
 
-// FunctionResult represents the result from a controller function.
-type FunctionResult interface {
-	GetDuration() time.Duration
-	GetStartTime() time.Time
-
-	IsSuccessful() bool
-}
-
 // Validate validates the controller function parameters.
 func (cf *Func) Validate() error {
 	return validateNewControllerParams(cf.Function, cf.Params)
@@ -51,7 +43,7 @@ func (cf *Func) Validate() error {
 // Run the actual function that ControllerFunction actually represents.
 // The context passed as an argument to the Run function is propogated to the
 // underlying Function.
-func (cf *Func) Run(ctx context.Context) (FunctionResult, error) {
+func (cf *Func) Run(ctx context.Context) error {
 	function := reflect.ValueOf(cf.Function)
 
 	var params []reflect.Value
@@ -67,29 +59,16 @@ func (cf *Func) Run(ctx context.Context) (FunctionResult, error) {
 	// This will panic if the ControllerFunction is not validated.
 	values := function.Call(params)
 	if len(values) != 2 {
-		return nil, fmt.Errorf("error in the return value of the controller function")
+		return fmt.Errorf("error in the return value of the controller function")
 	}
 
-	resElem := values[0].Elem()
-	errElem := values[1].Elem()
+	errElem := values[0].Elem()
 
-	if !resElem.IsValid() {
-		if !errElem.IsValid() {
-			return nil, nil
-		}
-
-		return nil, errElem.Interface().(error)
-	}
-
-	retRes, ok := resElem.Interface().(FunctionResult)
-	if !ok {
-		return nil, fmt.Errorf("resElem.Interface() did not return a ControllerFunctionResult")
-	}
 	if !errElem.IsValid() {
-		return retRes, nil
+		return nil
 	}
 
-	return resElem.Interface().(FunctionResult), errElem.Interface().(error)
+	return errElem.Interface().(error)
 }
 
 // NewControllerFunction returns an instance of a new controller function.
@@ -128,15 +107,11 @@ func validateNewControllerParams(function Function, params ...FuncParam) error {
 		return fmt.Errorf("provided function is not valid, must have atleast one argument, the context")
 	}
 
-	if funcType.NumOut() != 2 {
+	if funcType.NumOut() != 1 {
 		return fmt.Errorf("provided function is not valid, must have an error as return value")
 	}
 
-	if funcType.Out(0) != reflect.TypeOf((*FunctionResult)(nil)).Elem() {
-		return fmt.Errorf("the return type of the function is not valid, must return a ControllerResult")
-	}
-
-	if funcType.Out(1) != reflect.TypeOf((*error)(nil)).Elem() {
+	if funcType.Out(0) != reflect.TypeOf((*error)(nil)).Elem() {
 		return fmt.Errorf("the return type of the function is not valid, must return an error value")
 	}
 
@@ -226,9 +201,6 @@ type Controller struct {
 	ctxDoFunc    context.Context
 	cancelDoFunc context.CancelFunc
 
-	// executionStatistics contains the stats for execution of the controller.
-	executionStatistics map[time.Time]time.Duration
-
 	// terminated is closed after the controller has been terminated
 	terminated chan struct{}
 }
@@ -245,36 +217,6 @@ func (c *Controller) Type() string {
 	}
 
 	return c.cType
-}
-
-// ExecutionStat represents a controller config while execution.
-type ExecutionStat struct {
-	Name string
-	Type string
-
-	StartTime time.Time
-	Duration  time.Duration
-}
-
-// ExtractExecutionStatistics returns the statistics from a controller.
-func (c *Controller) ExtractExecutionStatistics() map[time.Time]time.Duration {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	// Take reference of the statistics here
-	stats := c.executionStatistics
-
-	// clear out the controller statistics
-	c.executionStatistics = make(map[time.Time]time.Duration)
-	return stats
-}
-
-// ClearExecutionStats clears all the stats in execution statistics.
-func (c *Controller) ClearExecutionStats() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	c.executionStatistics = make(map[time.Time]time.Duration)
 }
 
 // RunController starts running the controller.
@@ -299,23 +241,12 @@ func (c *Controller) RunController() {
 			start := time.Now()
 
 			// Run the function.
-			res, err := internal.DoFunc.Run(c.ctxDoFunc)
+			err := internal.DoFunc.Run(c.ctxDoFunc)
 			duration := time.Since(start)
 			c.mutex.Lock()
 
 			c.lastDuration = duration
 			c.getLogger().Debug("Controller func execution time: ", c.lastDuration)
-			if res != nil {
-				c.getLogger().Debug("Controller reported runtime: ", res.GetDuration())
-				duration := defaults.ControllerInvalidDuration
-				if res.IsSuccessful() {
-					duration = res.GetDuration()
-				}
-
-				c.executionStatistics[res.GetStartTime()] = duration
-			} else {
-				c.getLogger().Warnf("Invalid check execution function for the controller: %s", c.name)
-			}
 
 			if err != nil {
 				c.recordError(err)
@@ -380,7 +311,7 @@ func (c *Controller) RunController() {
 shutdown:
 	c.getLogger().Debug("Shutting down controller")
 
-	if _, err := internal.StopFunc.Run(context.TODO()); err != nil {
+	if err := internal.StopFunc.Run(context.TODO()); err != nil {
 		c.mutex.Lock()
 		c.recordError(err)
 		c.mutex.Unlock()

@@ -28,8 +28,8 @@ func NewManager() *Manager {
 }
 
 // NoopFunc is a nil function.
-func NoopFunc(_ctx context.Context) (FunctionResult, error) {
-	return nil, nil
+func NoopFunc(_ctx context.Context) error {
+	return nil
 }
 
 // GetAllControllers Returns the name of all the controllers that are managed by this
@@ -87,8 +87,6 @@ func (m *Manager) updateController(name, cType string, internal Internal) (*Cont
 			stop:       make(chan struct{}),
 			update:     make(chan struct{}, 1),
 			terminated: make(chan struct{}),
-
-			executionStatistics: make(map[time.Time]time.Duration),
 		}
 		ctrl.updateController(internal, false)
 		ctrl.getLogger().Debug("Starting new controller")
@@ -212,26 +210,4 @@ func (m *Manager) GetStats() []*Status {
 	}
 
 	return stats
-}
-
-// PullLatestControllerStatistics pulls the latest controller stats.
-func (m *Manager) PullLatestControllerStatistics() []ExecutionStat {
-	stat := []ExecutionStat{}
-
-	for _, controller := range m.controllers {
-		statMap := controller.ExtractExecutionStatistics()
-
-		for t, duration := range statMap {
-			stat = append(stat, ExecutionStat{
-				Name: controller.Name(),
-				Type: controller.Type(),
-
-				StartTime: t,
-				Duration:  duration,
-			})
-			break
-		}
-	}
-
-	return stat
 }

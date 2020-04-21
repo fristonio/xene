@@ -93,6 +93,12 @@ func (b *Backend) Get(ctx context.Context, key string) (*types.Value, error) {
 	}, nil
 }
 
+// KeyDoesNotExistError checks if the provided error is due to non existance of the key
+// or not.
+func (b *Backend) KeyDoesNotExistError(err error) bool {
+	return err.Error() == badger.ErrKeyNotFound.Error()
+}
+
 // GetPrefix returns the first key which matches the prefix and its value
 func (b *Backend) GetPrefix(ctx context.Context, path string) (string, *types.Value, error) {
 	txn := b.db.NewTransaction(false)
@@ -223,6 +229,38 @@ func (b *Backend) ListPrefix(ctx context.Context, path string) (types.KeyValuePa
 	}
 
 	return list, nil
+}
+
+// PrefixScanWithFunction scans the provided key prefix keys in the store and run
+// the provided function for each one of them.
+func (b *Backend) PrefixScanWithFunction(ctx context.Context,
+	key string, f types.KVPairStructFunc) {
+
+	// Start a badger iteration and iterate over the target prefix keys.
+	_ = b.db.View(func(txn *badger.Txn) error {
+		it := txn.NewIterator(badger.DefaultIteratorOptions)
+		defer it.Close()
+		prefix := []byte(key)
+
+		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+			item := it.Item()
+			val, err := item.ValueCopy(nil)
+			if err != nil {
+				log.Errorf("error while copying value for item: %s: %s", key, err)
+				continue
+			}
+
+			f(&types.KVPairStruct{
+				Key:   string(item.Key()),
+				Value: string(val),
+
+				Version:          item.Version(),
+				ExpiresAt:        item.ExpiresAt(),
+				DeletedOrExpired: item.IsDeletedOrExpired(),
+			})
+		}
+		return nil
+	})
 }
 
 // Encode encodes a binary slice into a character set that the backend

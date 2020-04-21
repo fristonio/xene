@@ -8,6 +8,7 @@ import (
 	// Swagger docs
 	_ "github.com/fristonio/xene/pkg/apiserver/docs"
 
+	"github.com/fristonio/xene/pkg/apiserver/controller"
 	"github.com/fristonio/xene/pkg/auth/jwt"
 	"github.com/fristonio/xene/pkg/defaults"
 
@@ -119,6 +120,12 @@ func (s *APIServer) RunServer() error {
 			Handler: s.router,
 		}
 		log.Infof("Xene API server is listening on: %s", hostPort)
+
+		// start running the controllers for API server.
+		err := controller.RunControllers()
+		if err != nil {
+			log.Errorf("Error while running controllers: %s", err)
+		}
 		return s.server.ListenAndServe()
 	case schemeUnix, schemeHTTPS:
 		log.Warnf("the api server scheme %s is not suppported yet", s.scheme)

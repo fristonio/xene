@@ -30,3 +30,7 @@ type KVPairStruct struct {
 	ExpiresAt        uint64 `json:"expiresAt"`
 	DeletedOrExpired bool   `json:"deletedOrExpired"`
 }
+
+// KVPairStructFunc is the function type of a function which takes KVPairStruct as
+// an argument.
+type KVPairStructFunc func(*KVPairStruct)

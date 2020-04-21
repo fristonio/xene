@@ -25,6 +25,10 @@ type Backend interface {
 	// Get returns the value of the key.
 	Get(ctx context.Context, key string) (*types.Value, error)
 
+	// KeyDoesNotExistError is the method to check if the error is due to non
+	// existance of the key during the get operation.
+	KeyDoesNotExistError(err error) bool
+
 	// GetPrefix returns the first key which matches the prefix and its value
 	GetPrefix(ctx context.Context, prefix string) (string, *types.Value, error)
 
@@ -45,6 +49,9 @@ type Backend interface {
 
 	// ListPrefix returns a list of keys matching the prefix
 	ListPrefix(ctx context.Context, prefix string) (types.KeyValuePairs, error)
+
+	// ListPrefix returns a list of keys matching the prefix
+	PrefixScanWithFunction(ctx context.Context, prefix string, f types.KVPairStructFunc)
 
 	// Encodes a binary slice into a character set that the backend
 	// supports

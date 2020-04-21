@@ -20,6 +20,7 @@ func getRegex(pattern string) regex {
 
 // RBACMapT is the type corresponding to the RBACMap containing the entire
 // details corresponding to role based accesss to API server api.
+//nolint
 type RBACMapT map[string](map[string][]regex)
 
 // APIServerRBACMap is the map containing the Role based access
