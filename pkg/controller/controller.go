@@ -58,7 +58,7 @@ func (cf *Func) Run(ctx context.Context) error {
 	// as we have already validated it before adding the ControllerFunction.
 	// This will panic if the ControllerFunction is not validated.
 	values := function.Call(params)
-	if len(values) != 2 {
+	if len(values) != 1 {
 		return fmt.Errorf("error in the return value of the controller function")
 	}
 
@@ -169,7 +169,7 @@ type Internal struct {
 	// Should we have a constant back off for retries during errors.
 	RetryBackOff bool
 
-	// NoErrorRetry when set to true, disabled retries on errors
+	// NoErrorRetry when set to true, disables retries on errors
 	NoErrorRetry bool
 }
 
