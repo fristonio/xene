@@ -21,10 +21,18 @@ type ObjectMeta struct {
 	Name string `json:"name"`
 }
 
+// GetName return the name of the object
+func (o *ObjectMeta) GetName() string {
+	return o.Name
+}
+
 // Metadata corresponds to the metadata associated with the object.
 type Metadata struct {
 	ObjectMeta `json:",inline"`
 
 	// UID is the unique ID associated with each managed resource.
 	UID string `json:"uid,omitempty"`
+
+	// LastVersionApplied is the version of the type that was applied last.
+	LastAppliedVersion uint64 `json:"lastAppliedVersion,omitempty"`
 }

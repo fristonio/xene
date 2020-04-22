@@ -6,6 +6,8 @@ import (
 
 	"github.com/fristonio/xene/pkg/auth/jwt"
 	"github.com/fristonio/xene/pkg/defaults"
+	"github.com/fristonio/xene/pkg/proto"
+
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -66,10 +68,11 @@ func (s *Server) RunServer() error {
 		c := grpc.Creds(creds)
 		grpcServer = grpc.NewServer(c, grpc.UnaryInterceptor(s.JWTVerficationMiddleware))
 	} else {
-		grpcServer = grpc.NewServer(grpc.UnaryInterceptor(s.JWTVerficationMiddleware))
+		grpcServer = grpc.NewServer()
 	}
 
 	s.server = grpcServer
+	proto.RegisterAgentServiceServer(grpcServer, newAgentServer())
 	return grpcServer.Serve(lis)
 }
 

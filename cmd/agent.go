@@ -15,15 +15,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-var agentName string
-
 var agentCmd = &cobra.Command{
 	Use:   "agent",
 	Short: "Run xene agent.",
 	Long:  "Run xene agent to deploy executor for running configured workflows.",
 	Run: func(cmd *cobra.Command, args []string) {
-		if option.Config.Agent.Address == "" || option.Config.Agent.APIServer == "" {
-			log.Error("--address and --api-server are required flags for agent.")
+		if option.Config.Agent.Address == "" || option.Config.Agent.APIServer == "" ||
+			option.Config.Agent.Name == "" {
+			log.Error("--address, --name and --api-server are required flags for agent.")
 			os.Exit(1)
 		}
 
@@ -52,12 +51,11 @@ var agentCmd = &cobra.Command{
 			os.Exit(0)
 		}()
 
-		agentName = utils.RandToken(24)
-		log.Infof("Registered agent name is: %s", agentName)
+		log.Infof("Registered agent name is: %s", option.Config.Agent.Name)
 		// Join the agent pool in the API server
 		err := server.JoinAPIServer(
 			option.Config.Agent.APIServer,
-			agentName,
+			option.Config.Agent.Name,
 			option.Config.Agent.Address,
 			option.Config.Agent.APIAuthToken)
 		if err != nil {
@@ -88,12 +86,16 @@ func init() {
 		"", "Key to use when using secure mode of GRPC protocol.")
 	agentFlags.StringVarP(&option.Config.Agent.CertFile, "cert-file", "l",
 		"", "Certificate to use for the agent when running in secure GRPC mode.")
+	agentFlags.StringVarP(&option.Config.Agent.Name, "name", "n",
+		"", "Name to run the agent with.")
 	agentFlags.BoolVarP(&option.Config.Agent.Insecure, "insecure", "i",
 		true, "Run agent in insecure mode")
 	agentFlags.StringVarP(&option.Config.Agent.Address, "address", "m",
 		"", "Own address of the agent, for the API server to communmicate")
 	agentFlags.StringVarP(&option.Config.Agent.JWTSecret, "jwt-secret", "j",
 		"", "JWT secret to use for authentication purpose for GRPC server")
+
+	_ = agentCmd.MarkPersistentFlagRequired("name")
 	_ = agentCmd.MarkPersistentFlagRequired("address")
 	_ = agentCmd.MarkPersistentFlagRequired("api-server")
 

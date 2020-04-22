@@ -148,5 +148,9 @@ func (s *APIServer) Shutdown() {
 	}
 
 	s.shuttingDown = false
+	err := controller.StopControllers()
+	if err != nil {
+		log.Error(err)
+	}
 	log.Info("server shutdown successful.")
 }

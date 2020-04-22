@@ -2,6 +2,9 @@ package option
 
 // AgentOpts contains the desired configuration to run.
 type AgentOpts struct {
+	// Name is the name of the agent.
+	Name string `yaml:"name"`
+
 	// Host is the host to bind the agent on.
 	Host string `yaml:"host"`
 

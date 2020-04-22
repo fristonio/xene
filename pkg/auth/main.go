@@ -36,5 +36,9 @@ func GetTokenFromGRPCContext(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("missing metadata in the context")
 	}
 
-	return getTokenFromHeader(md["Authorization"][0])
+	if len(md["Authorization"]) > 0 {
+		return getTokenFromHeader(md["Authorization"][0])
+	}
+
+	return "", fmt.Errorf("no Authorization header in grpc request")
 }

@@ -3,7 +3,13 @@ package controller
 import (
 	"fmt"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
+)
+
+var (
+	log *logrus.Entry = logrus.WithFields(logrus.Fields{
+		"package": "apiserver-controller",
+	})
 )
 
 var (
@@ -14,6 +20,9 @@ var (
 
 // Controller is the standard interface which should be implemented by all the registered controllers.
 type Controller interface {
+	// Configure sets up the controller
+	Configure()
+
 	// Run starts running the controller.
 	Run() error
 
@@ -29,7 +38,26 @@ func RunControllers() error {
 	log.Info("starting to run configured controllers for API server")
 	errs := make(map[string]string)
 	for _, controller := range RegisteredControllers {
+		controller.Configure()
 		err := controller.Run()
+		if err != nil {
+			errs[controller.Name()] = err.Error()
+		}
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("error while running apiserver controllers: %v", errs)
+	}
+
+	return nil
+}
+
+// StopControllers stops running all the controllers managed by API server.
+func StopControllers() error {
+	log.Info("stopping running controllers for apiserver.")
+	errs := make(map[string]string)
+	for _, controller := range RegisteredControllers {
+		err := controller.Stop()
 		if err != nil {
 			errs[controller.Name()] = err.Error()
 		}
