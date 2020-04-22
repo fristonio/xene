@@ -3,24 +3,37 @@ syntax = "proto3";
 package proto;
 
 // Generate file by the following command
-//     protoc --proto_path=pkg --go_out=plugins=grpc:pkg pkg/proto/agent.proto
+// protoc -I pkg/proto pkg/proto/agent.proto --go_out=plugins=grpc:pkg/proto
 
 message Pipeline {
     // spec contains the actual spec of the pipeline. Each pipeline
     // is evaluated at the agent only. The work of the apiserver
     // is to schedule pipelines corresponding to a workflow on a number
     // of worker agents.
-    string spec = 1;
+    string Spec = 1;
 }
 
 message PipelineStatus {
     // status contains the current status of the pipeline.
     // It can be one of the preconfigured statuses for a pipeline.
-    string status = 1;
+    string Status = 1;
+}
+
+message StatusOpts {
+    // Verbose specify if the status information returned should be verbose or not.
+    bool Verbose = 1;
+}
+
+message AgentStatus {
+    // Healthy is a boolean value which specifies the health status of the agent.
+    bool Healthy = 1;
 }
 
 // AgentService describes the grpc service running in the agent
 service AgentService {
+    // Status returns the status of the agent service running.
+    rpc Status(StatusOpts) returns (AgentStatus) {}
+
     // SchedulePipeline is the RPC to schedule a pipeline on to the agent
     rpc SchedulePipeline(Pipeline) returns (PipelineStatus) {}
 }
