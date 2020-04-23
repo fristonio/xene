@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/fristonio/xene/pkg/controller"
+	"github.com/fristonio/xene/pkg/defaults"
 	"github.com/fristonio/xene/pkg/store"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
 )
@@ -49,8 +50,8 @@ func NewAgentController() *AgentController {
 		Manager:               controller.NewManager(),
 		Nodes:                 make(map[string]*v1alpha1.Agent),
 		blacklistedNodes:      make(map[string]*v1alpha1.Agent),
-		agentHealthCheckLimit: 3,
-		healthCheckInterval:   time.Second * 5,
+		agentHealthCheckLimit: defaults.AgentHealthCheckRetriesLimit,
+		healthCheckInterval:   defaults.AgentHealthCheckInterval,
 	}
 }
 

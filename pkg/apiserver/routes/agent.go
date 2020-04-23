@@ -69,9 +69,10 @@ func agentRegisterHandler(ctx *gin.Context) {
 		return
 	}
 
-	if agent.Metadata.ObjectMeta.Name == "" {
+	err = agent.Validate()
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, response.HTTPError{
-			Error: fmt.Sprintf("name is a required field in agent description"),
+			Error: fmt.Sprintf("error while validating agent spec: %s", err),
 		})
 		return
 	}

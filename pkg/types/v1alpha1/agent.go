@@ -21,6 +21,19 @@ type Agent struct {
 	Spec AgentSpec `json:"spec"`
 }
 
+// Validate checks for any issues in the information about the agent in the type.
+func (a *Agent) Validate() error {
+	if err := a.TypeMeta.Validate(AgentKind); err != nil {
+		return err
+	}
+
+	if err := a.Metadata.Validate(); err != nil {
+		return err
+	}
+
+	return a.Spec.Validate()
+}
+
 // CheckHealth checks for the health status of the provided agent in context.
 // If the agent is not healthy or there is some issue with the connectivity the
 // function returns an error.
@@ -61,4 +74,14 @@ type AgentSpec struct {
 	// AuthToken contains the auth token to communicate with the running agent at the
 	// provided address.
 	AuthToken string `json:"authToken"`
+}
+
+// Validate validates the specification provided for the agent..
+func (a *AgentSpec) Validate() error {
+	_, err := url.Parse(a.Address)
+	if err != nil {
+		return fmt.Errorf("address is not valid: %s", err)
+	}
+
+	return nil
 }

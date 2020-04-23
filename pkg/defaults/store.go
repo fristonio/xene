@@ -14,4 +14,7 @@ const (
 	// StoreControllerRunInterval contains the run interval for store configured
 	// controller do functions.
 	StoreControllerRunInterval time.Duration = time.Second * 10
+
+	// StoreControllerNameLength is the length of the store controller name
+	StoreControllerNameLength uint32 = 12
 )

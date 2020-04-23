@@ -75,7 +75,7 @@ func NewController(
 		DeleteFunc: delFunc,
 		Key:        key,
 		Prefix:     prefix,
-		name:       utils.RandToken(12),
+		name:       utils.RandToken(defaults.StoreControllerNameLength),
 		cache:      NewCache(),
 		Manager:    ControllerManager,
 	}
@@ -96,7 +96,7 @@ func NewControllerWithSharedCache(
 		DeleteFunc: delFunc,
 		Key:        key,
 		Prefix:     prefix,
-		name:       utils.RandToken(12),
+		name:       utils.RandToken(defaults.StoreControllerNameLength),
 		cache:      GlobalSharedCache,
 		Manager:    ControllerManager,
 	}
