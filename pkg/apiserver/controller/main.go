@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 
+	"github.com/fristonio/xene/pkg/apiserver/controller/agent"
 	"github.com/sirupsen/logrus"
 )
 
@@ -68,4 +69,8 @@ func StopControllers() error {
 	}
 
 	return nil
+}
+
+func init() {
+	RegisteredControllers = append(RegisteredControllers, agent.AgentCtrl)
 }

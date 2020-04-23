@@ -1,0 +1,19 @@
+{
+    "CN": "client",
+    "hosts": [
+        ""
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C":"Asia",
+            "L":"India",
+            "O":"Xene",
+            "OU":"Xene Root CA",
+            "ST":"India"
+        }
+    ]
+}

@@ -46,9 +46,9 @@ func (s *Server) JoinAPIServer(apiServerAddr, agentName, agentAddr, authToken st
 		},
 		Spec: types.AgentSpec{
 			Address:          agentAddr,
-			ClientKeySecret:  fmt.Sprintf("%s-cilent-key", agentName),
-			ClientCertSecret: fmt.Sprintf("%s-cilent-cert", agentName),
-			RootCASecret:     fmt.Sprintf("%s-cilent-key", agentName),
+			ClientKeySecret:  fmt.Sprintf("%s-client-key", agentName),
+			ClientCertSecret: fmt.Sprintf("%s-client-cert", agentName),
+			RootCASecret:     fmt.Sprintf("%s-root-ca-chain", agentName),
 		},
 	}
 
@@ -57,7 +57,7 @@ func (s *Server) JoinAPIServer(apiServerAddr, agentName, agentAddr, authToken st
 		return fmt.Errorf("error while marshaling agent manifest: %s", err)
 	}
 
-	client := client.New(httptransport.New(apiServerAddr, "", nil), strfmt.Default)
+	client := client.New(httptransport.New(addr.Host, "", nil), strfmt.Default)
 	bearerTokenAuth := httptransport.BearerToken(authToken)
 
 	resp, err := client.Registry.

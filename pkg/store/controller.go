@@ -191,6 +191,11 @@ func (c *Controller) storeControllerDoFunc(ctx context.Context) error {
 	return nil
 }
 
+// DeleteFromCache deletes the entry from the store cache.
+func (c *Controller) DeleteFromCache(key string) {
+	c.cache.Remove(key)
+}
+
 // Stop shuts down a running store controller.
 func (c *Controller) Stop() error {
 	log.WithFields(log.Fields{

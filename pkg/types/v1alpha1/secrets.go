@@ -40,6 +40,12 @@ func (s *Secret) AddContent(data []byte) {
 	s.Spec.Content = base64.StdEncoding.EncodeToString(data)
 }
 
+// GetContent adds the provided data to the secret content after base64 encoding
+// it to a string.
+func (s *Secret) GetContent() ([]byte, error) {
+	return base64.StdEncoding.DecodeString(s.Spec.Content)
+}
+
 // SecretSpec contains the spec of the secret.
 type SecretSpec struct {
 	// Type contains the type of secret we are storing.

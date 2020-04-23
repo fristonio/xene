@@ -1,0 +1,22 @@
+{
+    "CN": "*.xene.io",
+    "hosts": [
+        "http://127.0.0.1",
+        "EXTERNAL_IP",
+        "*.xene.io",
+        "http://127.0.0.1:6061"
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C":"Asia",
+            "L":"India",
+            "O":"Xene",
+            "OU":"Xene Root CA",
+            "ST":"India"
+        }
+    ]
+  }

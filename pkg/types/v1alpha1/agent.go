@@ -37,22 +37,7 @@ func (a *Agent) Validate() error {
 // CheckHealth checks for the health status of the provided agent in context.
 // If the agent is not healthy or there is some issue with the connectivity the
 // function returns an error.
-func (a *Agent) CheckHealth() error {
-	var opts []grpc.DialOption
-
-	// Fix this to include secure connection using Mutual TLS.
-	opts = append(opts, grpc.WithInsecure())
-
-	addr, err := url.Parse(a.Spec.Address)
-	if err != nil {
-		return fmt.Errorf("error while parsing Agent address: %s", err)
-	}
-	conn, err := grpc.Dial(addr.Host, opts...)
-	if err != nil {
-		return fmt.Errorf("error failed to dial: %s", err)
-	}
-	defer conn.Close()
-
+func (a *Agent) CheckHealth(conn *grpc.ClientConn) error {
 	client := proto.NewAgentServiceClient(conn)
 	status, err := client.Status(context.TODO(), &proto.StatusOpts{Verbose: true})
 	if err != nil {
