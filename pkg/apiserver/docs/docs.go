@@ -34,6 +34,11 @@ var doc = `{
     "paths": {
         "/api/v1/authok": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "auth OK handler handles the ping to api routes which are",
                 "consumes": [
                     "application/json"
@@ -57,6 +62,11 @@ var doc = `{
         },
         "/api/v1/registry/agent": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "If a name is provided return the corresponding agent object, if prefix is set to some value",
                 "consumes": [
                     "application/json"
@@ -98,6 +108,11 @@ var doc = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/x-www-form-urlencoded"
                 ],
@@ -141,6 +156,11 @@ var doc = `{
         },
         "/api/v1/registry/agent/{name}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -176,6 +196,11 @@ var doc = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Deletes the agent specified by the name parameter, if the agent is not",
                 "consumes": [
                     "application/json"
@@ -218,6 +243,11 @@ var doc = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -249,6 +279,11 @@ var doc = `{
         },
         "/api/v1/registry/secret": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "If a name is provided return the corresponding secret object, if prefix is set to some value",
                 "consumes": [
                     "application/json"
@@ -290,6 +325,11 @@ var doc = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/x-www-form-urlencoded"
                 ],
@@ -333,6 +373,11 @@ var doc = `{
         },
         "/api/v1/registry/secret/{name}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -368,6 +413,11 @@ var doc = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Deletes the secret specified by the name parameter, if the secret is not",
                 "consumes": [
                     "application/json"
@@ -410,6 +460,11 @@ var doc = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -441,6 +496,11 @@ var doc = `{
         },
         "/api/v1/registry/workflow": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "If a name is provided return the corresponding workflow object, if prefix  is set to some value",
                 "consumes": [
                     "application/json"
@@ -482,6 +542,11 @@ var doc = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "This route creates a new workflow for xene to operate on, if the workflow already exists",
                 "consumes": [
                     "application/x-www-form-urlencoded"
@@ -526,6 +591,11 @@ var doc = `{
         },
         "/api/v1/registry/workflow/{name}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -561,6 +631,11 @@ var doc = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Deletes the workflow specified by the name parameter, if the workflow is not",
                 "consumes": [
                     "application/json"
@@ -603,6 +678,11 @@ var doc = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -828,10 +908,13 @@ var doc = `{
         }
     },
     "securityDefinitions": {
-        "BasicAuth": {
+        "ApiKeyAuth": {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
+        },
+        "BasicAuth": {
+            "type": "basic"
         }
     }
 }`

@@ -73,6 +73,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.HTTPMessage'
+      security:
+      - ApiKeyAuth: []
       summary: Handles ping event for api routes.
       tags:
       - api
@@ -102,6 +104,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Returns the specified agent object from the store.
       tags:
       - registry
@@ -129,6 +133,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Creates a new agent in the store.
       tags:
       - registry
@@ -159,6 +165,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Deletes the specified agent from the store.
       tags:
       - registry
@@ -182,6 +190,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Returns the specified agent object from the store with the name in
         params.
       tags:
@@ -202,6 +212,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Patches the specified agent from the store.
       tags:
       - registry
@@ -231,6 +243,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Returns the specified secret object from the store.
       tags:
       - registry
@@ -258,6 +272,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Creates a new secret in the store.
       tags:
       - registry
@@ -288,6 +304,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Deletes the specified secret from the store.
       tags:
       - registry
@@ -311,6 +329,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Returns the specified secret object from the store with the name in
         params.
       tags:
@@ -331,6 +351,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Patches the specified secret from the store.
       tags:
       - registry
@@ -360,6 +382,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Returns the specified workflow object from the store.
       tags:
       - registry
@@ -389,6 +413,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Creates a new workflow in the store.
       tags:
       - registry
@@ -419,6 +445,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Deletes the specified workflow from the store.
       tags:
       - registry
@@ -442,6 +470,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Returns the specified workflow object from the store with the name
         in params.
       tags:
@@ -462,6 +492,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
       summary: Patches the specified workflow from the store.
       tags:
       - registry
@@ -547,8 +579,10 @@ paths:
       tags:
       - auth
 securityDefinitions:
-  BasicAuth:
+  ApiKeyAuth:
     in: header
     name: Authorization
     type: apiKey
+  BasicAuth:
+    type: basic
 swagger: "2.0"
