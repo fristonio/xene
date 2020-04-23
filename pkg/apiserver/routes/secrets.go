@@ -25,6 +25,7 @@ import (
 // @Success 200 {object} response.RegistryItemsFromPrefix
 // @Success 200 {object} response.RegistryItem
 // @Failure 500 {object} response.HTTPError
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/secret [get]
 func secretGetHandler(ctx *gin.Context) {
 	registryGetHandler(ctx, v1alpha1.SecretKeyPrefix)
@@ -37,6 +38,7 @@ func secretGetHandler(ctx *gin.Context) {
 // @Param name path string true "name of the secret to get."
 // @Success 200 {object} response.RegistryItem
 // @Failure 500 {object} response.HTTPError
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/secret/{name} [get]
 func secretGetByNameHandler(ctx *gin.Context) {
 	registryGetByNameHandler(ctx, v1alpha1.SecretKeyPrefix)
@@ -50,6 +52,7 @@ func secretGetByNameHandler(ctx *gin.Context) {
 // @Failure 500 {object} response.HTTPError
 // @Failure 400 {object} response.HTTPError
 // @Success 200 {object} response.HTTPMessage
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/secret [post]
 func secretRegisterHandler(ctx *gin.Context) {
 	newSecret := ctx.PostForm("secret")
@@ -98,6 +101,7 @@ func secretRegisterHandler(ctx *gin.Context) {
 // @Produce json
 // @Param name path string true "Name of the secret to be patched."
 // @Failure 400 {object} response.HTTPError
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/secret/{name} [patch]
 func secretPatchHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusBadRequest, response.HTTPError{
@@ -115,6 +119,7 @@ func secretPatchHandler(ctx *gin.Context) {
 // @Failure 500 {object} response.HTTPError
 // @Failure 400 {object} response.HTTPError
 // @Success 200 {object} response.HTTPMessage
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/secret/{name} [delete]
 func secretRemoveHandler(ctx *gin.Context) {
 	registryDeleteHandler(ctx, v1alpha1.SecretKeyPrefix)

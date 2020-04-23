@@ -27,3 +27,9 @@ $$  /\$$\ \$$$$$$$\ $$ |  $$ |\$$$$$$$\
 \__/  \__| \_______|\__|  \__| \_______|
 INFO[0000] Xene API server is listening on: 127.0.0.1:6060
 ```
+
+Being backed by gin-swagger the api client is also generated automatically using go-swagger. Get it from [here](https://github.com/go-swagger/go-swagger). To generate the clientset and modeles for apiserver run the following command
+
+```bash
+$ swagger generate client -f docs/swagger.yaml
+```

@@ -52,7 +52,7 @@ type SecretSpec struct {
 
 // Validate validates the integrity of the Secret object.
 func (s *SecretSpec) Validate() error {
-	if s.Type != defaults.SecretTypeCertificates || s.Type != defaults.SecretTypeDefault {
+	if s.Type != defaults.SecretTypeCertificates && s.Type != defaults.SecretTypeDefault {
 		return fmt.Errorf("Invalid %s secret type in the spec", s.Type)
 	}
 

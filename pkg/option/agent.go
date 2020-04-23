@@ -30,6 +30,15 @@ type AgentOpts struct {
 	// CertFile contains the certificate for agent's secure GRPC scheme.
 	CertFile string `yaml:"certFile"`
 
+	// RootCACert contains the root CA certificate for gRPC server.
+	RootCACert string `yaml:"rootCACert"`
+
+	// ClientKeyFile is the key file to use for client connecting to the GRPC server.
+	ClientKeyFile string `yaml:"clientKeyFile"`
+
+	// ClientCertFile contains the certificate for client(apiserver) to connect to GRPC server.
+	ClientCertFile string `yaml:"clientCertFile"`
+
 	// JWTSecret contains the jwt secret for authorizing clients for GRPC
 	// server
 	JWTSecret string `yaml:"jwtSecret"`

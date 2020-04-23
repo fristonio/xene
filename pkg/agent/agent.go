@@ -1,7 +1,10 @@
 package agent
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"net"
 
 	"github.com/fristonio/xene/pkg/auth/jwt"
@@ -21,8 +24,9 @@ type Server struct {
 	host string
 	port uint32
 
-	certFile string
-	keyFile  string
+	certFile   string
+	keyFile    string
+	rootCACert string
 
 	insecureMode bool
 
@@ -31,7 +35,8 @@ type Server struct {
 }
 
 // NewServer returns a new server for agent.
-func NewServer(host string, port uint32, address, certFile, keyFile, jwtSecret string, insecureMode bool) *Server {
+func NewServer(host string, port uint32, address, certFile, keyFile, rootCACert,
+	jwtSecret string, insecureMode bool) *Server {
 	return &Server{
 		shuttingDown: false,
 		address:      address,
@@ -39,6 +44,7 @@ func NewServer(host string, port uint32, address, certFile, keyFile, jwtSecret s
 		port:         port,
 		certFile:     certFile,
 		keyFile:      keyFile,
+		rootCACert:   rootCACert,
 		insecureMode: insecureMode,
 		authProvider: jwt.NewJWTAuthProvider(jwtSecret),
 	}
@@ -60,13 +66,29 @@ func (s *Server) RunServer() error {
 	// for request authentication.
 	var grpcServer *grpc.Server
 	if !s.insecureMode {
-		creds, err := credentials.NewServerTLSFromFile(s.certFile, s.keyFile)
+		certificate, err := tls.LoadX509KeyPair(s.certFile, s.keyFile)
 		if err != nil {
-			return fmt.Errorf("failed to create credentials: %v", err)
+			log.Fatalf("error while loading key cert pair for server: %s", err)
 		}
 
-		c := grpc.Creds(creds)
-		grpcServer = grpc.NewServer(c, grpc.UnaryInterceptor(s.JWTVerficationMiddleware))
+		certPool := x509.NewCertPool()
+		data, err := ioutil.ReadFile(s.rootCACert)
+		if err != nil {
+			log.Fatalf("failed to read root ca cert: %s", err)
+		}
+
+		ok := certPool.AppendCertsFromPEM(data)
+		if !ok {
+			log.Fatal("failed to append client certs")
+		}
+		tlsConfig := &tls.Config{
+			ClientAuth:   tls.RequireAndVerifyClientCert,
+			Certificates: []tls.Certificate{certificate},
+			ClientCAs:    certPool,
+		}
+
+		c := grpc.Creds(credentials.NewTLS(tlsConfig))
+		grpcServer = grpc.NewServer(c)
 	} else {
 		grpcServer = grpc.NewServer()
 	}

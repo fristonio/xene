@@ -105,7 +105,8 @@ func NewHTTPSServer(host string, port uint32, keyFile, certFile, jwtSecret strin
 //
 // @host localhost:6060
 // @BasePath /
-// @securityDefinitions.apikey BasicAuth
+// @securityDefinitions.basic BasicAuth
+// @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
 func (s *APIServer) RunServer() error {

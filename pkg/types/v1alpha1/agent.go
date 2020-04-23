@@ -71,9 +71,15 @@ type AgentSpec struct {
 	// Address contains the address of the agent.
 	Address string `json:"address"`
 
-	// AuthToken contains the auth token to communicate with the running agent at the
-	// provided address.
-	AuthToken string `json:"authToken"`
+	// ClientKeySecret is the xene client key registry secret object name to use
+	// for the GRPC client for agent.
+	ClientKeySecret string `json:"clientKeySecret"`
+
+	// ClientCertSecret is the xene registry secret which contains the client certificate.
+	ClientCertSecret string `json:"clientCertSecret"`
+
+	// RootCASecret corresponds to the root certificate authority xene secret.
+	RootCASecret string `json:"rootCA"`
 }
 
 // Validate validates the specification provided for the agent..

@@ -4,4 +4,4 @@ xene
 vendor/
 venv/
 site/
-
+*.gen/

@@ -25,6 +25,7 @@ import (
 // @Success 200 {object} response.RegistryItemsFromPrefix
 // @Success 200 {object} response.RegistryItem
 // @Failure 500 {object} response.HTTPError
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/agent [get]
 func agentGetHandler(ctx *gin.Context) {
 	registryGetHandler(ctx, v1alpha1.AgentKeyPrefix)
@@ -37,6 +38,7 @@ func agentGetHandler(ctx *gin.Context) {
 // @Param name path string true "name of the agent to get."
 // @Success 200 {object} response.RegistryItem
 // @Failure 500 {object} response.HTTPError
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/agent/{name} [get]
 func agentGetByNameHandler(ctx *gin.Context) {
 	registryGetByNameHandler(ctx, v1alpha1.AgentKeyPrefix)
@@ -50,6 +52,7 @@ func agentGetByNameHandler(ctx *gin.Context) {
 // @Failure 500 {object} response.HTTPError
 // @Failure 400 {object} response.HTTPError
 // @Success 200 {object} response.HTTPMessage
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/agent [post]
 func agentRegisterHandler(ctx *gin.Context) {
 	newAgent := ctx.PostForm("agent")
@@ -97,6 +100,7 @@ func agentRegisterHandler(ctx *gin.Context) {
 // @Produce json
 // @Param name path string true "Name of the agent to be patched."
 // @Failure 400 {object} response.HTTPError
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/agent/{name} [patch]
 func agentPatchHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusBadRequest, response.HTTPError{
@@ -114,6 +118,7 @@ func agentPatchHandler(ctx *gin.Context) {
 // @Failure 500 {object} response.HTTPError
 // @Failure 400 {object} response.HTTPError
 // @Success 200 {object} response.HTTPMessage
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/agent/{name} [delete]
 func agentRemoveHandler(ctx *gin.Context) {
 	registryDeleteHandler(ctx, v1alpha1.AgentKeyPrefix)

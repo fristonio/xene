@@ -30,11 +30,21 @@ var agentCmd = &cobra.Command{
 			option.Config.Agent.JWTSecret = utils.RandToken(40)
 		}
 
+		if !option.Config.Agent.Insecure {
+			if option.Config.Agent.KeyFile == "" ||
+				option.Config.Agent.CertFile == "" ||
+				option.Config.Agent.RootCACert == "" ||
+				option.Config.Agent.ClientCertFile == "" ||
+				option.Config.Agent.ClientKeyFile == "" {
+				log.Fatal("In insecure mode all the key and certificates file should be specifed")
+			}
+		}
 		server := agent.NewServer(option.Config.Agent.Host,
 			option.Config.Agent.Port,
 			option.Config.Agent.Address,
 			option.Config.Agent.CertFile,
 			option.Config.Agent.KeyFile,
+			option.Config.Agent.RootCACert,
 			option.Config.Agent.JWTSecret,
 			option.Config.Agent.Insecure)
 
@@ -86,10 +96,16 @@ func init() {
 		"", "Key to use when using secure mode of GRPC protocol.")
 	agentFlags.StringVarP(&option.Config.Agent.CertFile, "cert-file", "l",
 		"", "Certificate to use for the agent when running in secure GRPC mode.")
+	agentFlags.StringVarP(&option.Config.Agent.RootCACert, "root-ca", "r",
+		"", "Root CA certificate chain to use for mTLS.")
+	agentFlags.StringVarP(&option.Config.Agent.ClientKeyFile, "client-key-file", "",
+		"", "Key to use when agent's grpc server.")
+	agentFlags.StringVarP(&option.Config.Agent.ClientCertFile, "client-cert-file", "",
+		"", "Certificate to use for the client connecting to agent.")
 	agentFlags.StringVarP(&option.Config.Agent.Name, "name", "n",
 		"", "Name to run the agent with.")
 	agentFlags.BoolVarP(&option.Config.Agent.Insecure, "insecure", "i",
-		true, "Run agent in insecure mode")
+		false, "Run agent in insecure mode")
 	agentFlags.StringVarP(&option.Config.Agent.Address, "address", "m",
 		"", "Own address of the agent, for the API server to communmicate")
 	agentFlags.StringVarP(&option.Config.Agent.JWTSecret, "jwt-secret", "j",

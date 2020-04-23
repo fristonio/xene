@@ -20,6 +20,7 @@ func APIGroupRouter(r *gin.RouterGroup) {
 // @Accept  json
 // @Produce json
 // @Success 200 {object} response.HTTPMessage
+// @Security ApiKeyAuth
 // @Router /api/v1/authok [get]
 func authOKHandler(ctx *gin.Context) {
 	ctx.JSON(200, response.HTTPMessage{

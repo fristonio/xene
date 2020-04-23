@@ -26,6 +26,7 @@ import (
 // @Success 200 {object} response.RegistryItemsFromPrefix
 // @Success 200 {object} response.RegistryItem
 // @Failure 500 {object} response.HTTPError
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/workflow [get]
 func workflowGetHandler(ctx *gin.Context) {
 	registryGetHandler(ctx, v1alpha1.WorkflowKeyPrefix)
@@ -38,6 +39,7 @@ func workflowGetHandler(ctx *gin.Context) {
 // @Param name path string true "name of the workflow to get."
 // @Success 200 {object} response.RegistryItem
 // @Failure 500 {object} response.HTTPError
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/workflow/{name} [get]
 func workflowGetByNameHandler(ctx *gin.Context) {
 	registryGetByNameHandler(ctx, v1alpha1.WorkflowKeyPrefix)
@@ -54,6 +56,7 @@ func workflowGetByNameHandler(ctx *gin.Context) {
 // @Failure 500 {object} response.HTTPError
 // @Failure 400 {object} response.HTTPError
 // @Success 200 {object} response.HTTPMessage
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/workflow [post]
 func workflowCreateHandler(ctx *gin.Context) {
 	workflow := ctx.PostForm("workflow")
@@ -100,6 +103,7 @@ func workflowCreateHandler(ctx *gin.Context) {
 // @Produce json
 // @Param name path string true "Name of the workflow to be patched."
 // @Failure 400 {object} response.HTTPError
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/workflow/{name} [patch]
 func workflowPatchHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusBadRequest, response.HTTPError{
@@ -117,6 +121,7 @@ func workflowPatchHandler(ctx *gin.Context) {
 // @Failure 500 {object} response.HTTPError
 // @Failure 400 {object} response.HTTPError
 // @Success 200 {object} response.HTTPMessage
+// @Security ApiKeyAuth
 // @Router /api/v1/registry/workflow/{name} [delete]
 func workflowDeleteHandler(ctx *gin.Context) {
 	registryDeleteHandler(ctx, v1alpha1.WorkflowKeyPrefix)
