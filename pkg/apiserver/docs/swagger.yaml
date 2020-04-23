@@ -205,6 +205,135 @@ paths:
       summary: Patches the specified agent from the store.
       tags:
       - registry
+  /api/v1/registry/secret:
+    get:
+      consumes:
+      - application/json
+      description: If a name is provided return the corresponding secret object, if
+        prefix is set to some value
+      parameters:
+      - description: Prefix based get for secret.
+        in: query
+        name: prefix
+        type: string
+      - description: name of the secret to get.
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RegistryItem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Returns the specified secret object from the store.
+      tags:
+      - registry
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - description: secret manifest to be created.
+        in: formData
+        name: secret
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPMessage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Creates a new secret in the store.
+      tags:
+      - registry
+  /api/v1/registry/secret/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the secret specified by the name parameter, if the secret
+        is not
+      parameters:
+      - description: Name of the secret to be deleted.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPMessage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Deletes the specified secret from the store.
+      tags:
+      - registry
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: name of the secret to get.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RegistryItem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Returns the specified secret object from the store with the name in
+        params.
+      tags:
+      - registry
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Name of the secret to be patched.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Patches the specified secret from the store.
+      tags:
+      - registry
   /api/v1/registry/workflow:
     get:
       consumes:

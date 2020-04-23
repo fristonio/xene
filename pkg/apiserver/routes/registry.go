@@ -19,6 +19,9 @@ func RegistryGroupRoutes(r *gin.RouterGroup) {
 
 	agentGroup := r.Group("agent")
 	agentGroupRoutes(agentGroup)
+
+	secretsGroup := r.Group("secret")
+	secretsGroupRoutes(secretsGroup)
 }
 
 // workflowGroupRoutes sets up the routes for workflow registry group.
@@ -30,13 +33,22 @@ func workflowGroupRoutes(r *gin.RouterGroup) {
 	r.DELETE("/:name", workflowDeleteHandler)
 }
 
-// agentsGroupRoutes sets up the routes for workflow registry group.
+// agentsGroupRoutes sets up the routes for agent registry group.
 func agentGroupRoutes(r *gin.RouterGroup) {
 	r.GET("", agentGetHandler)
 	r.GET("/:name", agentGetByNameHandler)
 	r.POST("", agentRegisterHandler)
 	r.PATCH("", agentPatchHandler)
 	r.DELETE("/:name", agentRemoveHandler)
+}
+
+// secretsGroupRoutes sets up the routes for secrets registry group.
+func secretsGroupRoutes(r *gin.RouterGroup) {
+	r.GET("", secretGetHandler)
+	r.GET("/:name", secretGetByNameHandler)
+	r.POST("", secretRegisterHandler)
+	r.PATCH("", secretPatchHandler)
+	r.DELETE("/:name", secretRemoveHandler)
 }
 
 func registryGetHandler(ctx *gin.Context, pre string) {

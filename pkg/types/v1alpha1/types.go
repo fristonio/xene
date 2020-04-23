@@ -1,5 +1,7 @@
 package v1alpha1
 
+import "fmt"
+
 // TypeMeta describe the type details for a particular object understood by
 // xene. It is same as that what kubernetes uses for type specification of the
 // object.
@@ -10,6 +12,15 @@ type TypeMeta struct {
 
 	// ApiVersion is the version this specification corresponds to.
 	APIVersion string `json:"apiVersion"`
+}
+
+// Validate checks for the information in TypeMeta
+func (t *TypeMeta) Validate(reqKind string) error {
+	if reqKind != t.Kind {
+		return fmt.Errorf("kind is not valid for the type: %s(required %s)", t.Kind, reqKind)
+	}
+
+	return nil
 }
 
 // ObjectMeta contains metadata which is common to all of the objects in xene.
@@ -35,4 +46,13 @@ type Metadata struct {
 
 	// LastVersionApplied is the version of the type that was applied last.
 	LastAppliedVersion uint64 `json:"lastAppliedVersion,omitempty"`
+}
+
+// Validate validates the information present in metadata.
+func (m *Metadata) Validate() error {
+	if m.ObjectMeta.Name == "" {
+		return fmt.Errorf("name is a required parameter in object manifest")
+	}
+
+	return nil
 }
