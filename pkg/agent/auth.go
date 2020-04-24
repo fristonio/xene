@@ -27,12 +27,6 @@ func (s *Server) JoinAPIServer(apiServerAddr, agentName, agentAddr, authToken st
 		return fmt.Errorf("error while parsing Agent address: %s", err)
 	}
 
-	// First create secrets corresponding to the agent.
-	err = s.createXeneSecrets(addr.Host, agentName, authToken)
-	if err != nil {
-		return err
-	}
-
 	agentManifest := types.Agent{
 		TypeMeta: types.TypeMeta{
 			Kind:       "agent",
@@ -45,11 +39,22 @@ func (s *Server) JoinAPIServer(apiServerAddr, agentName, agentAddr, authToken st
 			},
 		},
 		Spec: types.AgentSpec{
-			Address:          agentAddr,
-			ClientKeySecret:  fmt.Sprintf("%s-client-key", agentName),
-			ClientCertSecret: fmt.Sprintf("%s-client-cert", agentName),
-			RootCASecret:     fmt.Sprintf("%s-root-ca-chain", agentName),
+			Address:  agentAddr,
+			Insecure: option.Config.Agent.Insecure,
 		},
+	}
+
+	if !option.Config.Agent.Insecure {
+		// First create secrets corresponding to the agent.
+		err = s.createXeneSecrets(addr.Host, agentName, authToken)
+		if err != nil {
+			return err
+		}
+
+		agentManifest.Spec.ClientKeySecret = fmt.Sprintf("%s-client-key", agentName)
+		agentManifest.Spec.ClientCertSecret = fmt.Sprintf("%s-client-cert", agentName)
+		agentManifest.Spec.RootCASecret = fmt.Sprintf("%s-root-ca-chain", agentName)
+		agentManifest.Spec.ServerName = option.Config.Agent.ServerName
 	}
 
 	ag, err := json.Marshal(agentManifest)

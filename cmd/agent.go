@@ -35,7 +35,8 @@ var agentCmd = &cobra.Command{
 				option.Config.Agent.CertFile == "" ||
 				option.Config.Agent.RootCACert == "" ||
 				option.Config.Agent.ClientCertFile == "" ||
-				option.Config.Agent.ClientKeyFile == "" {
+				option.Config.Agent.ClientKeyFile == "" ||
+				option.Config.Agent.ServerName == "" {
 				log.Fatal("In insecure mode all the key and certificates file should be specifed")
 			}
 		}
@@ -87,6 +88,8 @@ func init() {
 		defaults.AgentHost, "Host to bind the agent to.")
 	agentFlags.Uint32VarP(&option.Config.Agent.Port, "port", "p",
 		defaults.AgentPort, "Port to bind the xene agent grpc server on.")
+	agentFlags.StringVarP(&option.Config.Agent.ServerName, "server-name", "",
+		"", "server domain name for the certificates to be used by clients.")
 	agentFlags.StringVarP(&option.Config.Agent.APIServer, "api-server", "s",
 		fmt.Sprintf("%s:%d", defaults.APIServerHost, defaults.APIServerPort),
 		"api server address to connect to")

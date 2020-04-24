@@ -11,6 +11,10 @@ type AgentOpts struct {
 	// Port is the port to run the agent on.
 	Port uint32 `yaml:"port"`
 
+	// ServerName is the host to be used by clients when configuring
+	// GRPC secure connection.
+	ServerName string `yaml:"serverName"`
+
 	// APIServer is the address of the api server to join.
 	APIServer string `yaml:"apiServer"`
 

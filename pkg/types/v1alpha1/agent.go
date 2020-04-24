@@ -56,6 +56,10 @@ type AgentSpec struct {
 	// Address contains the address of the agent.
 	Address string `json:"address"`
 
+	// Insecure specifies if the agent is running insecure mode,
+	// in that case we don't need certifictes for communication.
+	Insecure bool `json:"insecure"`
+
 	// ClientKeySecret is the xene client key registry secret object name to use
 	// for the GRPC client for agent.
 	ClientKeySecret string `json:"clientKeySecret"`
@@ -65,6 +69,10 @@ type AgentSpec struct {
 
 	// RootCASecret corresponds to the root certificate authority xene secret.
 	RootCASecret string `json:"rootCA"`
+
+	// ServerName is the hostname of the server, this is used in case
+	// of mTLS authentication between apiserver and the agent.
+	ServerName string `json:"serverName"`
 }
 
 // Validate validates the specification provided for the agent..
@@ -72,6 +80,12 @@ func (a *AgentSpec) Validate() error {
 	_, err := url.Parse(a.Address)
 	if err != nil {
 		return fmt.Errorf("address is not valid: %s", err)
+	}
+
+	if !a.Insecure {
+		if a.ClientCertSecret == "" || a.ClientKeySecret == "" || a.RootCASecret == "" || a.ServerName == "" {
+			return fmt.Errorf("insecure mode, requires client and root CA certs to be specified")
+		}
 	}
 
 	return nil

@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net"
 
-	"github.com/fristonio/xene/pkg/auth/jwt"
 	"github.com/fristonio/xene/pkg/defaults"
 	"github.com/fristonio/xene/pkg/proto"
 
@@ -30,8 +29,7 @@ type Server struct {
 
 	insecureMode bool
 
-	server       *grpc.Server
-	authProvider *jwt.AuthProvider
+	server *grpc.Server
 }
 
 // NewServer returns a new server for agent.
@@ -46,7 +44,6 @@ func NewServer(host string, port uint32, address, certFile, keyFile, rootCACert,
 		keyFile:      keyFile,
 		rootCACert:   rootCACert,
 		insecureMode: insecureMode,
-		authProvider: jwt.NewJWTAuthProvider(jwtSecret),
 	}
 }
 

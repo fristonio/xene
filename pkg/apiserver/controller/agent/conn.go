@@ -17,6 +17,15 @@ import (
 // GetAgentConnection returns a GRPC connection corresponding to the provided
 // Agent manifest.
 func GetAgentConnection(ag *v1alpha1.Agent) (*grpc.ClientConn, error) {
+	u, err := url.Parse(ag.Spec.Address)
+	if err != nil {
+		return nil, fmt.Errorf("error while parsing agent address: %s", err)
+	}
+
+	if ag.Spec.Insecure {
+		return grpc.Dial(u.Host, grpc.WithInsecure())
+	}
+
 	clientCert, err := store.KVStore.Get(
 		context.TODO(),
 		fmt.Sprintf("%s/%s", v1alpha1.SecretKeyPrefix, ag.Spec.ClientCertSecret))
@@ -82,16 +91,11 @@ func GetAgentConnection(ag *v1alpha1.Agent) (*grpc.ClientConn, error) {
 	}
 
 	transportCreds := credentials.NewTLS(&tls.Config{
-		ServerName:   "agent.xene.io",
+		ServerName:   ag.Spec.ServerName,
 		Certificates: []tls.Certificate{certificate},
 		RootCAs:      certPool,
 	})
 
 	dialOption := grpc.WithTransportCredentials(transportCreds)
-
-	u, err := url.Parse(ag.Spec.Address)
-	if err != nil {
-		return nil, fmt.Errorf("error while parsing agent address: %s", err)
-	}
 	return grpc.Dial(u.Host, dialOption)
 }
