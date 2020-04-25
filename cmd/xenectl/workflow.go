@@ -32,7 +32,7 @@ var workflowCmd = &cobra.Command{
 	Short: "Subcommand for managing xene configured workflows",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 
@@ -46,6 +46,9 @@ var workflowCreateCmd = &cobra.Command{
 		}
 
 		data, err := ioutil.ReadFile(workflowFileName)
+		if err != nil {
+			log.Fatalf("error while reading file: %s", err)
+		}
 
 		client, auth := getClientAndAuth()
 		res, err := client.Registry.PostAPIV1RegistryWorkflow(

@@ -37,7 +37,7 @@ func (w *Workflow) Resolve() error {
 		if trigger, ok := w.Spec.Triggers[pipeline.TriggerName]; ok {
 			pipeline.Trigger = &trigger
 		} else {
-			return fmt.Errorf("not a valid trigger(%s) for pipeline(%s)", pipeline.Trigger, name)
+			return fmt.Errorf("not a valid trigger(%s) for pipeline(%s)", pipeline.TriggerName, name)
 		}
 	}
 
@@ -47,7 +47,7 @@ func (w *Workflow) Resolve() error {
 // WorkflowSpec contains the spec of the workflow.
 type WorkflowSpec struct {
 	// Triggers contains a list of trigger.
-	Triggers map[string]TriggerSpec `json:"trigger"`
+	Triggers map[string]TriggerSpec `json:"triggers"`
 
 	// Pipelines contains a list of pipeline configured with workflow.
 	Pipelines map[string]PipelineSpec `json:"pipelines"`

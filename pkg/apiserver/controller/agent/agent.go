@@ -105,6 +105,16 @@ func (a *Controller) Name() string {
 	return a.name
 }
 
+// GetAllAgents returns all the agent which are not blacklisted.
+func (a *Controller) GetAllAgents() []string {
+	agents := make([]string, 0)
+	for name := range a.Nodes {
+		agents = append(agents, name)
+	}
+
+	return agents
+}
+
 // AgentConnection returns the grpc connection for the agent.
 func (a *Controller) AgentConnection(agent string) *grpc.ClientConn {
 	ag, ok := a.Nodes[agent]

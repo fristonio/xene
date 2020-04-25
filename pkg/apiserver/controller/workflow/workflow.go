@@ -116,11 +116,21 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 			return fmt.Errorf("error while unmarshaling the workflow spec from workflow status data: %s", err)
 		}
 
-		if curWorkflow.Resolve() != nil || wf.Resolve() != nil {
-			return fmt.Errorf("error while resolving workflows")
+		err = curWorkflow.Resolve()
+		if err != nil {
+			log.Info(wfStatus.WorkflowSpec)
+			return fmt.Errorf("error while resolving workflow from status: %s", err)
+		}
+		err = wf.Resolve()
+		if err != nil {
+			log.Info(kv.Value)
+			return fmt.Errorf("error while resolving workflow object: %s", err)
 		}
 
 		// At this point, try best efforts for each pipeline.
+		if wfStatus.Pipelines == nil {
+			wfStatus.Pipelines = make(map[string]v1alpha1.PipelineStatus)
+		}
 		log.Infof("starting pipeline scheduling for workflow: %s", wf.Metadata.GetName())
 		for name, pipeline := range wf.Spec.Pipelines {
 			if p, ok := curWorkflow.Spec.Pipelines[name]; ok {

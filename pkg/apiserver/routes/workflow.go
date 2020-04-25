@@ -83,9 +83,17 @@ func workflowCreateHandler(ctx *gin.Context) {
 		})
 		return
 	}
+
+	wfData, err := json.Marshal(&wf)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while marshalling wrokflow object: %s", err),
+		})
+		return
+	}
 	err = store.KVStore.Set(context.TODO(),
 		fmt.Sprintf("%s/%s", v1alpha1.WorkflowKeyPrefix, wf.Metadata.ObjectMeta.Name),
-		[]byte(workflow))
+		wfData)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
 			Error: fmt.Sprintf("error while setting key: %s", err),

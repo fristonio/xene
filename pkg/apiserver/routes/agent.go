@@ -79,9 +79,17 @@ func agentRegisterHandler(ctx *gin.Context) {
 		})
 		return
 	}
+
+	agentData, err := json.Marshal(&agent)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while marshalling agent object: %s", err),
+		})
+		return
+	}
 	err = store.KVStore.Set(context.TODO(),
 		fmt.Sprintf("%s/%s", v1alpha1.AgentKeyPrefix, agent.Metadata.ObjectMeta.Name),
-		[]byte(newAgent))
+		agentData)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
 			Error: fmt.Sprintf("error while setting key: %s", err),

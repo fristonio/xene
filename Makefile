@@ -39,6 +39,7 @@ help:
 > @echo "* docs: Build docs site using mkdocs in site/ directory"
 > @echo "* check-api-docs: checks the integrity of API docs for xene."
 > @echo "* proto: Generate protobuf client and server code for definitions in pkg/proto/."
+> @echo "* generate-api: Generate swagger client, models and docs for apiserver."
 > @echo ""
 
 # Build status

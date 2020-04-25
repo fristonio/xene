@@ -39,6 +39,7 @@ func init() {
 
 	rootCmd.AddCommand(workflowCmd)
 	rootCmd.AddCommand(cmdrefCmd)
+	rootCmd.AddCommand(versionCmd)
 }
 
 func initConfig() {

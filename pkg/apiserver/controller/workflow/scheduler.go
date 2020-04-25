@@ -17,6 +17,8 @@ import (
 type Scheduler struct {
 	// AgentController is for interacting with agent configured for xene.
 	AgentController *agent.Controller
+
+	agentsLoadMap map[string]uint64
 }
 
 // Action is a type specifying action of an operation
@@ -38,11 +40,45 @@ var (
 func NewSchedulerWithDefaultAgentCtrl() *Scheduler {
 	return &Scheduler{
 		AgentController: agent.AgentCtrl,
+		agentsLoadMap:   make(map[string]uint64),
 	}
+}
+
+func (s *Scheduler) assignNewAgent(status *v1alpha1.PipelineStatus) error {
+	agents := s.AgentController.GetAllAgents()
+	for _, agent := range agents {
+		if _, ok := s.agentsLoadMap[agent]; !ok {
+			s.agentsLoadMap[agent] = 0
+		}
+	}
+
+	if len(s.agentsLoadMap) == 0 {
+		return fmt.Errorf("no agent configured, skipping pipeline schedule")
+	}
+	var (
+		minWeight uint64 = 1<<64 - 1
+		agent     string
+	)
+	for name, weight := range s.agentsLoadMap {
+		if weight < minWeight {
+			minWeight = weight
+			agent = name
+		}
+	}
+
+	status.Executor = agent
+	return nil
 }
 
 func (s *Scheduler) performPipelineAction(action Action, wfName, name string,
 	pipeline *v1alpha1.PipelineSpec, status *v1alpha1.PipelineStatus) error {
+
+	if status.Executor == "" {
+		err := s.assignNewAgent(status)
+		if err != nil {
+			return err
+		}
+	}
 
 	agentName := status.Executor
 	conn := s.AgentController.AgentConnection(agentName)
