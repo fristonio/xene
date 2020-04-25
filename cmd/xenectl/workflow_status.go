@@ -5,38 +5,38 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/fristonio/xene/pkg/apiserver/client/registry"
+	"github.com/fristonio/xene/pkg/apiserver/client/status"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var workflowCmd = &cobra.Command{
-	Use:   "workflow",
-	Short: "Subcommand for managing xene configured workflows",
+var workflowStatusCmd = &cobra.Command{
+	Use:   "workflowstatus",
+	Short: "Subcommand for managing xene configured workflows status",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 	},
 }
 
-var workflowCreateCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create a workflow from the provided file",
+var workflowStatusCreateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update a workflow status object from the provided file",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		if workflowFileName == "" {
+		if workflowStatusFileName == "" {
 			log.Fatalf("workflow file name(--file) is a required parameter and must be a valid file")
 		}
 
-		data, err := ioutil.ReadFile(workflowFileName)
+		data, err := ioutil.ReadFile(workflowStatusFileName)
 		if err != nil {
 			log.Fatalf("error while reading file: %s", err)
 		}
 
 		client, auth := getClientAndAuth()
-		res, err := client.Registry.PostAPIV1RegistryWorkflow(
-			registry.NewPostAPIV1RegistryWorkflowParams().WithWorkflow(string(data)),
+		res, err := client.Status.PostAPIV1StatusWorkflow(
+			status.NewPostAPIV1StatusWorkflowParams().WithWorkflow(string(data)),
 			auth)
 		if err != nil {
 			log.Errorf("error while getting workflow document: %s", err)
@@ -47,9 +47,9 @@ var workflowCreateCmd = &cobra.Command{
 	},
 }
 
-var workflowGetCmd = &cobra.Command{
+var workflowStatusGetCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get the workflow from the provided name.",
+	Short: "Get the workflow status with the provided name.",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		if workflowName == "" {
@@ -57,8 +57,8 @@ var workflowGetCmd = &cobra.Command{
 		}
 
 		client, auth := getClientAndAuth()
-		res, err := client.Registry.GetAPIV1RegistryWorkflowName(
-			registry.NewGetAPIV1RegistryWorkflowNameParams().WithName(workflowName),
+		res, err := client.Status.GetAPIV1StatusWorkflowName(
+			status.NewGetAPIV1StatusWorkflowNameParams().WithName(workflowName),
 			auth)
 		if err != nil {
 			log.Errorf("error while getting workflow document: %s", err)
@@ -74,7 +74,7 @@ var workflowGetCmd = &cobra.Command{
 	},
 }
 
-var workflowDeleteCmd = &cobra.Command{
+var workflowStatusDeleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Get the workflow with the provided name.",
 
@@ -84,8 +84,8 @@ var workflowDeleteCmd = &cobra.Command{
 		}
 
 		client, auth := getClientAndAuth()
-		res, err := client.Registry.DeleteAPIV1RegistryWorkflowName(
-			registry.NewDeleteAPIV1RegistryWorkflowNameParams().WithName(workflowName),
+		res, err := client.Status.DeleteAPIV1StatusWorkflowName(
+			status.NewDeleteAPIV1StatusWorkflowNameParams().WithName(workflowName),
 			auth)
 		if err != nil {
 			log.Errorf("error while getting workflow document: %s", err)
@@ -97,18 +97,18 @@ var workflowDeleteCmd = &cobra.Command{
 }
 
 var (
-	workflowFileName string
-	workflowName     string
+	workflowStatusFileName string
 )
 
 func init() {
-	workflowCreateCmd.Flags().StringVarP(&workflowFileName, "file", "f",
+	workflowStatusCreateCmd.Flags().StringVarP(&workflowStatusFileName, "file", "f",
 		"", "File to use for workflow manfiest.")
-	workflowGetCmd.Flags().StringVarP(&workflowName, "name", "n",
+	workflowStatusGetCmd.Flags().StringVarP(&workflowName, "name", "n",
 		"", "name of the workflow definition to get.")
-	workflowDeleteCmd.Flags().StringVarP(&workflowName, "name", "n",
+	workflowStatusDeleteCmd.Flags().StringVarP(&workflowName, "name", "n",
 		"", "name of the workflow definition to delete.")
 
-	workflowCmd.AddCommand(workflowCreateCmd)
-	workflowCmd.AddCommand(workflowGetCmd)
+	workflowStatusCmd.AddCommand(workflowStatusCreateCmd)
+	workflowStatusCmd.AddCommand(workflowStatusGetCmd)
+	workflowStatusCmd.AddCommand(workflowStatusDeleteCmd)
 }

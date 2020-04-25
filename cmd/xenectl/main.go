@@ -37,9 +37,10 @@ func init() {
 	rootCmd.Flags().StringVarP(&option.ConfigFile, "config", "c",
 		"", "Config file for xenectf to use.")
 
-	rootCmd.AddCommand(workflowCmd)
 	rootCmd.AddCommand(cmdrefCmd)
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(workflowCmd)
+	rootCmd.AddCommand(workflowStatusCmd)
 }
 
 func initConfig() {

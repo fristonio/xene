@@ -500,6 +500,145 @@ paths:
       summary: Patches the specified workflow from the store.
       tags:
       - registry
+  /api/v1/status/workflow:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Prefix based get for workflow status documents.
+        in: query
+        name: prefix
+        type: string
+      - description: name of the workflow to get status object for.
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RegistryItem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Returns the specified workflowStatus object from the store.
+      tags:
+      - status
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: This route creates a new workflow status for xene to operate on,
+        if the workflow already exists
+      parameters:
+      - description: WorkflowStatus manifest to be created.
+        in: formData
+        name: workflow
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPMessage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Creates a new workflow status in the store.
+      tags:
+      - status
+  /api/v1/status/workflow/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the workflow status specified by the name parameter, if
+        the workflow is not
+      parameters:
+      - description: Name of the workflow status to be deleted.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPMessage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Deletes the specified workflow from the store.
+      tags:
+      - status
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: name of the workflow to get status document for.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RegistryItem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Returns the specified workflow object from the store with the name
+        in params.
+      tags:
+      - status
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Name of the workflow status to be patched.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Patches the specified workflow status from the store.
+      tags:
+      - registry
   /health:
     get:
       consumes:

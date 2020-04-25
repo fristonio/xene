@@ -51,6 +51,8 @@ type ClientService interface {
 
 	PatchAPIV1RegistryWorkflowName(params *PatchAPIV1RegistryWorkflowNameParams, authInfo runtime.ClientAuthInfoWriter) error
 
+	PatchAPIV1StatusWorkflowName(params *PatchAPIV1StatusWorkflowNameParams, authInfo runtime.ClientAuthInfoWriter) error
+
 	PostAPIV1RegistryAgent(params *PostAPIV1RegistryAgentParams, authInfo runtime.ClientAuthInfoWriter) (*PostAPIV1RegistryAgentOK, error)
 
 	PostAPIV1RegistrySecret(params *PostAPIV1RegistrySecretParams, authInfo runtime.ClientAuthInfoWriter) (*PostAPIV1RegistrySecretOK, error)
@@ -461,6 +463,34 @@ func (a *Client) PatchAPIV1RegistryWorkflowName(params *PatchAPIV1RegistryWorkfl
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &PatchAPIV1RegistryWorkflowNameReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+  PatchAPIV1StatusWorkflowName patches the specified workflow status from the store
+*/
+func (a *Client) PatchAPIV1StatusWorkflowName(params *PatchAPIV1StatusWorkflowNameParams, authInfo runtime.ClientAuthInfoWriter) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPatchAPIV1StatusWorkflowNameParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "PatchAPIV1StatusWorkflowName",
+		Method:             "PATCH",
+		PathPattern:        "/api/v1/status/workflow/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &PatchAPIV1StatusWorkflowNameReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,

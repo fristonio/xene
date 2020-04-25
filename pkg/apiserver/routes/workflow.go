@@ -29,7 +29,7 @@ import (
 // @Security ApiKeyAuth
 // @Router /api/v1/registry/workflow [get]
 func workflowGetHandler(ctx *gin.Context) {
-	registryGetHandler(ctx, v1alpha1.WorkflowKeyPrefix)
+	storeGetHandler(ctx, v1alpha1.WorkflowKeyPrefix)
 }
 
 // @Summary Returns the specified workflow object from the store with the name in params.
@@ -42,7 +42,7 @@ func workflowGetHandler(ctx *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /api/v1/registry/workflow/{name} [get]
 func workflowGetByNameHandler(ctx *gin.Context) {
-	registryGetByNameHandler(ctx, v1alpha1.WorkflowKeyPrefix)
+	storeGetByNameHandler(ctx, v1alpha1.WorkflowKeyPrefix)
 }
 
 // workflowCreateHandler creates a new workflow.
@@ -133,5 +133,125 @@ func workflowPatchHandler(ctx *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /api/v1/registry/workflow/{name} [delete]
 func workflowDeleteHandler(ctx *gin.Context) {
-	registryDeleteHandler(ctx, v1alpha1.WorkflowKeyPrefix)
+	storeDeleteHandler(ctx, v1alpha1.WorkflowKeyPrefix)
+}
+
+// workflowStatusGetHandler retrivies a given workflowStatus object from the store.
+// @Summary Returns the specified workflowStatus object from the store.
+// @Tags status
+// @Accept  json
+// @Produce json
+// @Param prefix query string false "Prefix based get for workflow status documents."
+// @Param name query string false "name of the workflow to get status object for."
+// @Success 200 {object} response.RegistryItemsFromPrefix
+// @Success 200 {object} response.RegistryItem
+// @Failure 500 {object} response.HTTPError
+// @Security ApiKeyAuth
+// @Router /api/v1/status/workflow [get]
+func workflowStatusGetHandler(ctx *gin.Context) {
+	storeGetHandler(ctx, v1alpha1.WorkflowStatusKeyPrefix)
+}
+
+// @Summary Returns the specified workflow object from the store with the name in params.
+// @Tags status
+// @Accept  json
+// @Produce json
+// @Param name path string true "name of the workflow to get status document for."
+// @Success 200 {object} response.RegistryItem
+// @Failure 500 {object} response.HTTPError
+// @Security ApiKeyAuth
+// @Router /api/v1/status/workflow/{name} [get]
+func workflowStatusGetByNameHandler(ctx *gin.Context) {
+	storeGetByNameHandler(ctx, v1alpha1.WorkflowStatusKeyPrefix)
+}
+
+// workflowStatusCreateHandler creates a new workflow status object.
+// @Summary Creates a new workflow status in the store.
+// @Description This route creates a new workflow status for xene to operate on, if the workflow already exists
+// this will update it with the new workflow.
+// @Tags status
+// @Accept  application/x-www-form-urlencoded
+// @Produce json
+// @Param workflow formData string true "WorkflowStatus manifest to be created."
+// @Failure 500 {object} response.HTTPError
+// @Failure 400 {object} response.HTTPError
+// @Success 200 {object} response.HTTPMessage
+// @Security ApiKeyAuth
+// @Router /api/v1/status/workflow [post]
+func workflowStatusCreateHandler(ctx *gin.Context) {
+	workflow := ctx.PostForm("workflow")
+	if workflow == "" {
+		ctx.JSON(http.StatusBadRequest, response.HTTPError{
+			Error: "workflow is a required parameter",
+		})
+		return
+	}
+
+	var wf types.WorkflowStatus
+	err := json.Unmarshal([]byte(workflow), &wf)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, response.HTTPError{
+			Error: fmt.Sprintf("error while unmarshling: %s", err),
+		})
+		return
+	}
+
+	err = wf.Validate()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, response.HTTPError{
+			Error: fmt.Sprintf("error while validating workflow status spec: %s", err),
+		})
+		return
+	}
+
+	wfData, err := json.Marshal(&wf)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while marshalling wrokflow status object: %s", err),
+		})
+		return
+	}
+	err = store.KVStore.Set(context.TODO(),
+		fmt.Sprintf("%s/%s", v1alpha1.WorkflowStatusKeyPrefix, wf.Metadata.ObjectMeta.Name),
+		wfData)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while setting key: %s", err),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response.HTTPMessage{
+		Message: fmt.Sprintf("%s workflow status created/updated", wf.Metadata.ObjectMeta.Name),
+	})
+}
+
+// @Summary Patches the specified workflow status from the store.
+// @Tags registry
+// @Accept json
+// @Produce json
+// @Param name path string true "Name of the workflow status to be patched."
+// @Failure 400 {object} response.HTTPError
+// @Security ApiKeyAuth
+// @Router /api/v1/status/workflow/{name} [patch]
+func workflowStatusPatchHandler(ctx *gin.Context) {
+	ctx.JSON(http.StatusBadRequest, response.HTTPError{
+		Error: "route not implemented yet",
+	})
+}
+
+// @Summary Deletes the specified workflow from the store.
+// @Description Deletes the workflow status specified by the name parameter, if the workflow is not
+// present then an error is thrown.
+// @Tags status
+// @Accept  json
+// @Produce json
+// @Param name path string true "Name of the workflow status to be deleted."
+// @Failure 500 {object} response.HTTPError
+// @Failure 400 {object} response.HTTPError
+// @Success 200 {object} response.HTTPMessage
+// @Security ApiKeyAuth
+// @Router /api/v1/status/workflow/{name} [delete]
+func workflowStatusDeleteHandler(ctx *gin.Context) {
+	storeDeleteHandler(ctx, v1alpha1.WorkflowStatusKeyPrefix)
 }

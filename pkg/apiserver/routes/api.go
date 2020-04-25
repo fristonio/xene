@@ -11,6 +11,9 @@ func APIGroupRouter(r *gin.RouterGroup) {
 
 	registryGroup := r.Group("registry")
 	RegistryGroupRoutes(registryGroup)
+
+	statusGroup := r.Group("status")
+	StatusGroupRoutes(statusGroup)
 }
 
 // @Summary Handles ping event for api routes.

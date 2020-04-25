@@ -52,7 +52,7 @@ func secretsGroupRoutes(r *gin.RouterGroup) {
 	r.DELETE("/:name", secretRemoveHandler)
 }
 
-func registryGetHandler(ctx *gin.Context, pre string) {
+func storeGetHandler(ctx *gin.Context, pre string) {
 	prefix := ctx.Query("prefix")
 	name := ctx.Query("name")
 
@@ -126,7 +126,7 @@ func registryGetHandler(ctx *gin.Context, pre string) {
 	})
 }
 
-func registryGetByNameHandler(ctx *gin.Context, prefix string) {
+func storeGetByNameHandler(ctx *gin.Context, prefix string) {
 	name := ctx.Param("name")
 	if name == "" {
 		ctx.JSON(http.StatusBadRequest, response.HTTPError{
@@ -162,7 +162,7 @@ func registryGetByNameHandler(ctx *gin.Context, prefix string) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-func registryDeleteHandler(ctx *gin.Context, prefix string) {
+func storeDeleteHandler(ctx *gin.Context, prefix string) {
 	name := ctx.Param("name")
 	if name == "" {
 		ctx.JSON(http.StatusBadRequest, response.HTTPError{
@@ -174,12 +174,12 @@ func registryDeleteHandler(ctx *gin.Context, prefix string) {
 	err := store.KVStore.Delete(context.TODO(), fmt.Sprintf("%s/%s", prefix, name))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
-			Error: fmt.Sprintf("error while deleting workflow: %s", err),
+			Error: fmt.Sprintf("error while deleting store item: %s", err),
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, response.HTTPMessage{
-		Message: fmt.Sprintf("workflow(%s) has been deleted", name),
+		Message: fmt.Sprintf("store item(%s) has been deleted", name),
 	})
 }

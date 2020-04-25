@@ -14,6 +14,7 @@ import (
 	"github.com/fristonio/xene/pkg/apiserver/client/auth"
 	"github.com/fristonio/xene/pkg/apiserver/client/health"
 	"github.com/fristonio/xene/pkg/apiserver/client/registry"
+	"github.com/fristonio/xene/pkg/apiserver/client/status"
 )
 
 // Default xene API server HTTP client.
@@ -62,6 +63,7 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *XeneAPISer
 	cli.Auth = auth.New(transport, formats)
 	cli.Health = health.New(transport, formats)
 	cli.Registry = registry.New(transport, formats)
+	cli.Status = status.New(transport, formats)
 	return cli
 }
 
@@ -114,6 +116,8 @@ type XeneAPIServer struct {
 
 	Registry registry.ClientService
 
+	Status status.ClientService
+
 	Transport runtime.ClientTransport
 }
 
@@ -124,4 +128,5 @@ func (c *XeneAPIServer) SetTransport(transport runtime.ClientTransport) {
 	c.Auth.SetTransport(transport)
 	c.Health.SetTransport(transport)
 	c.Registry.SetTransport(transport)
+	c.Status.SetTransport(transport)
 }

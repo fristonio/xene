@@ -28,7 +28,7 @@ import (
 // @Security ApiKeyAuth
 // @Router /api/v1/registry/secret [get]
 func secretGetHandler(ctx *gin.Context) {
-	registryGetHandler(ctx, v1alpha1.SecretKeyPrefix)
+	storeGetHandler(ctx, v1alpha1.SecretKeyPrefix)
 }
 
 // @Summary Returns the specified secret object from the store with the name in params.
@@ -41,7 +41,7 @@ func secretGetHandler(ctx *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /api/v1/registry/secret/{name} [get]
 func secretGetByNameHandler(ctx *gin.Context) {
-	registryGetByNameHandler(ctx, v1alpha1.SecretKeyPrefix)
+	storeGetByNameHandler(ctx, v1alpha1.SecretKeyPrefix)
 }
 
 // @Summary Creates a new secret in the store.
@@ -80,9 +80,16 @@ func secretRegisterHandler(ctx *gin.Context) {
 		return
 	}
 
+	secretData, err := json.Marshal(&secret)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while marshalling secret object: %s", err),
+		})
+		return
+	}
 	err = store.KVStore.Set(context.TODO(),
 		fmt.Sprintf("%s/%s", v1alpha1.SecretKeyPrefix, secret.Metadata.ObjectMeta.Name),
-		[]byte(newSecret))
+		secretData)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
 			Error: fmt.Sprintf("error while setting key: %s", err),
@@ -122,5 +129,5 @@ func secretPatchHandler(ctx *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /api/v1/registry/secret/{name} [delete]
 func secretRemoveHandler(ctx *gin.Context) {
-	registryDeleteHandler(ctx, v1alpha1.SecretKeyPrefix)
+	storeDeleteHandler(ctx, v1alpha1.SecretKeyPrefix)
 }

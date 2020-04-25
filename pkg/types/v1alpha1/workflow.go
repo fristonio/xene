@@ -111,6 +111,19 @@ type WorkflowStatus struct {
 	Pipelines map[string]PipelineStatus `json:"pipelines"`
 }
 
+// Validate checks for any issues in the information about the workflow status in the type.
+func (w *WorkflowStatus) Validate() error {
+	if err := w.TypeMeta.Validate(WorkflowStatusKind); err != nil {
+		return err
+	}
+
+	if err := w.Metadata.Validate(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // NewWorkflowStatus returns a new WorkflowStatus object using the workflow
 // specification provided.
 func NewWorkflowStatus(wf *Workflow) (WorkflowStatus, error) {

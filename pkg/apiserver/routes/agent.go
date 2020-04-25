@@ -28,7 +28,7 @@ import (
 // @Security ApiKeyAuth
 // @Router /api/v1/registry/agent [get]
 func agentGetHandler(ctx *gin.Context) {
-	registryGetHandler(ctx, v1alpha1.AgentKeyPrefix)
+	storeGetHandler(ctx, v1alpha1.AgentKeyPrefix)
 }
 
 // @Summary Returns the specified agent object from the store with the name in params.
@@ -41,7 +41,7 @@ func agentGetHandler(ctx *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /api/v1/registry/agent/{name} [get]
 func agentGetByNameHandler(ctx *gin.Context) {
-	registryGetByNameHandler(ctx, v1alpha1.AgentKeyPrefix)
+	storeGetByNameHandler(ctx, v1alpha1.AgentKeyPrefix)
 }
 
 // @Summary Creates a new agent in the store.
@@ -129,5 +129,5 @@ func agentPatchHandler(ctx *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /api/v1/registry/agent/{name} [delete]
 func agentRemoveHandler(ctx *gin.Context) {
-	registryDeleteHandler(ctx, v1alpha1.AgentKeyPrefix)
+	storeDeleteHandler(ctx, v1alpha1.AgentKeyPrefix)
 }
