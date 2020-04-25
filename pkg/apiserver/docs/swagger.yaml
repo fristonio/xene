@@ -37,7 +37,7 @@ definitions:
   response.RegistryItem:
     properties:
       item:
-        example: Workflow Document
+        description: Items contains the Serialized kvstore item
         type: string
     type: object
   response.RegistryItemsFromPrefix:
@@ -46,7 +46,10 @@ definitions:
         example: 2
         type: integer
       items:
-        type: string
+        description: Items contains the Serialized kvstore items
+        items:
+          type: string
+        type: array
     type: object
 host: localhost:6060
 info:

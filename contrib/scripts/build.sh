@@ -42,6 +42,8 @@ if [ -n "$VERBOSE" ]; then
 fi
 
 GOBIN=$PWD go "${GO_CMD}" -o "${GOPATH}/bin/xene" ${GO_FLAGS} -ldflags "${ldflags}" "${repo_path}/cmd"
+GOBIN=$PWD go "${GO_CMD}" -o "${GOPATH}/bin/xenectl" ${GO_FLAGS} -ldflags "${ldflags}" "${repo_path}/cmd/xenectl"
+
 
 echo "[*] Build Complete."
 exit 0

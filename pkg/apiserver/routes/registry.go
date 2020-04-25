@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -75,9 +76,9 @@ func registryGetHandler(ctx *gin.Context, pre string) {
 		resp := response.RegistryItemsFromPrefix{
 			Count: len(kvPairs),
 		}
-		wf := []types.KVPairStruct{}
+		wf := make([]string, 0)
 		for key, value := range kvPairs {
-			wf = append(wf, types.KVPairStruct{
+			data, err := json.Marshal(types.KVPairStruct{
 				Key:   key,
 				Value: string(value.Data),
 
@@ -85,6 +86,13 @@ func registryGetHandler(ctx *gin.Context, pre string) {
 				ExpiresAt:        value.ExpiresAt,
 				DeletedOrExpired: value.DeletedOrExpired,
 			})
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+					Error: fmt.Sprintf("error while unmarshaling objects %s: %s", key, err),
+				})
+				return
+			}
+			wf = append(wf, string(data))
 		}
 		resp.Items = wf
 		ctx.JSON(http.StatusOK, resp)
@@ -99,15 +107,22 @@ func registryGetHandler(ctx *gin.Context, pre string) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, response.RegistryItem{
-		Item: types.KVPairStruct{
-			Key:   name,
-			Value: string(val.Data),
+	data, err := json.Marshal(types.KVPairStruct{
+		Key:   name,
+		Value: string(val.Data),
 
-			Version:          val.Version,
-			ExpiresAt:        val.ExpiresAt,
-			DeletedOrExpired: val.DeletedOrExpired,
-		},
+		Version:          val.Version,
+		ExpiresAt:        val.ExpiresAt,
+		DeletedOrExpired: val.DeletedOrExpired,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while unmarshaling objects %s: %s", name, err),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, response.RegistryItem{
+		Item: string(data),
 	})
 }
 
@@ -126,15 +141,22 @@ func registryGetByNameHandler(ctx *gin.Context, prefix string) {
 		return
 	}
 
-	resp := response.RegistryItem{
-		Item: types.KVPairStruct{
-			Key:   name,
-			Value: string(val.Data),
+	data, err := json.Marshal(types.KVPairStruct{
+		Key:   name,
+		Value: string(val.Data),
 
-			Version:          val.Version,
-			ExpiresAt:        val.ExpiresAt,
-			DeletedOrExpired: val.DeletedOrExpired,
-		},
+		Version:          val.Version,
+		ExpiresAt:        val.ExpiresAt,
+		DeletedOrExpired: val.DeletedOrExpired,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while unmarshaling objects %s: %s", name, err),
+		})
+		return
+	}
+	resp := response.RegistryItem{
+		Item: string(data),
 	}
 
 	ctx.JSON(http.StatusOK, resp)

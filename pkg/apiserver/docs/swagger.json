@@ -874,8 +874,8 @@
             "type": "object",
             "properties": {
                 "item": {
-                    "type": "string",
-                    "example": "Workflow Document"
+                    "description": "Items contains the Serialized kvstore item",
+                    "type": "string"
                 }
             }
         },
@@ -887,7 +887,11 @@
                     "example": 2
                 },
                 "items": {
-                    "type": "string"
+                    "description": "Items contains the Serialized kvstore items",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         }

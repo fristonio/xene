@@ -889,8 +889,8 @@ var doc = `{
             "type": "object",
             "properties": {
                 "item": {
-                    "type": "string",
-                    "example": "Workflow Document"
+                    "description": "Items contains the Serialized kvstore item",
+                    "type": "string"
                 }
             }
         },
@@ -902,7 +902,11 @@ var doc = `{
                     "example": 2
                 },
                 "items": {
-                    "type": "string"
+                    "description": "Items contains the Serialized kvstore items",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         }

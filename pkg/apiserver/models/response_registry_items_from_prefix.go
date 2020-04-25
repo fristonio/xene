@@ -18,8 +18,8 @@ type ResponseRegistryItemsFromPrefix struct {
 	// count
 	Count int64 `json:"count,omitempty"`
 
-	// items
-	Items string `json:"items,omitempty"`
+	// Items contains the Serialized kvstore items
+	Items []string `json:"items"`
 }
 
 // Validate validates this response registry items from prefix

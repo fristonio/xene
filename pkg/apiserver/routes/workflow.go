@@ -76,9 +76,10 @@ func workflowCreateHandler(ctx *gin.Context) {
 		return
 	}
 
-	if wf.Metadata.ObjectMeta.Name == "" {
+	err = wf.Validate()
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, response.HTTPError{
-			Error: fmt.Sprintf("name is a required field in workflow description"),
+			Error: fmt.Sprintf("error while validating workflow spec: %s", err),
 		})
 		return
 	}

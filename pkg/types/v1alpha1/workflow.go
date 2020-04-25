@@ -17,6 +17,19 @@ type Workflow struct {
 	Spec WorkflowSpec `json:"spec"`
 }
 
+// Validate checks for any issues in the information about the workflow in the type.
+func (w *Workflow) Validate() error {
+	if err := w.TypeMeta.Validate(WorkflowKind); err != nil {
+		return err
+	}
+
+	if err := w.Metadata.Validate(); err != nil {
+		return err
+	}
+
+	return w.Spec.Validate()
+}
+
 // Resolve resolves the workflow object by acting upon different relations
 // in the spec.
 func (w *Workflow) Resolve() error {
@@ -38,6 +51,11 @@ type WorkflowSpec struct {
 
 	// Pipelines contains a list of pipeline configured with workflow.
 	Pipelines map[string]PipelineSpec `json:"pipelines"`
+}
+
+// Validate validates the specification provided for the workflow.
+func (w *WorkflowSpec) Validate() error {
+	return nil
 }
 
 // TriggerSpec contains spec of a trigger for xene workflow.

@@ -15,7 +15,7 @@ import (
 // swagger:model response.RegistryItem
 type ResponseRegistryItem struct {
 
-	// item
+	// Items contains the Serialized kvstore item
 	Item string `json:"item,omitempty"`
 }
 
