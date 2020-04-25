@@ -30,11 +30,11 @@ func registerController(c *Controller) {
 	RegisteredControllers[c.name] = c
 }
 
-type addFuncType func(*v1alpha1.KVPairStruct)
+type addFuncType func(*v1alpha1.KVPairStruct) error
 
-type updateFuncType func(*v1alpha1.KVPairStruct, uint64)
+type updateFuncType func(*v1alpha1.KVPairStruct, uint64) error
 
-type deleteFuncType func(*v1alpha1.KVPairStruct)
+type deleteFuncType func(*v1alpha1.KVPairStruct) error
 
 // Controller is a type corresponding to a store controller.
 // A store controller can be used to run function based on changes to a store
@@ -46,8 +46,7 @@ type Controller struct {
 
 	DeleteFunc deleteFuncType
 
-	Prefix bool
-
+	// Key is the prefix key to watch for.
 	Key string
 
 	name string
@@ -65,16 +64,15 @@ func (c *Controller) Name() string {
 // NewController returns a new store controller to periodically run functions
 // based on changes to the specifed key in the store.
 func NewController(
-	key string, prefix bool,
-	addFunc, delFunc func(*v1alpha1.KVPairStruct),
-	updateFunc func(*v1alpha1.KVPairStruct, uint64)) *Controller {
+	key string,
+	addFunc, delFunc func(*v1alpha1.KVPairStruct) error,
+	updateFunc func(*v1alpha1.KVPairStruct, uint64) error) *Controller {
 
 	return &Controller{
 		AddFunc:    addFunc,
 		UpdateFunc: updateFunc,
 		DeleteFunc: delFunc,
 		Key:        key,
-		Prefix:     prefix,
 		name:       utils.RandToken(defaults.StoreControllerNameLength),
 		cache:      NewCache(),
 		Manager:    ControllerManager,
@@ -86,16 +84,15 @@ func NewController(
 // The controller in this case is configured with the global shared store, which share its state
 // with other controller.
 func NewControllerWithSharedCache(
-	key string, prefix bool,
-	addFunc, delFunc func(*v1alpha1.KVPairStruct),
-	updateFunc func(*v1alpha1.KVPairStruct, uint64)) *Controller {
+	key string,
+	addFunc, delFunc func(*v1alpha1.KVPairStruct) error,
+	updateFunc func(*v1alpha1.KVPairStruct, uint64) error) *Controller {
 
 	return &Controller{
 		AddFunc:    addFunc,
 		UpdateFunc: updateFunc,
 		DeleteFunc: delFunc,
 		Key:        key,
-		Prefix:     prefix,
 		name:       utils.RandToken(defaults.StoreControllerNameLength),
 		cache:      GlobalSharedCache,
 		Manager:    ControllerManager,
@@ -132,58 +129,31 @@ func (c *Controller) storeControllerDoFunc(ctx context.Context) error {
 	log.WithFields(log.Fields{
 		"package": "store",
 	}).Infof("running controller function for store controller: %s", c.name)
-	if !c.Prefix {
-		val, err := KVStore.Get(context.TODO(), c.Key)
-		if err != nil {
-			if (KVStore.KeyDoesNotExistError(err) || val.DeletedOrExpired) &&
-				c.cache.CheckIfExists(c.Key) {
-				c.DeleteFunc(&v1alpha1.KVPairStruct{
-					Key:   c.Key,
-					Value: "",
-
-					DeletedOrExpired: val.DeletedOrExpired,
-					Version:          val.Version,
-					ExpiresAt:        val.ExpiresAt,
-				})
-
-				c.cache.Remove(c.Key)
-				return nil
-			}
-
-			return err
-		}
-
-		kvPair := &v1alpha1.KVPairStruct{
-			Key:   c.Key,
-			Value: string(val.Data),
-
-			DeletedOrExpired: val.DeletedOrExpired,
-			Version:          val.Version,
-			ExpiresAt:        val.ExpiresAt,
-		}
-
-		if c.cache.CheckIfAdded(c.Key, val.Version) {
-			c.AddFunc(kvPair)
-		} else if c.cache.CheckIfUpdated(c.Key, val.Version) {
-			c.UpdateFunc(kvPair, c.cache.Get(c.Key))
-		}
-
-		c.cache.Set(c.Key, kvPair.Version)
-		return nil
-	}
 
 	// Here we do a prefix scan for the provided key with our function
 	KVStore.PrefixScanWithFunction(context.TODO(), c.Key, func(kv *v1alpha1.KVPairStruct) {
 		if c.cache.CheckIfExists(kv.Key) && kv.DeletedOrExpired {
-			c.DeleteFunc(kv)
+			err := c.DeleteFunc(kv)
+			if err != nil {
+				log.Errorf("error while calling delete for key: %s: %s", kv.Key, err)
+				return
+			}
 			c.cache.Remove(kv.Key)
 			return
 		}
 
 		if c.cache.CheckIfAdded(kv.Key, kv.Version) {
-			c.AddFunc(kv)
+			err := c.AddFunc(kv)
+			if err != nil {
+				log.Errorf("error while calling add for key: %s: %s", kv.Key, err)
+				return
+			}
 		} else if c.cache.CheckIfUpdated(kv.Key, kv.Version) {
-			c.UpdateFunc(kv, c.cache.Get(kv.Key))
+			err := c.UpdateFunc(kv, c.cache.Get(kv.Key))
+			if err != nil {
+				log.Errorf("error while calling update for key: %s: %s", kv.Key, err)
+				return
+			}
 		}
 		c.cache.Set(kv.Key, kv.Version)
 	})

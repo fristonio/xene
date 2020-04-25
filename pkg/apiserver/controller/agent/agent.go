@@ -87,6 +87,15 @@ func (a *Controller) Run() error {
 
 // Stop shuts down the controller.
 func (a *Controller) Stop() error {
+	a.Manager.RemoveAllAndWait()
+	for _, node := range a.Nodes {
+		if node.conn != nil {
+			node.conn.Close()
+		}
+	}
+
+	a.Nodes = make(map[string]Node)
+	a.blacklistedNodes = make(map[string]Node)
 	return a.storeCtrl.Stop()
 }
 
@@ -94,6 +103,35 @@ func (a *Controller) Stop() error {
 // the underlying store controller.
 func (a *Controller) Name() string {
 	return a.name
+}
+
+// AgentConnection returns the grpc connection for the agent.
+func (a *Controller) AgentConnection(agent string) *grpc.ClientConn {
+	ag, ok := a.Nodes[agent]
+	if !ok {
+		return nil
+	}
+
+	if ag.conn == nil {
+		conn, err := GetAgentConnection(ag.Agent)
+		if err != nil {
+			log.Errorf("error while establishing agent connection, blacklisting agent: %s", err)
+			err = a.Manager.RemoveController(agent)
+			if err != nil {
+				log.Errorf("error while removing controller for %s: %s", agent, err)
+				return nil
+			}
+			delete(a.Nodes, agent)
+			a.blacklistedNodes[agent] = Node{
+				Name:  agent,
+				Agent: ag.Agent,
+			}
+		}
+
+		ag.conn = conn
+	}
+
+	return ag.conn
 }
 
 // BlacklistedAgents returns a list of agent nodes which are blacklisted by the agent
@@ -107,35 +145,30 @@ func (a *Controller) BlacklistedAgents() []string {
 	return agents
 }
 
-func (a *Controller) addController(kv *v1alpha1.KVPairStruct) {
+func (a *Controller) addController(kv *v1alpha1.KVPairStruct) error {
 	var ag v1alpha1.Agent
 	err := json.Unmarshal([]byte(kv.Value), &ag)
 	if err != nil {
-		log.Errorf("error while unmarshaling the agent spec from data: %s", err)
-		return
+		return fmt.Errorf("error while unmarshaling the agent spec from data: %s", err)
 	}
 
 	conn, err := GetAgentConnection(&ag)
 	if err != nil {
 		// if the error occurs while creating the connection then we delete
 		// the event from the cache and will try to set this up later.
-		log.Errorf("error while creating agent connection: %s", err)
-		a.storeCtrl.DeleteFromCache(kv.Key)
-		return
+		return fmt.Errorf("error while creating agent connection: %s", err)
 	}
 
 	ctrlFunc, err := controller.NewControllerFunction(a.ControllerFunc, &ag)
 	if err != nil {
-		log.Errorf("error while creating controller function: %s", err)
-		return
+		return fmt.Errorf("error while creating controller function: %s", err)
 	}
 	err = a.Manager.UpdateController(ag.Metadata.GetName(), "agent-controller", controller.Internal{
 		DoFunc:      ctrlFunc,
 		RunInterval: a.healthCheckInterval,
 	})
 	if err != nil {
-		log.Errorf("error while updating agent controller for : %s", ag.Metadata.GetName())
-		return
+		return fmt.Errorf("error while updating agent controller for : %s", ag.Metadata.GetName())
 	}
 	a.Nodes[ag.Metadata.GetName()] = Node{
 		Agent: &ag,
@@ -143,6 +176,7 @@ func (a *Controller) addController(kv *v1alpha1.KVPairStruct) {
 		conn:  conn,
 	}
 	delete(a.blacklistedNodes, ag.Metadata.GetName())
+	return nil
 }
 
 // newAgentStoreController returns the agent store controller for apiserver.
@@ -151,36 +185,35 @@ func (a *Controller) addController(kv *v1alpha1.KVPairStruct) {
 func (a *Controller) newAgentStoreController() *store.Controller {
 	return store.NewControllerWithSharedCache(
 		fmt.Sprintf("%s/", v1alpha1.AgentKeyPrefix),
-		true,
 		// Add function for a new agent.
-		func(kv *v1alpha1.KVPairStruct) {
+		func(kv *v1alpha1.KVPairStruct) error {
 			log.Infof("agent added: %s", kv.Key)
-			a.addController(kv)
+			return a.addController(kv)
 		},
 
 		// Delete function for the new agent.
-		func(kv *v1alpha1.KVPairStruct) {
+		func(kv *v1alpha1.KVPairStruct) error {
 			log.Infof("agent deleted: %s", kv.Key)
 			var ag v1alpha1.Agent
 			err := json.Unmarshal([]byte(kv.Value), &ag)
 			if err != nil {
-				log.Errorf("error while unmarshaling the agent spec from data: %s", err)
-				return
+				return fmt.Errorf("error while unmarshaling the agent spec from data: %s", err)
 			}
 
 			err = a.Manager.RemoveController(ag.Metadata.GetName())
 			if err != nil {
-				log.Errorf("error while removing controller for %s: %s", ag.Metadata.GetName(), err)
+				return fmt.Errorf("error while removing controller for %s: %s", ag.Metadata.GetName(), err)
 			}
 
 			delete(a.Nodes, ag.Metadata.GetName())
 			delete(a.blacklistedNodes, ag.Metadata.GetName())
+			return nil
 		},
 
 		// Update function for a new agent function.
-		func(kv *v1alpha1.KVPairStruct, version uint64) {
+		func(kv *v1alpha1.KVPairStruct, version uint64) error {
 			log.Infof("Agent updated: %s", kv.Key)
-			a.addController(kv)
+			return a.addController(kv)
 		},
 	)
 }

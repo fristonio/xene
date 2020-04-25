@@ -29,7 +29,7 @@ func (s *Server) JoinAPIServer(apiServerAddr, agentName, agentAddr, authToken st
 
 	agentManifest := types.Agent{
 		TypeMeta: types.TypeMeta{
-			Kind:       "agent",
+			Kind:       types.AgentKind,
 			APIVersion: "v1alpha1",
 		},
 		Metadata: types.Metadata{
@@ -106,7 +106,7 @@ func (s *Server) createXeneSecrets(apiServerAddr, agentName, authToken string) e
 		secretData []byte
 		secret     = &v1alpha1.Secret{
 			TypeMeta: v1alpha1.TypeMeta{
-				Kind:       "secret",
+				Kind:       v1alpha1.SecretKind,
 				APIVersion: "v1alpha1",
 			},
 			Metadata: v1alpha1.Metadata{

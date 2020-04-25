@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/fristonio/xene/pkg/apiserver/controller/agent"
+	"github.com/fristonio/xene/pkg/apiserver/controller/workflow"
 	"github.com/sirupsen/logrus"
 )
 
@@ -73,4 +74,5 @@ func StopControllers() error {
 
 func init() {
 	RegisteredControllers = append(RegisteredControllers, agent.AgentCtrl)
+	RegisteredControllers = append(RegisteredControllers, workflow.WorkflowCtrl)
 }

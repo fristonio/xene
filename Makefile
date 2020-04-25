@@ -38,6 +38,7 @@ help:
 > @echo "* govet: Run govet on the code to check for any mistakes."
 > @echo "* docs: Build docs site using mkdocs in site/ directory"
 > @echo "* check-api-docs: checks the integrity of API docs for xene."
+> @echo "* proto: Generate protobuf client and server code for definitions in pkg/proto/."
 > @echo ""
 
 # Build status
@@ -75,4 +76,8 @@ check-api-docs:
 > @echo "[*] Checking API docs integrity"
 > @./contrib/scripts/check-api-docs.sh
 
-.PHONY: build format check-lint fix-lint govet help docs
+proto:
+> @echo "[*] Generating proto definitions"
+> @protoc -I pkg/proto pkg/proto/agent.proto --go_out=plugins=grpc:pkg/proto
+
+.PHONY: build format check-lint fix-lint govet help docs proto

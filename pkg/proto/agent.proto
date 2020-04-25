@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package proto;
 
+option go_package = ".;proto";
+
 // Generate file by the following command
 // protoc -I pkg/proto pkg/proto/agent.proto --go_out=plugins=grpc:pkg/proto
 
@@ -11,12 +13,23 @@ message Pipeline {
     // is to schedule pipelines corresponding to a workflow on a number
     // of worker agents.
     string Spec = 1;
+
+    string Name = 2;
+
+    string Workflow = 3;
 }
 
 message PipelineStatus {
+    // LastRunTimestamp contains the timstamp corresponding to the last run
+    // of the pipeline.
+    int64 LastRunTimestamp = 1;
+
+    // Executor contains the name of the agent which ran the pipeline.
+    string Executor = 2;
+
     // status contains the current status of the pipeline.
     // It can be one of the preconfigured statuses for a pipeline.
-    string Status = 1;
+    string Status = 3;
 }
 
 message StatusOpts {
@@ -34,6 +47,12 @@ service AgentService {
     // Status returns the status of the agent service running.
     rpc Status(StatusOpts) returns (AgentStatus) {}
 
+    // UpdatePipeline is the RPC to update a pipeline on to the agent
+    rpc UpdatePipeline(Pipeline) returns (PipelineStatus) {}
+
     // SchedulePipeline is the RPC to schedule a pipeline on to the agent
     rpc SchedulePipeline(Pipeline) returns (PipelineStatus) {}
+
+    // RemovePipeline is the RPC to remove a pipeline from the agent.
+    rpc RemovePipeline(Pipeline) returns (PipelineStatus) {}
 }

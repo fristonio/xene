@@ -43,9 +43,6 @@ type Metadata struct {
 
 	// UID is the unique ID associated with each managed resource.
 	UID string `json:"uid,omitempty"`
-
-	// LastVersionApplied is the version of the type that was applied last.
-	LastAppliedVersion uint64 `json:"lastAppliedVersion,omitempty"`
 }
 
 // Validate validates the information present in metadata.
