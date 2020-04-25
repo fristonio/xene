@@ -1,0 +1,20 @@
+{
+    "kind": "Workflow",
+    "apiVersion": "v1alpha1",
+    "metadata": {
+      "name": "temp-workflow",
+      "description": "A test temporary workflow"
+    },
+    "spec": {
+      "triggers": {
+        "temp-trigger": {
+          "type": "null"
+        }
+      },
+      "pipelines": {
+        "temp-pipeline": {
+          "trigger": "temp-trigger"
+        }
+      }
+    }
+  }
