@@ -48,11 +48,7 @@ type TriggerSpec struct {
 
 // DeepEqual checks if the two Trigger objects are equal or not.
 func (t *TriggerSpec) DeepEqual(tz *TriggerSpec) bool {
-	if t.Type != tz.Type {
-		return false
-	}
-
-	return true
+	return t.Type == tz.Type
 }
 
 // PipelineSpec contains the spec of a pipeline associated with the workflow.

@@ -80,4 +80,11 @@ proto:
 > @echo "[*] Generating proto definitions"
 > @protoc -I pkg/proto pkg/proto/agent.proto --go_out=plugins=grpc:pkg/proto
 
-.PHONY: build format check-lint fix-lint govet help docs proto
+apiserver-gen:
+> @cd pkg/apiserver
+> @echo "[*] Generating swagger documentation"
+> @swag init --generatedTime=false
+> @echo "[*] Generating swagger apiserver clients"
+> @swagger generate client -f docs/swagger.yaml
+
+.PHONY: build format check-lint fix-lint govet help docs proto apiserver-gen
