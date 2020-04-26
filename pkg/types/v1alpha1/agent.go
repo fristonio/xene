@@ -9,6 +9,9 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Executor is a type for representing an executor on the agent.
+type Executor string
+
 // Agent is the type which contains agent object definition.
 type Agent struct {
 	// TypeMeta stores meta type information for the agent object.

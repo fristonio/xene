@@ -27,6 +27,10 @@ func (w *Workflow) Validate() error {
 		return err
 	}
 
+	if err := w.Resolve(); err != nil {
+		return err
+	}
+
 	return w.Spec.Validate()
 }
 
@@ -38,6 +42,10 @@ func (w *Workflow) Resolve() error {
 			pipeline.Trigger = &trigger
 		} else {
 			return fmt.Errorf("not a valid trigger(%s) for pipeline(%s)", pipeline.TriggerName, name)
+		}
+
+		if err := pipeline.Resolve(name); err != nil {
+			return err
 		}
 	}
 
@@ -55,6 +63,18 @@ type WorkflowSpec struct {
 
 // Validate validates the specification provided for the workflow.
 func (w *WorkflowSpec) Validate() error {
+	for name, trigger := range w.Triggers {
+		if err := trigger.Validate(name); err != nil {
+			return err
+		}
+	}
+
+	for name, pipeline := range w.Pipelines {
+		if err := pipeline.Validate(name); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -62,6 +82,12 @@ func (w *WorkflowSpec) Validate() error {
 type TriggerSpec struct {
 	// Type contains the type of the trigger we are using
 	Type string `json:"type"`
+}
+
+// Validate validates the specification provided for the a trigger.
+func (t *TriggerSpec) Validate(name string) error {
+
+	return nil
 }
 
 // DeepEqual checks if the two Trigger objects are equal or not.
@@ -74,8 +100,67 @@ type PipelineSpec struct {
 	// trigger contains the Trigger for the configured pipeline.
 	Trigger *TriggerSpec
 
-	// Trigger contains the name of the trigger to use for the pipeline.
+	// TriggerName contains the name of the trigger to use for the pipeline.
 	TriggerName string `json:"trigger"`
+
+	// Description contains description about the pipeline.
+	Description string `json:"description"`
+
+	// Executor describes executor for the pipeline.
+	// Should be one of the preconfigured list of available executors.
+	Executor string `json:"executor"`
+
+	// RootTask contains the root task for the pipeline.
+	RootTask *TaskSpec
+
+	// Tasks contains the list of the tasks in the pipeline.
+	Tasks map[string]TaskSpec `json:"tasks"`
+}
+
+// Validate validates the specification provided for the pipeline.
+func (p *PipelineSpec) Validate(name string) error {
+	return nil
+}
+
+// Resolve resolves the specification provided for the pipeline.
+func (p *PipelineSpec) Resolve(name string) error {
+	return nil
+}
+
+// TaskSpec contains the spec corresponding to a single task in a pipeline.
+type TaskSpec struct {
+	// Description contains the description of the task
+	Description string `json:"description"`
+
+	// DependsOn contains a list of tasks this task depends on.
+	// This is used to build the dag for the pipeline.
+	DependsOn []*TaskSpec
+
+	// Dependencies is a list of task names which this particular
+	// task depends on. It is used to resolve the DependsOn variable in
+	// the struct.
+	Dependencies []string `json:"dependencies"`
+
+	// Step contains a list of steps to go through for the task.
+	// These are executed linear.
+	Steps []*TaskStepSpec `json:"steps"`
+}
+
+// TaskStepSpec contains the specification of an individual TaskStep
+type TaskStepSpec struct {
+	// Name contains the name of the Step
+	Name string `json:"name"`
+
+	// Description contains the description of the step, this is
+	// optional.
+	Description string `json:"description"`
+
+	// Type contains the type of the Step we are exeucting.
+	Type string `json:"type"`
+
+	// Cmd defines the command to execute for a step, when the
+	// type of step is shell.
+	Cmd string `json:"cmd"`
 }
 
 // DeepEqual checks if the two pipeline objects are equal or not.
@@ -159,3 +244,6 @@ type PipelineStatus struct {
 	// Status contains the status information of the pipeline.
 	Status string `json:"status"`
 }
+
+// TriggerType is the type to specify the type of trigger.
+type TriggerType string

@@ -39,14 +39,28 @@ spec:
     type: webhook
 
   pipelines:
-  - name: test-pipeline
-    description: Run CI pipeline for the changes landed in the master.
-    tasks:
-    - name: build
-    - name: test
-      dependencies: [build]
-    - name: push
-      dependencies: [test]
+  - test-pipeline:
+      description: Run CI pipeline for the changes landed in the master.
+      tasks:
+      - build:
+          steps:
+          - make-target:
+              type: shell
+              cmd: make build
+      - test:
+            dependencies:
+            - build
+            steps:
+            make-target:
+                type: shell
+                cmd: make test
+      - push:
+            dependencies:
+            - test
+            steps:
+            make-target:
+                type: shell
+                cmd: make push
 
   - name: git-sync
     description: Sync the commit in master to all the git mirrors maintained.

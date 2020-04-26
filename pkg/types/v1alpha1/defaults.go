@@ -29,4 +29,10 @@ var (
 
 	// SecretKind is the kind when creating a secret object in xene.
 	SecretKind string = "Secret"
+
+	// DefaultTriggerType contains the name of the default trigger type.
+	DefaultTriggerType TriggerType = "default"
+
+	// DockerExecutor is the name of the docker executor used by agent.
+	DockerExecutor Executor = "docker"
 )
