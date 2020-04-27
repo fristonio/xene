@@ -91,6 +91,14 @@ func (s *Scheduler) performPipelineAction(action Action, wfName, name string,
 		return fmt.Errorf("error while marshaling pipeline spec: %s", err)
 	}
 
+	var triggerData []byte
+	if pipeline.Trigger != nil {
+		triggerData, err = json.Marshal(pipeline.Trigger)
+		if err != nil {
+			return fmt.Errorf("error while marshaling trigger spec: %s", err)
+		}
+	}
+
 	client := proto.NewAgentServiceClient(conn)
 	var pStatus *proto.PipelineStatus
 
@@ -98,6 +106,7 @@ func (s *Scheduler) performPipelineAction(action Action, wfName, name string,
 		Name:     name,
 		Spec:     string(data),
 		Workflow: wfName,
+		Trigger:  string(triggerData),
 	}
 
 	switch action {
@@ -123,6 +132,7 @@ func (s *Scheduler) performPipelineAction(action Action, wfName, name string,
 // UpdatePipeline updates the pipeline manifest scheduled on some agent.
 func (s *Scheduler) UpdatePipeline(wfName, name string, new *v1alpha1.PipelineSpec,
 	status *v1alpha1.WorkflowStatus) error {
+	log.Debugf("in scheduler update pipeline step")
 	plStatus, ok := status.Pipelines[name]
 	if !ok {
 		return fmt.Errorf("no pipeline with name %s found in workflow status", name)
@@ -134,6 +144,7 @@ func (s *Scheduler) UpdatePipeline(wfName, name string, new *v1alpha1.PipelineSp
 // RemovePipeline removes the scheduled pipeline from an agent.
 func (s *Scheduler) RemovePipeline(wfName, name string, pipeline *v1alpha1.PipelineSpec,
 	status *v1alpha1.WorkflowStatus) error {
+	log.Debugf("in scheduler remove pipeline step")
 	plStatus, ok := status.Pipelines[name]
 	if !ok {
 		return fmt.Errorf("no pipeline with name %s found in workflow status", name)
@@ -146,6 +157,7 @@ func (s *Scheduler) RemovePipeline(wfName, name string, pipeline *v1alpha1.Pipel
 // and schedules the run.
 func (s *Scheduler) SchedulePipeline(wfName, name string, pipeline *v1alpha1.PipelineSpec,
 	status *v1alpha1.WorkflowStatus) error {
+	log.Debugf("in scheduler schedule pipeline step")
 	ps := v1alpha1.PipelineStatus{}
 	status.Pipelines[name] = ps
 

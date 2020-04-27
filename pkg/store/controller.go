@@ -34,7 +34,7 @@ type addFuncType func(*v1alpha1.KVPairStruct) error
 
 type updateFuncType func(*v1alpha1.KVPairStruct, uint64) error
 
-type deleteFuncType func(*v1alpha1.KVPairStruct) error
+type deleteFuncType func(string) error
 
 // Controller is a type corresponding to a store controller.
 // A store controller can be used to run function based on changes to a store
@@ -65,16 +65,19 @@ func (c *Controller) Name() string {
 // based on changes to the specifed key in the store.
 func NewController(
 	key string,
-	addFunc, delFunc func(*v1alpha1.KVPairStruct) error,
+	addFunc func(*v1alpha1.KVPairStruct) error,
+	delFunc func(string) error,
 	updateFunc func(*v1alpha1.KVPairStruct, uint64) error) *Controller {
+
+	name := utils.RandToken(defaults.StoreControllerNameLength)
 
 	return &Controller{
 		AddFunc:    addFunc,
 		UpdateFunc: updateFunc,
 		DeleteFunc: delFunc,
 		Key:        key,
-		name:       utils.RandToken(defaults.StoreControllerNameLength),
-		cache:      NewCache(),
+		name:       name,
+		cache:      NewCache(name),
 		Manager:    ControllerManager,
 	}
 }
@@ -85,7 +88,8 @@ func NewController(
 // with other controller.
 func NewControllerWithSharedCache(
 	key string,
-	addFunc, delFunc func(*v1alpha1.KVPairStruct) error,
+	addFunc func(*v1alpha1.KVPairStruct) error,
+	delFunc func(string) error,
 	updateFunc func(*v1alpha1.KVPairStruct, uint64) error) *Controller {
 
 	return &Controller{
@@ -103,7 +107,7 @@ func NewControllerWithSharedCache(
 func (c *Controller) Run() error {
 	log.WithFields(log.Fields{
 		"package": "store",
-	}).Infof("starting to run store controller: %s", c.name)
+	}).Infof("starting to setup store controller: %s", c.name)
 	registerController(c)
 
 	fun, err := controller.NewControllerFunction(c.storeControllerDoFunc)
@@ -122,6 +126,9 @@ func (c *Controller) Run() error {
 		return fmt.Errorf("error while updating controller: %s", err)
 	}
 
+	log.Infof("starting to run, store cache controller function for deleted keys.")
+	c.cache.RegisterDeleteFunc(c.Key, c.DeleteFunc)
+	_ = c.cache.RunController()
 	return nil
 }
 
@@ -133,7 +140,7 @@ func (c *Controller) storeControllerDoFunc(ctx context.Context) error {
 	// Here we do a prefix scan for the provided key with our function
 	KVStore.PrefixScanWithFunction(context.TODO(), c.Key, func(kv *v1alpha1.KVPairStruct) {
 		if c.cache.CheckIfExists(kv.Key) && kv.DeletedOrExpired {
-			err := c.DeleteFunc(kv)
+			err := c.DeleteFunc(kv.Key)
 			if err != nil {
 				log.Errorf("error while calling delete for key: %s: %s", kv.Key, err)
 				return
@@ -155,9 +162,11 @@ func (c *Controller) storeControllerDoFunc(ctx context.Context) error {
 				return
 			}
 		}
+
 		c.cache.Set(kv.Key, kv.Version)
 	})
 
+	log.Infof("controller execution finished")
 	return nil
 }
 
@@ -176,6 +185,7 @@ func (c *Controller) Stop() error {
 		return err
 	}
 
+	c.cache.StopController()
 	delete(RegisteredControllers, c.name)
 	return nil
 }

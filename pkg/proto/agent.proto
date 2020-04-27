@@ -17,6 +17,8 @@ message Pipeline {
     string Name = 2;
 
     string Workflow = 3;
+
+    string Trigger = 4;
 }
 
 message PipelineStatus {

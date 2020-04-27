@@ -3,6 +3,7 @@ module github.com/fristonio/xene
 go 1.13
 
 require (
+	cloud.google.com/go v0.45.1 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/dgraph-io/badger v1.6.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible

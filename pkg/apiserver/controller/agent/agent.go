@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/fristonio/xene/pkg/controller"
@@ -202,21 +203,17 @@ func (a *Controller) newAgentStoreController() *store.Controller {
 		},
 
 		// Delete function for the new agent.
-		func(kv *v1alpha1.KVPairStruct) error {
-			log.Infof("agent deleted: %s", kv.Key)
-			var ag v1alpha1.Agent
-			err := json.Unmarshal([]byte(kv.Value), &ag)
+		func(key string) error {
+			agentName := strings.TrimPrefix(key, v1alpha1.AgentKeyPrefix+"/")
+			log.Infof("agent deleted: %s", agentName)
+
+			err := a.Manager.RemoveController(agentName)
 			if err != nil {
-				return fmt.Errorf("error while unmarshaling the agent spec from data: %s", err)
+				return fmt.Errorf("error while removing controller for %s: %s", agentName, err)
 			}
 
-			err = a.Manager.RemoveController(ag.Metadata.GetName())
-			if err != nil {
-				return fmt.Errorf("error while removing controller for %s: %s", ag.Metadata.GetName(), err)
-			}
-
-			delete(a.Nodes, ag.Metadata.GetName())
-			delete(a.blacklistedNodes, ag.Metadata.GetName())
+			delete(a.Nodes, agentName)
+			delete(a.blacklistedNodes, agentName)
 			return nil
 		},
 

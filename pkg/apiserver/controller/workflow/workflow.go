@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/fristonio/xene/pkg/errors"
 	"github.com/fristonio/xene/pkg/store"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
 	log "github.com/sirupsen/logrus"
@@ -74,9 +75,9 @@ func (a *Controller) newWorkflowStoreController() *store.Controller {
 		},
 
 		// Delete function for the workflow object.
-		func(kv *v1alpha1.KVPairStruct) error {
-			log.Infof("workflow deleted: %s", kv.Key)
-			return nil
+		func(key string) error {
+			log.Infof("workflow deleted: %s", key)
+			return a.deleteWorkflow(key)
 		},
 
 		// Update function for an updated workflow object in the store.
@@ -85,6 +86,54 @@ func (a *Controller) newWorkflowStoreController() *store.Controller {
 			return a.addWorkflow(kv)
 		},
 	)
+}
+
+func (a *Controller) deleteWorkflow(key string) error {
+	wfName := strings.TrimPrefix(key, v1alpha1.WorkflowKeyPrefix+"/")
+
+	var (
+		wfStatus v1alpha1.WorkflowStatus
+		errs     = errors.NewMultiError()
+	)
+
+	val, err := store.KVStore.Get(context.TODO(),
+		fmt.Sprintf("%s/%s", v1alpha1.WorkflowStatusKeyPrefix, wfName))
+	if err == nil {
+		err := json.Unmarshal(val.Data, &wfStatus)
+		if err != nil {
+			return fmt.Errorf("error while unmarshaling the workflow status spec from data: %s", err)
+		}
+
+		var curWorkflow v1alpha1.Workflow
+		err = json.Unmarshal([]byte(wfStatus.WorkflowSpec), &curWorkflow)
+		if err != nil {
+			return fmt.Errorf("error while unmarshaling the workflow spec from workflow status data: %s", err)
+		}
+
+		err = curWorkflow.Resolve()
+		if err != nil {
+			return fmt.Errorf("error while resolving workflow from status: %s", err)
+		}
+
+		for name, pipeline := range curWorkflow.Spec.Pipelines {
+			err = a.Scheduler.RemovePipeline(wfName, name, &pipeline, &wfStatus)
+			if err != nil {
+				errs.Append(err)
+			}
+		}
+	} else if store.KVStore.KeyDoesNotExistError(err) {
+		log.Infof("WorkflowStatus not found for the workflow: %s, assuming already processed.", wfName)
+		return nil
+	} else {
+		return fmt.Errorf("error while getting workflow status: %s", err)
+	}
+
+	err = store.KVStore.Delete(context.TODO(), fmt.Sprintf("%s/%s", v1alpha1.WorkflowStatusKeyPrefix, wfName))
+	if err != nil {
+		return fmt.Errorf("error while deleting workflow status object: %s", err)
+	}
+
+	return errs.GetError()
 }
 
 func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
@@ -104,7 +153,7 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 
 	val, err := store.KVStore.Get(context.TODO(),
 		fmt.Sprintf("%s/%s", v1alpha1.WorkflowStatusKeyPrefix, wfName))
-	if err == nil {
+	if err == nil && !val.DeletedOrExpired {
 		err := json.Unmarshal(val.Data, &wfStatus)
 		if err != nil {
 			return fmt.Errorf("error while unmarshaling the workflow status spec from data: %s", err)
@@ -118,12 +167,10 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 
 		err = curWorkflow.Resolve()
 		if err != nil {
-			log.Info(wfStatus.WorkflowSpec)
 			return fmt.Errorf("error while resolving workflow from status: %s", err)
 		}
 		err = wf.Resolve()
 		if err != nil {
-			log.Info(kv.Value)
 			return fmt.Errorf("error while resolving workflow object: %s", err)
 		}
 
@@ -133,6 +180,9 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 		}
 		log.Infof("starting pipeline scheduling for workflow: %s", wf.Metadata.GetName())
 		for name, pipeline := range wf.Spec.Pipelines {
+			if _, ok := wfStatus.Pipelines[name]; !ok {
+				wfStatus.Pipelines[name] = v1alpha1.PipelineStatus{}
+			}
 			if p, ok := curWorkflow.Spec.Pipelines[name]; ok {
 				if !pipeline.DeepEqual(&p) {
 					err := a.Scheduler.UpdatePipeline(wfName, name, &pipeline, &wfStatus)
@@ -154,6 +204,10 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 
 		// remove pipelines which does not exist anymore.
 		for name, pipeline := range curWorkflow.Spec.Pipelines {
+			if _, ok := wfStatus.Pipelines[name]; !ok {
+				wfStatus.Pipelines[name] = v1alpha1.PipelineStatus{}
+			}
+
 			if _, ok := wf.Spec.Pipelines[name]; !ok {
 				err := a.Scheduler.RemovePipeline(wfName, name, &pipeline, &wfStatus)
 				if err != nil {
@@ -167,8 +221,8 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 		updatedWfSpec = curWorkflow
 
 	} else {
-		log.Debugf("workflow status not found for: %s", wfName)
-		log.Debugf("scheduling the pipelines for the workflow")
+		log.Infof("workflow status not found for: %s", wfName)
+		log.Infof("scheduling the pipelines for the workflow")
 
 		wfStatus, err := v1alpha1.NewWorkflowStatus(&wf)
 		if err != nil {

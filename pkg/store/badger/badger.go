@@ -93,6 +93,23 @@ func (b *Backend) Get(ctx context.Context, key string) (*types.Value, error) {
 	}, nil
 }
 
+// Exists checks if the key provided exists in the datastore or not.
+func (b *Backend) Exists(ctx context.Context, key string) (bool, error) {
+	txn := b.db.NewTransaction(false)
+	defer txn.Discard()
+
+	_, err := txn.Get([]byte(key))
+	if err != nil {
+		if err == badger.ErrKeyNotFound {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
+}
+
 // KeyDoesNotExistError checks if the provided error is due to non existance of the key
 // or not.
 func (b *Backend) KeyDoesNotExistError(err error) bool {

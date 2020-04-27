@@ -3,6 +3,9 @@ package v1alpha1
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/fristonio/xene/pkg/dag"
+	"github.com/fristonio/xene/pkg/utils"
 )
 
 // Workflow is the type which contains workflow object definition.
@@ -63,6 +66,9 @@ type WorkflowSpec struct {
 
 // Validate validates the specification provided for the workflow.
 func (w *WorkflowSpec) Validate() error {
+	if w.Triggers == nil || w.Pipelines == nil {
+		return fmt.Errorf("at least one pipeline and one trigger must be mentioned")
+	}
 	for name, trigger := range w.Triggers {
 		if err := trigger.Validate(name); err != nil {
 			return err
@@ -86,7 +92,6 @@ type TriggerSpec struct {
 
 // Validate validates the specification provided for the a trigger.
 func (t *TriggerSpec) Validate(name string) error {
-
 	return nil
 }
 
@@ -98,7 +103,10 @@ func (t *TriggerSpec) DeepEqual(tz *TriggerSpec) bool {
 // PipelineSpec contains the spec of a pipeline associated with the workflow.
 type PipelineSpec struct {
 	// trigger contains the Trigger for the configured pipeline.
-	Trigger *TriggerSpec
+	Trigger *TriggerSpec `json:"-"`
+
+	// Dag contains the dag corresponding to tasks in a pipeline.
+	Dag *dag.AcyclicGraph `json:"-"`
 
 	// TriggerName contains the name of the trigger to use for the pipeline.
 	TriggerName string `json:"trigger"`
@@ -111,10 +119,41 @@ type PipelineSpec struct {
 	Executor string `json:"executor"`
 
 	// RootTask contains the root task for the pipeline.
-	RootTask *TaskSpec
+	RootTask dag.Vertex `json:"-"`
 
 	// Tasks contains the list of the tasks in the pipeline.
 	Tasks map[string]TaskSpec `json:"tasks"`
+}
+
+// DeepEqual checks if the two pipeline objects are equal or not.
+func (p *PipelineSpec) DeepEqual(pz *PipelineSpec) bool {
+	if p.TriggerName != pz.TriggerName {
+		return false
+	}
+
+	if p.Trigger != nil && pz.Trigger != nil {
+		return p.Trigger.DeepEqual(pz.Trigger)
+	}
+
+	if p.Trigger != nil || pz.Trigger != nil {
+		return false
+	}
+
+	if p.Executor != pz.Executor {
+		return false
+	}
+
+	for name, task := range p.Tasks {
+		pzTask, ok := pz.Tasks[name]
+		if !ok {
+			return false
+		}
+
+		if !task.DeepEqual(&pzTask) {
+			return false
+		}
+	}
+	return true
 }
 
 // Validate validates the specification provided for the pipeline.
@@ -123,27 +162,90 @@ func (p *PipelineSpec) Validate(name string) error {
 }
 
 // Resolve resolves the specification provided for the pipeline.
-func (p *PipelineSpec) Resolve(name string) error {
+func (p *PipelineSpec) Resolve(pipelineName string) error {
+	p.Dag = dag.NewAcyclicGraph()
+	for name, task := range p.Tasks {
+		task.Resolve(name)
+		p.Dag.Add(&task)
+	}
+
+	for name, task := range p.Tasks {
+		for _, depName := range task.Dependencies {
+			t, ok := p.Tasks[depName]
+			if !ok {
+				return fmt.Errorf("pipeline %s: not a valid task dependency %s for task  %s", pipelineName, depName, name)
+			}
+
+			task.DependsOn = append(task.DependsOn, &t)
+			p.Dag.Connect(dag.BasicEdge(&task, &t))
+		}
+	}
+
+	root, err := p.Dag.Root()
+	if err != nil {
+		return fmt.Errorf("pipeline %s: error while resolving root: %s", pipelineName, err)
+	}
+
+	p.RootTask = root
 	return nil
 }
 
 // TaskSpec contains the spec corresponding to a single task in a pipeline.
 type TaskSpec struct {
+	name string
+
 	// Description contains the description of the task
 	Description string `json:"description"`
 
 	// DependsOn contains a list of tasks this task depends on.
 	// This is used to build the dag for the pipeline.
-	DependsOn []*TaskSpec
+	DependsOn []*TaskSpec `json:"-"`
 
 	// Dependencies is a list of task names which this particular
 	// task depends on. It is used to resolve the DependsOn variable in
 	// the struct.
 	Dependencies []string `json:"dependencies"`
 
+	// WorkingDirectory for the task.
+	WorkingDirectory string `json:"workingDir"`
+
 	// Step contains a list of steps to go through for the task.
 	// These are executed linear.
-	Steps []*TaskStepSpec `json:"steps"`
+	Steps []TaskStepSpec `json:"steps"`
+}
+
+// DeepEqual checks if the two TaskSpec objects are equal or not.
+func (t *TaskSpec) DeepEqual(tz *TaskSpec) bool {
+	if t.WorkingDirectory != tz.WorkingDirectory {
+		return false
+	}
+
+	if utils.CheckStringSliceEqual(t.Dependencies, tz.Dependencies) {
+		return false
+	}
+
+	if len(t.Steps) != len(tz.Steps) {
+		return false
+	}
+
+	for i, step := range t.Steps {
+		if !step.DeepEqual(&tz.Steps[i]) {
+			return false
+		}
+	}
+
+	return false
+}
+
+// Resolve resolves the task specification.
+func (t *TaskSpec) Resolve(name string) {
+	t.name = name
+}
+
+// Hashcode returns a string representation of the task, which is uniquely defined by
+// its name.
+func (t *TaskSpec) Hashcode() string {
+	return t.name
 }
 
 // TaskStepSpec contains the specification of an individual TaskStep
@@ -163,17 +265,10 @@ type TaskStepSpec struct {
 	Cmd string `json:"cmd"`
 }
 
-// DeepEqual checks if the two pipeline objects are equal or not.
-func (p *PipelineSpec) DeepEqual(pz *PipelineSpec) bool {
-	if p.TriggerName != pz.TriggerName {
-		return false
-	}
-
-	if p.Trigger != nil && pz.Trigger != nil {
-		return p.Trigger.DeepEqual(pz.Trigger)
-	}
-
-	if p.Trigger != nil || pz.Trigger != nil {
+// DeepEqual checks if the two TaskSteppec objects are equal or not.
+func (t *TaskStepSpec) DeepEqual(tz *TaskStepSpec) bool {
+	if t.Type != tz.Type &&
+		t.Cmd != tz.Cmd {
 		return false
 	}
 

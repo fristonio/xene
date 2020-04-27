@@ -8,12 +8,44 @@
     "spec": {
       "triggers": {
         "temp-trigger": {
-          "type": "null"
+          "type": "default"
         }
       },
       "pipelines": {
         "temp-pipeline": {
-          "trigger": "temp-trigger"
+          "trigger": "temp-trigger",
+          "description": "temporary pipeline",
+          "executor": "docker",
+          "tasks": {
+              "build-task": {
+                "description": "Build xene",
+                "workingDir": "/go/src/github.com/fristonio/xene/",
+                "steps": [
+                  {
+                    "name": "format",
+                    "type": "shell",
+                    "cmd": "make format"
+                  },
+                  {
+                    "name": "build",
+                    "type": "shell",
+                    "cmd": "make build"
+                  }
+                ]
+              },
+              "test-task": {
+                "description": "Test xene",
+                "workingDir": "/go/src/github.com/fristonio/xene/",
+                "dependencies": ["build-task"],
+                "steps": [
+                  {
+                    "name": "test",
+                    "type": "shell",
+                    "cmd": "make test"
+                  }
+                ]
+              }
+          }
         }
       }
     }

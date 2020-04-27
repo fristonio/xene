@@ -25,6 +25,9 @@ type Backend interface {
 	// Get returns the value of the key.
 	Get(ctx context.Context, key string) (*types.Value, error)
 
+	// Exists checks if the provided key exists or not
+	Exists(ctx context.Context, key string) (bool, error)
+
 	// KeyDoesNotExistError is the method to check if the error is due to non
 	// existance of the key during the get operation.
 	KeyDoesNotExistError(err error) bool

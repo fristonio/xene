@@ -111,4 +111,5 @@ func init() {
 
 	workflowCmd.AddCommand(workflowCreateCmd)
 	workflowCmd.AddCommand(workflowGetCmd)
+	workflowCmd.AddCommand(workflowDeleteCmd)
 }

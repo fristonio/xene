@@ -35,4 +35,10 @@ var (
 
 	// DockerExecutor is the name of the docker executor used by agent.
 	DockerExecutor Executor = "docker"
+
+	// RegisteredExecutors contains a list of executors allowed with xene.
+	RegisteredExecutors []Executor = []Executor{DockerExecutor}
+
+	// RegisteredTriggerTypes contains a list of TriggerTypes allowed with xene.
+	RegisteredTriggerTypes []TriggerType = []TriggerType{DefaultTriggerType}
 )
