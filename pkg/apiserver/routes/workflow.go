@@ -84,6 +84,7 @@ func workflowCreateHandler(ctx *gin.Context) {
 		return
 	}
 
+	wf.RemoveNonLinkedTriggers()
 	wfData, err := json.Marshal(&wf)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
@@ -91,6 +92,7 @@ func workflowCreateHandler(ctx *gin.Context) {
 		})
 		return
 	}
+
 	err = store.KVStore.Set(context.TODO(),
 		fmt.Sprintf("%s/%s", v1alpha1.WorkflowKeyPrefix, wf.Metadata.ObjectMeta.Name),
 		wfData)

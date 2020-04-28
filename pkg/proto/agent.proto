@@ -14,11 +14,19 @@ message Pipeline {
     // of worker agents.
     string Spec = 1;
 
+    // Name contains the name of the pipeline as configured in
+    // the workflow spec.
     string Name = 2;
 
+    // Workflow contains the name of the workflow the pipeline is configured for
     string Workflow = 3;
 
-    string Trigger = 4;
+    // Name contains the name of the trigger as configured in
+    // the workflow spec.
+    string TriggerName = 4;
+
+    // spec contains the actual spec of the trigger.
+    string TriggerSpec = 5;
 }
 
 message PipelineStatus {

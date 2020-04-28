@@ -90,7 +90,6 @@ func (a *Controller) newWorkflowStoreController() *store.Controller {
 
 func (a *Controller) deleteWorkflow(key string) error {
 	wfName := strings.TrimPrefix(key, v1alpha1.WorkflowKeyPrefix+"/")
-
 	var (
 		wfStatus v1alpha1.WorkflowStatus
 		errs     = errors.NewMultiError()
@@ -128,6 +127,7 @@ func (a *Controller) deleteWorkflow(key string) error {
 		return fmt.Errorf("error while getting workflow status: %s", err)
 	}
 
+	// Finally remove the status associated with the workflow from the db.
 	err = store.KVStore.Delete(context.TODO(), fmt.Sprintf("%s/%s", v1alpha1.WorkflowStatusKeyPrefix, wfName))
 	if err != nil {
 		return fmt.Errorf("error while deleting workflow status object: %s", err)
@@ -141,6 +141,11 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 	err := json.Unmarshal([]byte(kv.Value), &wf)
 	if err != nil {
 		return fmt.Errorf("error while unmarshaling the workflow spec from data: %s", err)
+	}
+
+	err = wf.Resolve()
+	if err != nil {
+		return fmt.Errorf("error while resolving workflow object: %s", err)
 	}
 
 	wfName := wf.Metadata.GetName()
@@ -169,58 +174,84 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 		if err != nil {
 			return fmt.Errorf("error while resolving workflow from status: %s", err)
 		}
-		err = wf.Resolve()
-		if err != nil {
-			return fmt.Errorf("error while resolving workflow object: %s", err)
-		}
 
 		// At this point, try best efforts for each pipeline.
 		if wfStatus.Pipelines == nil {
 			wfStatus.Pipelines = make(map[string]v1alpha1.PipelineStatus)
 		}
 		log.Infof("starting pipeline scheduling for workflow: %s", wf.Metadata.GetName())
-		for name, pipeline := range wf.Spec.Pipelines {
-			if _, ok := wfStatus.Pipelines[name]; !ok {
-				wfStatus.Pipelines[name] = v1alpha1.PipelineStatus{}
-			}
-			if p, ok := curWorkflow.Spec.Pipelines[name]; ok {
-				if !pipeline.DeepEqual(&p) {
-					err := a.Scheduler.UpdatePipeline(wfName, name, &pipeline, &wfStatus)
-					if err != nil {
-						errs = append(errs, err.Error())
-					} else {
-						curWorkflow.Spec.Pipelines[name] = pipeline
-					}
-				}
-			} else {
-				err := a.Scheduler.SchedulePipeline(wfName, name, &pipeline, &wfStatus)
-				if err != nil {
-					errs = append(errs, err.Error())
-				} else {
-					curWorkflow.Spec.Pipelines[name] = pipeline
-				}
-			}
-		}
 
-		// remove pipelines which does not exist anymore.
+		// First loop through all the pipelines which are supposed to be configured
+		// using the workflow status manifest and remove them if they don't exist in the
+		// new workflow.
+		// Current running source of truth for the workflow state is from the curWorkflow.
 		for name, pipeline := range curWorkflow.Spec.Pipelines {
 			if _, ok := wfStatus.Pipelines[name]; !ok {
 				wfStatus.Pipelines[name] = v1alpha1.PipelineStatus{}
 			}
 
+			var deleteTrigger bool
 			if _, ok := wf.Spec.Pipelines[name]; !ok {
+				ps := curWorkflow.GetTriggerAsssociatedPipelines(pipeline.TriggerName)
+				deleteTrigger = true
+				if len(ps) > 1 {
+					deleteTrigger = false
+				}
 				err := a.Scheduler.RemovePipeline(wfName, name, &pipeline, &wfStatus)
 				if err != nil {
 					errs = append(errs, err.Error())
 				} else {
-					curWorkflow.Spec.Pipelines[name] = pipeline
+					if deleteTrigger {
+						delete(curWorkflow.Spec.Triggers, pipeline.TriggerName)
+					}
+					delete(curWorkflow.Spec.Pipelines, name)
 				}
 			}
 		}
 
+		// Process pipelines in the Workflow document.
+		//
+		// First range through all the pipelines configured in the new workflow manifest
+		// then check which of these pipelines exists in the workflow registered
+		// in the status.
+		// If the pipeline exists in the workflow manifest in the status then check if the
+		// two pipelines differ, if they do then do an update on the pipeline.
+		// If the pipeline does not exist in the workflow manifest described in the statsus
+		// then schedule the pipeline and update the status.
+		for name, pipeline := range wf.Spec.Pipelines {
+			if _, ok := wfStatus.Pipelines[name]; !ok {
+				wfStatus.Pipelines[name] = v1alpha1.PipelineStatus{}
+			}
+
+			var err error
+			if p, ok := curWorkflow.Spec.Pipelines[name]; ok {
+				// This DeepEquals check also checks if the two pipelines
+				// have the same trigger configured.
+				if !pipeline.DeepEqual(&p) {
+					err := a.Scheduler.UpdatePipeline(wfName, name, &pipeline, &p, &wfStatus)
+					if err != nil {
+						errs = append(errs, err.Error())
+					} else {
+						curWorkflow.Spec.Pipelines[name] = pipeline
+						curWorkflow.Spec.Triggers[pipeline.TriggerName] = *pipeline.Trigger
+					}
+				}
+			} else {
+				err = a.Scheduler.SchedulePipeline(wfName, name, &pipeline, &wfStatus)
+				if err != nil {
+					errs = append(errs, err.Error())
+				} else {
+					curWorkflow.Spec.Pipelines[name] = pipeline
+					curWorkflow.Spec.Triggers[pipeline.TriggerName] = *pipeline.Trigger
+				}
+			}
+		}
+
+		// Remove all the triggers which are not required.
+		curWorkflow.RemoveNonLinkedTriggers()
 		updatedWfSpec = curWorkflow
 
-	} else {
+	} else if store.KVStore.KeyDoesNotExistError(err) {
 		log.Infof("workflow status not found for: %s", wfName)
 		log.Infof("scheduling the pipelines for the workflow")
 
@@ -238,6 +269,8 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 		}
 
 		updatedWfSpec = wf
+	} else {
+		return err
 	}
 
 	// Save the workflow status.

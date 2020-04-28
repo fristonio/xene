@@ -12,6 +12,18 @@ var (
 	// WorkflowStatusKeyPrefix is the key prefix for all the workflow status objects.
 	WorkflowStatusKeyPrefix string = fmt.Sprintf("%s/status/workflow", Version)
 
+	// PipelineStatusKeyPrefix is the key prefix for all the pipeline status objects.
+	PipelineStatusKeyPrefix string = fmt.Sprintf("%s/status/pipeline", Version)
+
+	// PipelineKeyPrefix is the key prefix for all the pipeline objects.
+	PipelineKeyPrefix string = fmt.Sprintf("%s/registry/pipeline", Version)
+
+	// TriggerStatusKeyPrefix is the key prefix for all the trigger status objects.
+	TriggerStatusKeyPrefix string = fmt.Sprintf("%s/status/trigger", Version)
+
+	// TriggerKeyPrefix is the key prefix for all the trigger objects.
+	TriggerKeyPrefix string = fmt.Sprintf("%s/registry/trigger", Version)
+
 	// WorkflowKind is the Kind when creating a Workflow
 	WorkflowKind string = "Workflow"
 

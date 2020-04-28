@@ -37,6 +37,20 @@ func (w *Workflow) Validate() error {
 	return w.Spec.Validate()
 }
 
+// GetTriggerAsssociatedPipelines returns a list of pipelines associated with the
+// provided triggername.
+func (w *Workflow) GetTriggerAsssociatedPipelines(trigger string) []string {
+	var pipelines []string
+
+	for name, pipeline := range w.Spec.Pipelines {
+		if trigger == pipeline.TriggerName {
+			pipelines = append(pipelines, name)
+		}
+	}
+
+	return pipelines
+}
+
 // Resolve resolves the workflow object by acting upon different relations
 // in the spec.
 func (w *Workflow) Resolve() error {
@@ -53,6 +67,93 @@ func (w *Workflow) Resolve() error {
 	}
 
 	return nil
+}
+
+// GetValidTriggers returns a list of valid triggers
+func (w *Workflow) GetValidTriggers() map[string]struct{} {
+	triggers := make(map[string]struct{})
+
+	for _, pipeline := range w.Spec.Pipelines {
+		if _, ok := triggers[pipeline.TriggerName]; ok {
+			continue
+		}
+		triggers[pipeline.TriggerName] = struct{}{}
+	}
+
+	return triggers
+}
+
+// RemoveNonLinkedTriggers removes all the triggers which don't have a pipeline
+// associated with them.
+func (w *Workflow) RemoveNonLinkedTriggers() {
+	triggers := w.GetValidTriggers()
+	for name := range w.Spec.Triggers {
+		if _, ok := triggers[name]; !ok {
+			delete(w.Spec.Triggers, name)
+		}
+	}
+}
+
+// CheckTriggerRequired checks if the provided trigger name is associated with
+// a pipeline or not.
+func (w *Workflow) CheckTriggerRequired(name string) bool {
+	triggers := w.GetValidTriggers()
+	if _, ok := triggers[name]; ok {
+		return true
+	}
+
+	return false
+}
+
+// ResolveActions takes into consideration the two workflows
+// and returns a strategy that can help us reach the current workflow
+// manifest from the provided one.
+func (w *Workflow) ResolveActions(old *Workflow) WorkflowActions {
+	actions := WorkflowActions{
+		Pipelines: Actions{},
+		Triggers:  Actions{},
+	}
+
+	for name, pipeline := range w.Spec.Pipelines {
+		// The pipeline already exists in the old workflow.
+		if p, ok := old.Spec.Pipelines[name]; ok {
+			// This DeepEquals check also checks if the two pipelines
+			// have the same trigger configured.
+			// Here we check if the two trigger specs are equal or not, if they
+			// are equal but the names of the trigger differ we remove and recreate the
+			// trigger with the new name.
+			if pipeline.TriggerName != p.TriggerName {
+				actions.Triggers.Reset = append(actions.Triggers.Reset, OldNewPair{
+					Old: p.TriggerName,
+					New: pipeline.TriggerName,
+				})
+				continue
+			} else if !pipeline.Trigger.DeepEqual(p.Trigger) {
+				actions.Triggers.Update = append(actions.Triggers.Update, pipeline.TriggerName)
+			}
+
+			if !pipeline.DeepEqual(&p) {
+				actions.Pipelines.Update = append(actions.Pipelines.Update, name)
+			}
+		} else {
+			actions.Pipelines.Add = append(actions.Pipelines.Add, name)
+		}
+	}
+
+	// Finally loop through all the pipelines which are supposed to be configured
+	// using the workflow status manifest and remove them if they don't exist in the
+	// new workflow.
+	for name, p := range old.Spec.Pipelines {
+		if _, ok := w.Spec.Pipelines[name]; !ok {
+			actions.Pipelines.Delete = append(actions.Pipelines.Delete, name)
+		}
+
+		if w.CheckTriggerRequired(p.TriggerName) {
+			actions.Triggers.Delete = append(actions.Triggers.Delete, p.TriggerName)
+		}
+	}
+
+	return actions
 }
 
 // WorkflowSpec contains the spec of the workflow.
@@ -100,6 +201,58 @@ func (t *TriggerSpec) DeepEqual(tz *TriggerSpec) bool {
 	return t.Type == tz.Type
 }
 
+// PipelineSpecWithName contains the spec of a pipeline associated with the workflow
+// along with the name stored.
+type PipelineSpecWithName struct {
+	PipelineSpec `json:",inline"`
+
+	// Name contains the name of the pipeline.
+	Name string `json:"name"`
+
+	// Workflow contains the workflow that the pipeline is a part of.
+	Workflow string `json:"workflow"`
+}
+
+// TriggerSpecWithName contains the spec of a trigger associated with the pipeline
+// along with the name stored.
+type TriggerSpecWithName struct {
+	TriggerSpec `json:",inline"`
+
+	// Name contains the name of the trigger.
+	Name string `json:"name"`
+
+	// Workflow contains the workflow that the trigger is a part of.
+	Workflow string `json:"workflow"`
+
+	// Pipelines contains a list of pipelines configured for the trigger.
+	Pipelines []string `json:"pipelines"`
+}
+
+// AddPipeline adds the pipeline with the provided name to the trigger
+// pipeline list.
+func (t *TriggerSpecWithName) AddPipeline(name string) {
+	for _, pipeline := range t.Pipelines {
+		if pipeline == name {
+			return
+		}
+	}
+
+	t.Pipelines = append(t.Pipelines, name)
+}
+
+// RemovePipeline removes the pipeline with the provided name to the trigger
+// pipeline list.
+func (t *TriggerSpecWithName) RemovePipeline(name string) {
+	newSlice := []string{}
+	for _, pipeline := range t.Pipelines {
+		if pipeline != name {
+			newSlice = append(newSlice, pipeline)
+		}
+	}
+
+	t.Pipelines = newSlice
+}
+
 // PipelineSpec contains the spec of a pipeline associated with the workflow.
 type PipelineSpec struct {
 	// trigger contains the Trigger for the configured pipeline.
@@ -132,7 +285,9 @@ func (p *PipelineSpec) DeepEqual(pz *PipelineSpec) bool {
 	}
 
 	if p.Trigger != nil && pz.Trigger != nil {
-		return p.Trigger.DeepEqual(pz.Trigger)
+		if !p.Trigger.DeepEqual(pz.Trigger) {
+			return false
+		}
 	}
 
 	if p.Trigger != nil || pz.Trigger != nil {
@@ -342,3 +497,40 @@ type PipelineStatus struct {
 
 // TriggerType is the type to specify the type of trigger.
 type TriggerType string
+
+// WorkflowActions defines a workflow document action that needs to be
+// performed on pipelines and triggers.
+type WorkflowActions struct {
+	Pipelines Actions
+	Triggers  Actions
+}
+
+func (wa *WorkflowActions) String() string {
+	return fmt.Sprintf(`Pipelines:
+* Add: %s
+* Delete: %s,
+* Update: %s
+* Reset: %s
+
+Triggers:
+* Add: %s
+* Delete: %s,
+* Update: %s
+* Reset: %s`, wa.Pipelines.Add, wa.Pipelines.Delete, wa.Pipelines.Update, wa.Pipelines.Reset,
+		wa.Triggers.Add, wa.Triggers.Delete, wa.Triggers.Update, wa.Triggers.Reset)
+}
+
+// Actions contains a list of names corresponding to the opeartion we have
+// to perform on them
+type Actions struct {
+	Add    []string
+	Delete []string
+	Update []string
+	Reset  []OldNewPair
+}
+
+// OldNewPair contains a pair of old and new identifier for a given object
+type OldNewPair struct {
+	Old string
+	New string
+}

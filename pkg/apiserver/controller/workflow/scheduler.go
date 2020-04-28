@@ -103,10 +103,11 @@ func (s *Scheduler) performPipelineAction(action Action, wfName, name string,
 	var pStatus *proto.PipelineStatus
 
 	protoPipeline := &proto.Pipeline{
-		Name:     name,
-		Spec:     string(data),
-		Workflow: wfName,
-		Trigger:  string(triggerData),
+		Name:        name,
+		Spec:        string(data),
+		Workflow:    wfName,
+		TriggerName: pipeline.TriggerName,
+		TriggerSpec: string(triggerData),
 	}
 
 	switch action {
@@ -130,7 +131,7 @@ func (s *Scheduler) performPipelineAction(action Action, wfName, name string,
 }
 
 // UpdatePipeline updates the pipeline manifest scheduled on some agent.
-func (s *Scheduler) UpdatePipeline(wfName, name string, new *v1alpha1.PipelineSpec,
+func (s *Scheduler) UpdatePipeline(wfName, name string, new, old *v1alpha1.PipelineSpec,
 	status *v1alpha1.WorkflowStatus) error {
 	log.Debugf("in scheduler update pipeline step")
 	plStatus, ok := status.Pipelines[name]

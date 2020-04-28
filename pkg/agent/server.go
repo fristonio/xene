@@ -2,9 +2,13 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/fristonio/xene/pkg/option"
 	"github.com/fristonio/xene/pkg/proto"
+	"github.com/fristonio/xene/pkg/store"
+	"github.com/fristonio/xene/pkg/types/v1alpha1"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -28,27 +32,163 @@ func (a *agentServer) Status(ctx context.Context, opts *proto.StatusOpts) (*prot
 
 // SchedulePipeline is the RPC to schedule a pipeline on to the agent
 func (a *agentServer) SchedulePipeline(ctx context.Context, pipeline *proto.Pipeline) (*proto.PipelineStatus, error) {
-	log.Debugf("rpc to schedule pipeline on the agent: %s", pipeline.Spec)
-	return &proto.PipelineStatus{
-		Status:   "Not Implemented",
-		Executor: a.name,
-	}, nil
+	pName := v1alpha1.GetWorkflowAppendedName(pipeline.Workflow, pipeline.Name)
+	log.Debugf("rpc to schedule pipeline on the agent: %s", pName)
+
+	// During scheduling if the pipeline already exists in the datastore
+	// we consider this as an error.
+	exist, err := store.KVStore.Exists(context.TODO(),
+		fmt.Sprintf("%s/%s", v1alpha1.PipelineKeyPrefix, pName))
+	if err != nil {
+		return nil, fmt.Errorf("error while checking pipeline in datastore: %s", err)
+	}
+	if exist {
+		return nil, fmt.Errorf("The pipeline %s already exist in agent, cannot schedule again", pName)
+	}
+
+	return a.updatePipeline(ctx, pipeline)
 }
 
 // UpdatePipeline is the RPC to update a pipeline on to the agent
 func (a *agentServer) UpdatePipeline(ctx context.Context, pipeline *proto.Pipeline) (*proto.PipelineStatus, error) {
-	log.Debugf("rpc to update pipeline on the agent: %s", pipeline.Spec)
-	return &proto.PipelineStatus{
-		Status:   "Not Implemented",
-		Executor: a.name,
-	}, nil
+	pName := v1alpha1.GetWorkflowAppendedName(pipeline.Workflow, pipeline.Name)
+	log.Debugf("rpc to update pipeline on the agent: %s", pName)
+	return a.updatePipeline(ctx, pipeline)
 }
 
 // RemovePipeline is the RPC to remove a pipeline from the agent.
 func (a *agentServer) RemovePipeline(ctx context.Context, pipeline *proto.Pipeline) (*proto.PipelineStatus, error) {
-	log.Debugf("rpc to remove pipeline from the agent: %s", pipeline.Spec)
+	pName := v1alpha1.GetWorkflowAppendedName(pipeline.Workflow, pipeline.Name)
+	tName := v1alpha1.GetWorkflowAppendedName(pipeline.Workflow, pipeline.TriggerName)
+	log.Debugf("rpc to remove pipeline from the agent: %s", pName)
+
+	var (
+		trigger v1alpha1.TriggerSpecWithName
+	)
+	val, err := store.KVStore.Get(context.TODO(),
+		fmt.Sprintf("%s/%s", v1alpha1.TriggerKeyPrefix, tName))
+	if err != nil && store.KVStore.KeyDoesNotExistError(err) {
+		log.Infof("no trigger exists associated with the pipeline")
+	} else if err != nil {
+		return nil, fmt.Errorf("error while checking trigger in datastore: %s", err)
+	} else {
+		err := json.Unmarshal(val.Data, &trigger)
+		if err != nil {
+			return nil, fmt.Errorf("error while unmarshalling trigger(%s) spec from datastore: %s", tName, err)
+		}
+
+		trigger.RemovePipeline(pName)
+		if len(trigger.Pipelines) == 0 {
+			err := store.KVStore.Delete(context.TODO(),
+				fmt.Sprintf("%s/%s", v1alpha1.TriggerKeyPrefix, tName))
+			if err != nil {
+				return nil, fmt.Errorf("error while removing trigger: %s", err)
+			}
+		} else {
+			log.Infof("more pipelines are associated with the trigger(%s), updating spec", tName)
+			tData, err := json.Marshal(&trigger)
+			if err != nil {
+				return nil, fmt.Errorf("error while marshaling trigger(%s) spec: %s", tName, err)
+			}
+			err = store.KVStore.Set(context.TODO(),
+				fmt.Sprintf("%s/%s", v1alpha1.TriggerKeyPrefix, tName),
+				tData)
+			if err != nil {
+				return nil, fmt.Errorf("error while setting trigger(%s): %s", tName, err)
+			}
+		}
+	}
+
+	err = store.KVStore.Delete(context.TODO(),
+		fmt.Sprintf("%s/%s", v1alpha1.PipelineKeyPrefix, pName))
+	if err != nil {
+		// Error at this point means that we don't have any trigger to run
+		// the pipeline.
+		return &proto.PipelineStatus{
+			Status:   "NoTrigger",
+			Executor: a.name,
+		}, fmt.Errorf("error while removing pipeline(%s): %s", pName, err)
+	}
+
 	return &proto.PipelineStatus{
-		Status:   "Not Implemented",
+		Status:   "NotScheduled",
+		Executor: a.name,
+	}, nil
+}
+
+// updatePipeline updates the provided pipeline spec.
+func (a *agentServer) updatePipeline(ctx context.Context, pipeline *proto.Pipeline) (*proto.PipelineStatus, error) {
+	pName := v1alpha1.GetWorkflowAppendedName(pipeline.Workflow, pipeline.Name)
+	tName := v1alpha1.GetWorkflowAppendedName(pipeline.Workflow, pipeline.TriggerName)
+
+	var (
+		pSpec v1alpha1.PipelineSpec
+		tSpec v1alpha1.TriggerSpec
+	)
+	err := json.Unmarshal([]byte(pipeline.Spec), &pSpec)
+	if err != nil {
+		return nil, fmt.Errorf("error while unmarshalling pipeline spec: %s", err)
+	}
+
+	err = json.Unmarshal([]byte(pipeline.TriggerSpec), &tSpec)
+	if err != nil {
+		return nil, fmt.Errorf("error while unmarshalling trigger spec: %s", err)
+	}
+
+	var (
+		trigger v1alpha1.TriggerSpecWithName
+	)
+	val, err := store.KVStore.Get(context.TODO(),
+		fmt.Sprintf("%s/%s", v1alpha1.TriggerKeyPrefix, tName))
+	if err != nil && store.KVStore.KeyDoesNotExistError(err) {
+		log.Infof("creating trigger specification in the datastore: %s", tName)
+		trigger = v1alpha1.TriggerSpecWithName{
+			Name:        pipeline.TriggerName,
+			Workflow:    pipeline.Workflow,
+			Pipelines:   []string{pName},
+			TriggerSpec: tSpec,
+		}
+	} else if err != nil {
+		return nil, fmt.Errorf("error while checking trigger in datastore: %s", err)
+	} else {
+		log.Infof("updating trigger specification in the datastore: %s", tName)
+		err := json.Unmarshal(val.Data, &trigger)
+		if err != nil {
+			return nil, fmt.Errorf("error while unmarshalling trigger(%s) spec from datastore: %s", tName, err)
+		}
+
+		trigger.TriggerSpec = tSpec
+		trigger.AddPipeline(pName)
+	}
+
+	tData, err := json.Marshal(&trigger)
+	if err != nil {
+		return nil, fmt.Errorf("error while marshaling trigger(%s) spec: %s", tName, err)
+	}
+	err = store.KVStore.Set(context.TODO(),
+		fmt.Sprintf("%s/%s", v1alpha1.TriggerKeyPrefix, tName),
+		tData)
+	if err != nil {
+		return nil, fmt.Errorf("error while setting trigger(%s): %s", tName, err)
+	}
+
+	pData, err := json.Marshal(&v1alpha1.PipelineSpecWithName{
+		Name:         pipeline.Name,
+		Workflow:     pipeline.Workflow,
+		PipelineSpec: pSpec,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error while marshaling pipeline(%s) spec: %s", pName, err)
+	}
+	err = store.KVStore.Set(context.TODO(),
+		fmt.Sprintf("%s/%s", v1alpha1.PipelineKeyPrefix, pName),
+		pData)
+	if err != nil {
+		return nil, fmt.Errorf("error while setting trigger(%s): %s", tName, err)
+	}
+
+	return &proto.PipelineStatus{
+		Status:   "Scheduled",
 		Executor: a.name,
 	}, nil
 }

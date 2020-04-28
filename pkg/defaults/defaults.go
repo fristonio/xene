@@ -22,15 +22,9 @@ $$  /\$$\ \$$$$$$$\ $$ |  $$ |\$$$$$$$\
 	// APIServerHost is the default host to bind the API Server to.
 	APIServerHost string = "0.0.0.0"
 
-	// AgentHost is the default host to bind the Agent to.
-	AgentHost string = "0.0.0.0"
-
 	// APIServerPort is the default port that the apiserver listens to, this can be
 	// overridden when initializing the server.
 	APIServerPort uint32 = 6060
-
-	// AgentPort is the port to bind the agent GRPC server on.
-	AgentPort uint32 = 6061
 
 	// APIServerScheme is the default server scheme to use for the API server.
 	APIServerScheme string = "http"
@@ -63,4 +57,7 @@ $$  /\$$\ \$$$$$$$\ $$ |  $$ |\$$$$$$$\
 	// ContextBucketKey is the key which is set in the context after JWT has been
 	// verified from the Authentication header.
 	ContextBucketKey string = "user"
+
+	// Seperator is the seperator when constructing names.
+	Seperator string = ":"
 )
