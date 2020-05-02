@@ -7,8 +7,11 @@ import (
 	"io/ioutil"
 	"net"
 
+	"github.com/fristonio/xene/pkg/agent/controller"
 	"github.com/fristonio/xene/pkg/defaults"
+	"github.com/fristonio/xene/pkg/option"
 	"github.com/fristonio/xene/pkg/proto"
+	"github.com/fristonio/xene/pkg/store"
 
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -92,6 +95,16 @@ func (s *Server) RunServer() error {
 
 	s.server = grpcServer
 	proto.RegisterAgentServiceServer(grpcServer, newAgentServer())
+
+	// Initialize store for xene agent.
+	log.Infof("setting up xene agent store client")
+	err = store.Setup(option.Config.Agent.StorageDir)
+	if err != nil {
+		log.Fatalf("error while initializing xene store: %s", err)
+	}
+
+	controller.RunControllers()
+
 	return grpcServer.Serve(lis)
 }
 

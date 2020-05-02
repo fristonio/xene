@@ -113,7 +113,7 @@ func init() {
 		"", "Own address of the agent, for the API server to communmicate")
 	agentFlags.StringVarP(&option.Config.Agent.JWTSecret, "jwt-secret", "j",
 		"", "JWT secret to use for authentication purpose for GRPC server")
-	agentFlags.StringVarP(&option.Config.Store.StorageDirectory, "storage-directory", "d",
+	agentFlags.StringVarP(&option.Config.Agent.StorageDir, "storage-directory", "d",
 		defaults.AgentStorageDir, "Storage directory to use for xene agent.")
 
 	_ = agentCmd.MarkPersistentFlagRequired("name")

@@ -45,6 +45,9 @@ var (
 	// DefaultTriggerType contains the name of the default trigger type.
 	DefaultTriggerType TriggerType = "default"
 
+	// CronTriggerType contains the name of the cron job trigger type.
+	CronTriggerType TriggerType = "cron"
+
 	// DockerExecutor is the name of the docker executor used by agent.
 	DockerExecutor Executor = "docker"
 

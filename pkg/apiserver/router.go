@@ -5,6 +5,7 @@ import (
 
 	"github.com/fristonio/xene/pkg/apiserver/response"
 	"github.com/fristonio/xene/pkg/apiserver/routes"
+	"github.com/fristonio/xene/pkg/option"
 	"github.com/fristonio/xene/pkg/store"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,7 @@ func (s *APIServer) NewAPIServerRouter(includeLogger bool) *gin.Engine {
 	r := gin.New()
 
 	// Initialize store for xene apiserver.
-	err := store.Setup()
+	err := store.Setup(option.Config.Store.StorageDirectory)
 	if err != nil {
 		log.Fatalf("error while initializing xene store: %s", err)
 	}

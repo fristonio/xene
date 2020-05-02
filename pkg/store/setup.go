@@ -12,14 +12,14 @@ import (
 var KVStore Backend
 
 // Setup sets up the store backend for xene.
-func Setup() error {
+func Setup(storageDir string) error {
 	if option.Config.Store.Engine == "" {
 		return fmt.Errorf("no storage engine configured")
 	}
 
 	switch option.Config.Store.Engine {
 	case defaults.StorageEngineBadger:
-		backend, err := badger.NewBadgerBackend(option.Config.Store.StorageDirectory)
+		backend, err := badger.NewBadgerBackend(storageDir)
 		if err != nil {
 			return err
 		}

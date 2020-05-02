@@ -56,7 +56,7 @@ func (w *Workflow) GetTriggerAsssociatedPipelines(trigger string) []string {
 func (w *Workflow) Resolve() error {
 	for name, pipeline := range w.Spec.Pipelines {
 		if trigger, ok := w.Spec.Triggers[pipeline.TriggerName]; ok {
-			pipeline.Trigger = &trigger
+			pipeline.Trigger = trigger
 		} else {
 			return fmt.Errorf("not a valid trigger(%s) for pipeline(%s)", pipeline.TriggerName, name)
 		}
@@ -132,7 +132,7 @@ func (w *Workflow) ResolveActions(old *Workflow) WorkflowActions {
 				actions.Triggers.Update = append(actions.Triggers.Update, pipeline.TriggerName)
 			}
 
-			if !pipeline.DeepEqual(&p) {
+			if !pipeline.DeepEqual(p) {
 				actions.Pipelines.Update = append(actions.Pipelines.Update, name)
 			}
 		} else {
@@ -159,10 +159,10 @@ func (w *Workflow) ResolveActions(old *Workflow) WorkflowActions {
 // WorkflowSpec contains the spec of the workflow.
 type WorkflowSpec struct {
 	// Triggers contains a list of trigger.
-	Triggers map[string]TriggerSpec `json:"triggers"`
+	Triggers map[string]*TriggerSpec `json:"triggers"`
 
 	// Pipelines contains a list of pipeline configured with workflow.
-	Pipelines map[string]PipelineSpec `json:"pipelines"`
+	Pipelines map[string]*PipelineSpec `json:"pipelines"`
 }
 
 // Validate validates the specification provided for the workflow.
@@ -188,7 +188,13 @@ func (w *WorkflowSpec) Validate() error {
 // TriggerSpec contains spec of a trigger for xene workflow.
 type TriggerSpec struct {
 	// Type contains the type of the trigger we are using
+	// Default type for the trigger means that the type of the trigger
+	// is webhook. For webhook triggers a WebhookURL is saved onto the
+	// PipelineStatus which can be then used to trigger the pipeline.
 	Type string `json:"type"`
+
+	// CronConfig contains the configuration for Cron trigger type.
+	CronConfig string `json:"cronConfig,omitempty"`
 }
 
 // Validate validates the specification provided for the a trigger.
@@ -275,7 +281,7 @@ type PipelineSpec struct {
 	RootTask dag.Vertex `json:"-"`
 
 	// Tasks contains the list of the tasks in the pipeline.
-	Tasks map[string]TaskSpec `json:"tasks"`
+	Tasks map[string]*TaskSpec `json:"tasks"`
 }
 
 // DeepEqual checks if the two pipeline objects are equal or not.
@@ -304,7 +310,7 @@ func (p *PipelineSpec) DeepEqual(pz *PipelineSpec) bool {
 			return false
 		}
 
-		if !task.DeepEqual(&pzTask) {
+		if !task.DeepEqual(pzTask) {
 			return false
 		}
 	}
@@ -321,7 +327,7 @@ func (p *PipelineSpec) Resolve(pipelineName string) error {
 	p.Dag = dag.NewAcyclicGraph()
 	for name, task := range p.Tasks {
 		task.Resolve(name)
-		p.Dag.Add(&task)
+		p.Dag.Add(task)
 	}
 
 	for name, task := range p.Tasks {
@@ -331,8 +337,8 @@ func (p *PipelineSpec) Resolve(pipelineName string) error {
 				return fmt.Errorf("pipeline %s: not a valid task dependency %s for task  %s", pipelineName, depName, name)
 			}
 
-			task.DependsOn = append(task.DependsOn, &t)
-			p.Dag.Connect(dag.BasicEdge(&task, &t))
+			task.DependsOn = append(task.DependsOn, t)
+			p.Dag.Connect(dag.BasicEdge(task, t))
 		}
 	}
 
@@ -443,7 +449,7 @@ type WorkflowStatus struct {
 	WorkflowSpec string `json:"workflowSpec"`
 
 	// Pipelines contains the status of all the pipelines.
-	Pipelines map[string]PipelineStatus `json:"pipelines"`
+	Pipelines map[string]*PipelineStatus `json:"pipelines"`
 }
 
 // Validate checks for any issues in the information about the workflow status in the type.
@@ -478,7 +484,7 @@ func NewWorkflowStatus(wf *Workflow) (WorkflowStatus, error) {
 			},
 		},
 		WorkflowSpec: string(data),
-		Pipelines:    make(map[string]PipelineStatus),
+		Pipelines:    make(map[string]*PipelineStatus),
 	}, nil
 }
 

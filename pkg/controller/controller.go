@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/fristonio/xene/pkg/defaults"
+	cron "github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
 )
 
@@ -138,6 +139,13 @@ func validateNewControllerParams(function Function, params ...FuncParam) error {
 	return nil
 }
 
+// Scheduler is the interface for custom scheduler implementation of controller
+// function.
+type Scheduler interface {
+	// Next returns the time when to run the controller function again.
+	Next(time.Time) time.Time
+}
+
 // Internal contains all parameters of a controller, including the functions to
 // run and other metadata related to runs.
 type Internal struct {
@@ -160,6 +168,11 @@ type Internal struct {
 	// returned last
 	RunInterval time.Duration
 
+	// Scheduler is any interface which implementation Next() function
+	// and thus returns the next time to run the controller.
+	// Scheduler takes priority over the RunInterval
+	scheduler Scheduler
+
 	// ErrorRetryBaseDuration is the initial time to wait to run DoFunc
 	// again on return of an error. On each consecutive error, this value
 	// is multiplied by the number of consecutive errors to provide a
@@ -171,6 +184,26 @@ type Internal struct {
 
 	// NoErrorRetry when set to true, disables retries on errors
 	NoErrorRetry bool
+
+	// SkipFirstRun skips the first run of the controller function.
+	SkipFirstRun bool
+}
+
+// NewControllerInternalWithCron returns a new controller Internal type with
+// a cron based scheduler for the controller function
+func NewControllerInternalWithCron(cronStr string, f *Func) (Internal, error) {
+	parser := cron.NewParser(cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
+	sched, err := parser.Parse(cronStr)
+	if err != nil {
+		return Internal{}, err
+	}
+
+	return Internal{
+		RetryBackOff: false,
+		DoFunc:       f,
+		scheduler:    sched,
+		SkipFirstRun: true,
+	}, nil
 }
 
 // Controller is the actual underlying controller. Each controller is created for a specific task
@@ -230,13 +263,18 @@ func (c *Controller) RunController() {
 	internal := c.internal
 	c.mutex.RUnlock()
 	runFunc := true
+	skip := c.internal.SkipFirstRun
 
 	// Default Run Interval for a controller.
 	interval := defaults.ControllerRetryInterval
 
 	for {
-		if runFunc {
-			interval = internal.RunInterval
+		if runFunc && !skip {
+			if c.internal.scheduler != nil {
+				interval = c.internal.scheduler.Next(time.Now()).Sub(time.Now())
+			} else {
+				interval = internal.RunInterval
+			}
 
 			start := time.Now()
 
@@ -281,6 +319,11 @@ func (c *Controller) RunController() {
 			}
 
 			c.mutex.Unlock()
+		}
+
+		// Only one time skip
+		if skip {
+			skip = false
 		}
 
 		select {

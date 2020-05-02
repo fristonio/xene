@@ -6,8 +6,8 @@ import (
 	"github.com/fristonio/xene/pkg/defaults"
 )
 
-// GetWorkflowAppendedName returns the name prefixed with the workflow
+// GetWorkflowPrefixedName returns the name prefixed with the workflow
 // name.
-func GetWorkflowAppendedName(wf, name string) string {
+func GetWorkflowPrefixedName(wf, name string) string {
 	return fmt.Sprintf("%s%s%s", wf, defaults.Seperator, name)
 }

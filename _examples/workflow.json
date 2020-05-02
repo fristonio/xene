@@ -8,7 +8,8 @@
     "spec": {
       "triggers": {
         "temp-trigger": {
-          "type": "default"
+          "type": "cron",
+          "cronConfig": "* * * * *"
         }
       },
       "pipelines": {

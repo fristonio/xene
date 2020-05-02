@@ -13,21 +13,21 @@ import (
 )
 
 var (
-	// RegisteredControllers contains a list of store controllers configured using the package
+	// RegisteredInformers contains a list of store Informers configured using the package
 	// it is useful for printing debug information related to store.
-	RegisteredControllers map[string]*Controller = make(map[string]*Controller)
+	RegisteredInformers map[string]*Informer = make(map[string]*Informer)
 
-	// ControllerManager is a global controller manager for all the store controllers
+	// ControllerManager is a global controller manager for all the store Informers
 	ControllerManager *controller.Manager = controller.NewManager()
 )
 
-// registerController adds the specified controller to registered controller list.
-func registerController(c *Controller) {
+// registerInformer adds the specified Informer to registered Informer list.
+func registerInformer(c *Informer) {
 	log.WithFields(log.Fields{
 		"package": "store",
-	}).Infof("registering store controller: %s for key: %s", c.name, c.Key)
+	}).Infof("registering store informer: %s for key: %s", c.name, c.Key)
 
-	RegisteredControllers[c.name] = c
+	RegisteredInformers[c.name] = c
 }
 
 type addFuncType func(*v1alpha1.KVPairStruct) error
@@ -36,10 +36,10 @@ type updateFuncType func(*v1alpha1.KVPairStruct, uint64) error
 
 type deleteFuncType func(string) error
 
-// Controller is a type corresponding to a store controller.
-// A store controller can be used to run function based on changes to a store
+// Informer is a type corresponding to a store Informer.
+// A store Informer can be used to run function based on changes to a store
 // object.
-type Controller struct {
+type Informer struct {
 	AddFunc addFuncType
 
 	UpdateFunc updateFuncType
@@ -57,21 +57,21 @@ type Controller struct {
 }
 
 // Name returns the name of the controller.
-func (c *Controller) Name() string {
+func (c *Informer) Name() string {
 	return c.name
 }
 
-// NewController returns a new store controller to periodically run functions
+// NewInformer returns a new store controller to periodically run functions
 // based on changes to the specifed key in the store.
-func NewController(
+func NewInformer(
 	key string,
 	addFunc func(*v1alpha1.KVPairStruct) error,
 	delFunc func(string) error,
-	updateFunc func(*v1alpha1.KVPairStruct, uint64) error) *Controller {
+	updateFunc func(*v1alpha1.KVPairStruct, uint64) error) *Informer {
 
 	name := utils.RandToken(defaults.StoreControllerNameLength)
 
-	return &Controller{
+	return &Informer{
 		AddFunc:    addFunc,
 		UpdateFunc: updateFunc,
 		DeleteFunc: delFunc,
@@ -82,17 +82,17 @@ func NewController(
 	}
 }
 
-// NewControllerWithSharedCache returns a new store controller to periodically run functions
+// NewInformerWithSharedCache returns a new store Informer to periodically run functions
 // based on changes to the specifed key in the store.
-// The controller in this case is configured with the global shared store, which share its state
-// with other controller.
-func NewControllerWithSharedCache(
+// The Informer in this case is configured with the global shared store, which share its state
+// with other Informer.
+func NewInformerWithSharedCache(
 	key string,
 	addFunc func(*v1alpha1.KVPairStruct) error,
 	delFunc func(string) error,
-	updateFunc func(*v1alpha1.KVPairStruct, uint64) error) *Controller {
+	updateFunc func(*v1alpha1.KVPairStruct, uint64) error) *Informer {
 
-	return &Controller{
+	return &Informer{
 		AddFunc:    addFunc,
 		UpdateFunc: updateFunc,
 		DeleteFunc: delFunc,
@@ -104,20 +104,20 @@ func NewControllerWithSharedCache(
 }
 
 // Run starts running the store controller configured.
-func (c *Controller) Run() error {
+func (c *Informer) Run() error {
 	log.WithFields(log.Fields{
 		"package": "store",
-	}).Infof("starting to setup store controller: %s", c.name)
-	registerController(c)
+	}).Infof("starting to setup store informer: %s", c.name)
+	registerInformer(c)
 
-	fun, err := controller.NewControllerFunction(c.storeControllerDoFunc)
+	fun, err := controller.NewControllerFunction(c.storeInformerDoFunc)
 	if err != nil {
-		return fmt.Errorf("error while creating controller function: %s", err)
+		return fmt.Errorf("error while creating informer's controller function: %s", err)
 	}
 	// create controller for the perodically running function.
 	err = c.Manager.UpdateController(
 		c.name,
-		"Store",
+		"store-informer",
 		controller.Internal{
 			DoFunc:      fun,
 			RunInterval: defaults.StoreControllerRunInterval,
@@ -128,14 +128,17 @@ func (c *Controller) Run() error {
 
 	log.Infof("starting to run, store cache controller function for deleted keys.")
 	c.cache.RegisterDeleteFunc(c.Key, c.DeleteFunc)
-	_ = c.cache.RunController()
+	err = c.cache.RunController()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-func (c *Controller) storeControllerDoFunc(ctx context.Context) error {
+func (c *Informer) storeInformerDoFunc(ctx context.Context) error {
 	log.WithFields(log.Fields{
 		"package": "store",
-	}).Infof("running controller function for store controller: %s", c.name)
+	}).Debugf("running controller function for store controller: %s", c.name)
 
 	// Here we do a prefix scan for the provided key with our function
 	KVStore.PrefixScanWithFunction(context.TODO(), c.Key, func(kv *v1alpha1.KVPairStruct) {
@@ -166,17 +169,17 @@ func (c *Controller) storeControllerDoFunc(ctx context.Context) error {
 		c.cache.Set(kv.Key, kv.Version)
 	})
 
-	log.Infof("controller execution finished")
+	log.Debugf("informer controller execution finished")
 	return nil
 }
 
 // DeleteFromCache deletes the entry from the store cache.
-func (c *Controller) DeleteFromCache(key string) {
+func (c *Informer) DeleteFromCache(key string) {
 	c.cache.Remove(key)
 }
 
 // Stop shuts down a running store controller.
-func (c *Controller) Stop() error {
+func (c *Informer) Stop() error {
 	log.WithFields(log.Fields{
 		"package": "store",
 	}).Infof("stopping controller: %s", c.name)
@@ -186,6 +189,6 @@ func (c *Controller) Stop() error {
 	}
 
 	c.cache.StopController()
-	delete(RegisteredControllers, c.name)
+	delete(RegisteredInformers, c.name)
 	return nil
 }

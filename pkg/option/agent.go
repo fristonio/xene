@@ -46,4 +46,7 @@ type AgentOpts struct {
 	// JWTSecret contains the jwt secret for authorizing clients for GRPC
 	// server
 	JWTSecret string `yaml:"jwtSecret"`
+
+	// StorageDir contains the storage directory of badger database.
+	StorageDir string `yaml:"storageDir"`
 }

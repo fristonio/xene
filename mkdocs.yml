@@ -3,6 +3,7 @@ site_name: Xene
 nav:
   - Home: README.md
   - CmdRef: cmdref/xene.md
+  - xenectl: cmdref/xenectl/xenectl.md
   - Design: design/README.md
   - APIDocs: /apidocs.html
 

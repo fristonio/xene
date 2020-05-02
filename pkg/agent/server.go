@@ -32,7 +32,7 @@ func (a *agentServer) Status(ctx context.Context, opts *proto.StatusOpts) (*prot
 
 // SchedulePipeline is the RPC to schedule a pipeline on to the agent
 func (a *agentServer) SchedulePipeline(ctx context.Context, pipeline *proto.Pipeline) (*proto.PipelineStatus, error) {
-	pName := v1alpha1.GetWorkflowAppendedName(pipeline.Workflow, pipeline.Name)
+	pName := v1alpha1.GetWorkflowPrefixedName(pipeline.Workflow, pipeline.Name)
 	log.Debugf("rpc to schedule pipeline on the agent: %s", pName)
 
 	// During scheduling if the pipeline already exists in the datastore
@@ -51,15 +51,15 @@ func (a *agentServer) SchedulePipeline(ctx context.Context, pipeline *proto.Pipe
 
 // UpdatePipeline is the RPC to update a pipeline on to the agent
 func (a *agentServer) UpdatePipeline(ctx context.Context, pipeline *proto.Pipeline) (*proto.PipelineStatus, error) {
-	pName := v1alpha1.GetWorkflowAppendedName(pipeline.Workflow, pipeline.Name)
+	pName := v1alpha1.GetWorkflowPrefixedName(pipeline.Workflow, pipeline.Name)
 	log.Debugf("rpc to update pipeline on the agent: %s", pName)
 	return a.updatePipeline(ctx, pipeline)
 }
 
 // RemovePipeline is the RPC to remove a pipeline from the agent.
 func (a *agentServer) RemovePipeline(ctx context.Context, pipeline *proto.Pipeline) (*proto.PipelineStatus, error) {
-	pName := v1alpha1.GetWorkflowAppendedName(pipeline.Workflow, pipeline.Name)
-	tName := v1alpha1.GetWorkflowAppendedName(pipeline.Workflow, pipeline.TriggerName)
+	pName := v1alpha1.GetWorkflowPrefixedName(pipeline.Workflow, pipeline.Name)
+	tName := v1alpha1.GetWorkflowPrefixedName(pipeline.Workflow, pipeline.TriggerName)
 	log.Debugf("rpc to remove pipeline from the agent: %s", pName)
 
 	var (
@@ -110,6 +110,7 @@ func (a *agentServer) RemovePipeline(ctx context.Context, pipeline *proto.Pipeli
 		}, fmt.Errorf("error while removing pipeline(%s): %s", pName, err)
 	}
 
+	log.Infof("pipeline has been removed from the agent")
 	return &proto.PipelineStatus{
 		Status:   "NotScheduled",
 		Executor: a.name,
@@ -118,8 +119,8 @@ func (a *agentServer) RemovePipeline(ctx context.Context, pipeline *proto.Pipeli
 
 // updatePipeline updates the provided pipeline spec.
 func (a *agentServer) updatePipeline(ctx context.Context, pipeline *proto.Pipeline) (*proto.PipelineStatus, error) {
-	pName := v1alpha1.GetWorkflowAppendedName(pipeline.Workflow, pipeline.Name)
-	tName := v1alpha1.GetWorkflowAppendedName(pipeline.Workflow, pipeline.TriggerName)
+	pName := v1alpha1.GetWorkflowPrefixedName(pipeline.Workflow, pipeline.Name)
+	tName := v1alpha1.GetWorkflowPrefixedName(pipeline.Workflow, pipeline.TriggerName)
 
 	var (
 		pSpec v1alpha1.PipelineSpec
@@ -187,6 +188,7 @@ func (a *agentServer) updatePipeline(ctx context.Context, pipeline *proto.Pipeli
 		return nil, fmt.Errorf("error while setting trigger(%s): %s", tName, err)
 	}
 
+	log.Infof("pipeline has been scheduled/updated on the agent.")
 	return &proto.PipelineStatus{
 		Status:   "Scheduled",
 		Executor: a.name,

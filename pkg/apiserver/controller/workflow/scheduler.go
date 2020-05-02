@@ -131,7 +131,7 @@ func (s *Scheduler) performPipelineAction(action Action, wfName, name string,
 }
 
 // UpdatePipeline updates the pipeline manifest scheduled on some agent.
-func (s *Scheduler) UpdatePipeline(wfName, name string, new, old *v1alpha1.PipelineSpec,
+func (s *Scheduler) UpdatePipeline(wfName, name string, new *v1alpha1.PipelineSpec,
 	status *v1alpha1.WorkflowStatus) error {
 	log.Debugf("in scheduler update pipeline step")
 	plStatus, ok := status.Pipelines[name]
@@ -139,7 +139,7 @@ func (s *Scheduler) UpdatePipeline(wfName, name string, new, old *v1alpha1.Pipel
 		return fmt.Errorf("no pipeline with name %s found in workflow status", name)
 	}
 
-	return s.performPipelineAction(ActionTypeUpdate, wfName, name, new, &plStatus)
+	return s.performPipelineAction(ActionTypeUpdate, wfName, name, new, plStatus)
 }
 
 // RemovePipeline removes the scheduled pipeline from an agent.
@@ -151,7 +151,7 @@ func (s *Scheduler) RemovePipeline(wfName, name string, pipeline *v1alpha1.Pipel
 		return fmt.Errorf("no pipeline with name %s found in workflow status", name)
 	}
 
-	return s.performPipelineAction(ActionTypeRemove, wfName, name, pipeline, &plStatus)
+	return s.performPipelineAction(ActionTypeRemove, wfName, name, pipeline, plStatus)
 }
 
 // SchedulePipeline finds out an appropriate agent for the pipeline
@@ -160,7 +160,7 @@ func (s *Scheduler) SchedulePipeline(wfName, name string, pipeline *v1alpha1.Pip
 	status *v1alpha1.WorkflowStatus) error {
 	log.Debugf("in scheduler schedule pipeline step")
 	ps := v1alpha1.PipelineStatus{}
-	status.Pipelines[name] = ps
+	status.Pipelines[name] = &ps
 
 	return s.performPipelineAction(ActionTypeSchedule, wfName, name, pipeline, &ps)
 }

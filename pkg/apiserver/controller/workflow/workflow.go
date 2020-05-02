@@ -14,9 +14,9 @@ import (
 
 // Controller represents a type corresponding to workflow manager and controller.
 type Controller struct {
-	// storeCtrl is the store controller corresponding to the workflow objects
+	// storeInformer is the store controller corresponding to the workflow objects
 	// in the datastore.
-	storeCtrl *store.Controller
+	storeInformer *store.Informer
 
 	// name contains the name of the controller
 	name string
@@ -42,18 +42,18 @@ func (a *Controller) Type() string {
 
 // Configure sets up the Agent controller and all its required components.
 func (a *Controller) Configure() {
-	a.storeCtrl = a.newWorkflowStoreController()
-	a.name = a.storeCtrl.Name()
+	a.storeInformer = a.newWorkflowStoreController()
+	a.name = a.storeInformer.Name()
 }
 
 // Run starts running the workflow controller.
 func (a *Controller) Run() error {
-	return a.storeCtrl.Run()
+	return a.storeInformer.Run()
 }
 
 // Stop shuts down the controller.
 func (a *Controller) Stop() error {
-	return a.storeCtrl.Stop()
+	return a.storeInformer.Stop()
 }
 
 // Name returns the name of the agent controller, it is completely defined by the name of
@@ -65,8 +65,8 @@ func (a *Controller) Name() string {
 // newWorkflowStoreController returns the workflow store controller for apiserver.
 // This controller watches for workflow object in the store and perform action based
 // on the changes to the object.
-func (a *Controller) newWorkflowStoreController() *store.Controller {
-	return store.NewControllerWithSharedCache(
+func (a *Controller) newWorkflowStoreController() *store.Informer {
+	return store.NewInformerWithSharedCache(
 		fmt.Sprintf("%s/", v1alpha1.WorkflowKeyPrefix),
 		// Add function for a new workflow.
 		func(kv *v1alpha1.KVPairStruct) error {
@@ -115,7 +115,7 @@ func (a *Controller) deleteWorkflow(key string) error {
 		}
 
 		for name, pipeline := range curWorkflow.Spec.Pipelines {
-			err = a.Scheduler.RemovePipeline(wfName, name, &pipeline, &wfStatus)
+			err = a.Scheduler.RemovePipeline(wfName, name, pipeline, &wfStatus)
 			if err != nil {
 				errs.Append(err)
 			}
@@ -177,7 +177,7 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 
 		// At this point, try best efforts for each pipeline.
 		if wfStatus.Pipelines == nil {
-			wfStatus.Pipelines = make(map[string]v1alpha1.PipelineStatus)
+			wfStatus.Pipelines = make(map[string]*v1alpha1.PipelineStatus)
 		}
 		log.Infof("starting pipeline scheduling for workflow: %s", wf.Metadata.GetName())
 
@@ -187,7 +187,7 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 		// Current running source of truth for the workflow state is from the curWorkflow.
 		for name, pipeline := range curWorkflow.Spec.Pipelines {
 			if _, ok := wfStatus.Pipelines[name]; !ok {
-				wfStatus.Pipelines[name] = v1alpha1.PipelineStatus{}
+				wfStatus.Pipelines[name] = &v1alpha1.PipelineStatus{}
 			}
 
 			var deleteTrigger bool
@@ -197,7 +197,7 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 				if len(ps) > 1 {
 					deleteTrigger = false
 				}
-				err := a.Scheduler.RemovePipeline(wfName, name, &pipeline, &wfStatus)
+				err := a.Scheduler.RemovePipeline(wfName, name, pipeline, &wfStatus)
 				if err != nil {
 					errs = append(errs, err.Error())
 				} else {
@@ -220,29 +220,29 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 		// then schedule the pipeline and update the status.
 		for name, pipeline := range wf.Spec.Pipelines {
 			if _, ok := wfStatus.Pipelines[name]; !ok {
-				wfStatus.Pipelines[name] = v1alpha1.PipelineStatus{}
+				wfStatus.Pipelines[name] = &v1alpha1.PipelineStatus{}
 			}
 
 			var err error
 			if p, ok := curWorkflow.Spec.Pipelines[name]; ok {
 				// This DeepEquals check also checks if the two pipelines
 				// have the same trigger configured.
-				if !pipeline.DeepEqual(&p) {
-					err := a.Scheduler.UpdatePipeline(wfName, name, &pipeline, &p, &wfStatus)
+				if !pipeline.DeepEqual(p) {
+					err := a.Scheduler.UpdatePipeline(wfName, name, pipeline, &wfStatus)
 					if err != nil {
 						errs = append(errs, err.Error())
 					} else {
 						curWorkflow.Spec.Pipelines[name] = pipeline
-						curWorkflow.Spec.Triggers[pipeline.TriggerName] = *pipeline.Trigger
+						curWorkflow.Spec.Triggers[pipeline.TriggerName] = pipeline.Trigger
 					}
 				}
 			} else {
-				err = a.Scheduler.SchedulePipeline(wfName, name, &pipeline, &wfStatus)
+				err = a.Scheduler.SchedulePipeline(wfName, name, pipeline, &wfStatus)
 				if err != nil {
 					errs = append(errs, err.Error())
 				} else {
 					curWorkflow.Spec.Pipelines[name] = pipeline
-					curWorkflow.Spec.Triggers[pipeline.TriggerName] = *pipeline.Trigger
+					curWorkflow.Spec.Triggers[pipeline.TriggerName] = pipeline.Trigger
 				}
 			}
 		}
@@ -261,7 +261,7 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 		}
 
 		for name, pipeline := range wf.Spec.Pipelines {
-			err = a.Scheduler.SchedulePipeline(wfName, name, &pipeline, &wfStatus)
+			err = a.Scheduler.SchedulePipeline(wfName, name, pipeline, &wfStatus)
 			if err != nil {
 				errs = append(errs, err.Error())
 				delete(wf.Spec.Pipelines, name)

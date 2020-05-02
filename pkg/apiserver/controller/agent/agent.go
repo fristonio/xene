@@ -31,9 +31,9 @@ type Controller struct {
 	// in the past. We will try to check for the agent health again after a cooldown.
 	blacklistedNodes map[string]Node
 
-	// storeCtrl is the store controller corresponding to the agent objects
+	// storeInformer is the store informer corresponding to the agent objects
 	// in the datastore.
-	storeCtrl *store.Controller
+	storeInformer *store.Informer
 
 	// name is the name of the controller, this is derived from the store controller.
 	name string
@@ -77,13 +77,13 @@ func (a *Controller) Type() string {
 
 // Configure sets up the Agent controller and all its required components.
 func (a *Controller) Configure() {
-	a.storeCtrl = a.newAgentStoreController()
-	a.name = a.storeCtrl.Name()
+	a.storeInformer = a.newAgentStoreController()
+	a.name = a.storeInformer.Name()
 }
 
 // Run starts running the agent controller.
 func (a *Controller) Run() error {
-	return a.storeCtrl.Run()
+	return a.storeInformer.Run()
 }
 
 // Stop shuts down the controller.
@@ -97,7 +97,7 @@ func (a *Controller) Stop() error {
 
 	a.Nodes = make(map[string]Node)
 	a.blacklistedNodes = make(map[string]Node)
-	return a.storeCtrl.Stop()
+	return a.storeInformer.Stop()
 }
 
 // Name returns the name of the agent controller, it is completely defined by the name of
@@ -193,8 +193,8 @@ func (a *Controller) addController(kv *v1alpha1.KVPairStruct) error {
 // newAgentStoreController returns the agent store controller for apiserver.
 // This controller watches for agent object in the store and perform action based
 // on the changes to the object.
-func (a *Controller) newAgentStoreController() *store.Controller {
-	return store.NewControllerWithSharedCache(
+func (a *Controller) newAgentStoreController() *store.Informer {
+	return store.NewInformerWithSharedCache(
 		fmt.Sprintf("%s/", v1alpha1.AgentKeyPrefix),
 		// Add function for a new agent.
 		func(kv *v1alpha1.KVPairStruct) error {
