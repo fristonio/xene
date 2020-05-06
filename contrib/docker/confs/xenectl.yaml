@@ -1,0 +1,2 @@
+apiServerAddr: 'http://xene-apiserver:6060'
+authToken: "xxxxxxxxxxxxxxxxxxx"

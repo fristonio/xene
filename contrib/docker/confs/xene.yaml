@@ -1,0 +1,28 @@
+apiserver:
+    host: "0.0.0.0"
+    verboseLogs: true
+    jwtSecret: "XeneAPISERVERSuperSecretJWT-0x001001"
+    oauth:
+        google:
+            name: google
+            clientID: "xxxxxxx.apps.googleusercontent.com"
+            clientSecret: "xxxxxxxxxxxxxxxxxxxx"
+            redirectURL: "http://localhost:6060/oauth/google/redirect"
+            scopes:
+                - profile
+                - email
+
+agent:
+    name: xene-agent-1
+    host: "0.0.0.0"
+    apiServer: "http://xene-apiserver:6060"
+    apiAuthToken: "sampleApiAuthToken"
+    address: "http://xene-agent-1:6061"
+    insecure: true
+    serverName: agent.xene.io
+    jwtSecret: "XeneAPISERVERSuperSecretJWT-0x001001-agent-1"
+    keyFile: /etc/xene/certs/server.gen/server-key.pem
+    certFile: /etc/xene/certs/server.gen/server.pem
+    rootCACert: /etc/xene/certs/ca.gen/ca.pem
+    clientKeyFile: /etc/xene/certs/client.gen/client-key.pem
+    clientCertFile: /etc/xene/certs/client.gen/client.pem
