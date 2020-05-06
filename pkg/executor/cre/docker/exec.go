@@ -73,7 +73,10 @@ func (n *NativeExecHandler) ExecInContainer(ctx context.Context, client *dockera
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
-	resp, err := client.ContainerExecAttach(ctx, execObj.ID, createOpts)
+	resp, err := client.ContainerExecAttach(ctx, execObj.ID, dockertypes.ExecStartCheck{
+		Detach: false,
+		Tty:    tty,
+	})
 	if ctxErr := contextError(ctx); ctxErr != nil {
 		return nil, ctxErr
 	}
