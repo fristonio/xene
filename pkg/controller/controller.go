@@ -192,7 +192,8 @@ type Internal struct {
 // NewControllerInternalWithCron returns a new controller Internal type with
 // a cron based scheduler for the controller function
 func NewControllerInternalWithCron(cronStr string, f *Func) (Internal, error) {
-	parser := cron.NewParser(cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
+	parser := cron.NewParser(
+		cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
 	sched, err := parser.Parse(cronStr)
 	if err != nil {
 		return Internal{}, err
@@ -271,7 +272,7 @@ func (c *Controller) RunController() {
 	for {
 		if runFunc && !skip {
 			if c.internal.scheduler != nil {
-				interval = c.internal.scheduler.Next(time.Now()).Sub(time.Now())
+				interval = time.Until(c.internal.scheduler.Next(time.Now()))
 			} else {
 				interval = internal.RunInterval
 			}

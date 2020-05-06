@@ -9,6 +9,7 @@ import (
 
 	"github.com/fristonio/xene/pkg/agent/controller"
 	"github.com/fristonio/xene/pkg/defaults"
+	"github.com/fristonio/xene/pkg/executor/cre/docker"
 	"github.com/fristonio/xene/pkg/option"
 	"github.com/fristonio/xene/pkg/proto"
 	"github.com/fristonio/xene/pkg/store"
@@ -53,6 +54,9 @@ func NewServer(host string, port uint32, address, certFile, keyFile, rootCACert,
 // RunServer starts running the GRPC server for xene agent.
 func (s *Server) RunServer() error {
 	fmt.Println(defaults.XeneBanner)
+
+	// Try connecting to docker container runtime.
+	docker.ConnectToDockerOrDie()
 
 	hostPort := fmt.Sprintf("%s:%d", s.host, s.port)
 
@@ -103,7 +107,10 @@ func (s *Server) RunServer() error {
 		log.Fatalf("error while initializing xene store: %s", err)
 	}
 
-	controller.RunControllers()
+	err = controller.RunControllers()
+	if err != nil {
+		log.Fatalf("error when running agent controllers: %s", err)
+	}
 
 	return grpcServer.Serve(lis)
 }

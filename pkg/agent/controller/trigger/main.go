@@ -176,9 +176,7 @@ func (c *Controller) addTrigger(kv *v1alpha1.KVPairStruct) error {
 		return nil
 	}
 
-	if _, ok := c.DefaultTriggers[triggerName]; ok {
-		delete(c.DefaultTriggers, triggerName)
-	}
+	delete(c.DefaultTriggers, triggerName)
 
 	if trigger.Type == string(v1alpha1.DefaultTriggerType) {
 		c.DefaultTriggers[triggerName] = struct{}{}

@@ -73,5 +73,4 @@ func StopControllers() error {
 
 func init() {
 	RegisteredControllers = append(RegisteredControllers, trigger.TriggerCtrl)
-	return
 }

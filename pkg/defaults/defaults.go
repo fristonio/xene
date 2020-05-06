@@ -59,5 +59,12 @@ $$  /\$$\ \$$$$$$$\ $$ |  $$ |\$$$$$$$\
 	ContextBucketKey string = "user"
 
 	// Seperator is the seperator when constructing names.
-	Seperator string = ":"
+	Seperator string = "--"
+
+	// ImagePullDeadline is the timeout duration for the image pull action using
+	// the container runtime
+	ImagePullDeadline time.Duration = time.Minute * 5
+
+	// CreateContainerTimeout is the timeout for a create container request.
+	CreateContainerTimeout time.Duration = time.Second * 15
 )

@@ -2,10 +2,16 @@ package trigger
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/fristonio/xene/pkg/controller"
+	"github.com/fristonio/xene/pkg/defaults"
+	"github.com/fristonio/xene/pkg/errors"
+	"github.com/fristonio/xene/pkg/executor"
+	"github.com/fristonio/xene/pkg/store"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
+	"github.com/fristonio/xene/pkg/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -73,10 +79,29 @@ func (t *Trigger) RunPipelines(ctx context.Context, manager *controller.Manager)
 		return fmt.Errorf("looking to update the pipeline specification, the Pipeline will be run next time")
 	}
 
+	errs := errors.NewMultiError()
 	// set running pipelines to true, as the controller is running the pipelines.
 	t.RunningPipelines++
 
 	log.Infof("starting to run pipelines: %v", t.Pipelines)
+	for _, name := range t.Pipelines {
+		val, err := store.KVStore.Get(context.TODO(), fmt.Sprintf("%s/%s", v1alpha1.PipelineKeyPrefix, name))
+		if err != nil {
+			errs.Append(fmt.Errorf("error while getting pipeline(%s) from kvstore: %s", name, err))
+			continue
+		}
+
+		var pipeline v1alpha1.PipelineSpecWithName
+		err = json.Unmarshal(val.Data, &pipeline)
+		if err != nil {
+			errs.Append(fmt.Errorf("error while unmarshaling pipeline(%s): %s", name, err))
+		}
+
+		pipelineID := utils.RandToken(defaults.PipelineIDSize)
+		p := executor.NewPipelineExecutor(name, pipelineID, &pipeline)
+		// Runs the pipeline
+		go p.Run()
+	}
 
 	t.RunningPipelines--
 
