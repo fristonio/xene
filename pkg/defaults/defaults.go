@@ -14,10 +14,10 @@ $$  /\$$\ \$$$$$$$\ $$ |  $$ |\$$$$$$$\
 `
 
 	// XeneConfigFile is the file name for xene config.
-	XeneConfigFile string = "/etc/xene/xene.yaml"
+	XeneConfigFile string = "/etc/xene/conf/xene.yaml"
 
 	// XeneCtlConfigFile is the file name for xenectl config.
-	XeneCtlConfigFile string = "/etc/xene/xenectl.yaml"
+	XeneCtlConfigFile string = "/etc/xene/conf/xenectl.yaml"
 
 	// APIServerHost is the default host to bind the API Server to.
 	APIServerHost string = "0.0.0.0"

@@ -40,6 +40,7 @@ help:
 > @echo "* check-api-docs: checks the integrity of API docs for xene."
 > @echo "* proto: Generate protobuf client and server code for definitions in pkg/proto/."
 > @echo "* generate-api: Generate swagger client, models and docs for apiserver."
+> @echo "* docker: Create docker image for xene"
 > @echo ""
 
 # Build status
@@ -88,4 +89,17 @@ apiserver-gen:
 > @echo "[*] Generating swagger apiserver clients"
 > @swagger generate client -f docs/swagger.yaml
 
-.PHONY: build format check-lint fix-lint govet help docs proto apiserver-gen
+docker:
+> @echo "[*] Starting to build docker image for xene"
+> @docker build . -f contrib/docker/Dockerfile -t fristonio/xene
+> @docker build . -f contrib/docker/Dockerfile.agent -t fristonio/xene-agent
+
+docker-compose-up:
+> @echo "[*] Starting docker compose setup for xene"
+> @docker-compose -f contrib/docker/docker-compose.yml up
+
+docker-compose-down:
+> @echo "[*] Shutting down docker compose setup for xene"
+> @docker-compose -f contrib/docker/docker-compose.yml down
+
+.PHONY: build format check-lint fix-lint govet help docs proto apiserver-gen docker docker-compose-up docker-compose-down

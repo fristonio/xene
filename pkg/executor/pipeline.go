@@ -70,7 +70,7 @@ func (p *PipelineExecutor) Run() {
 	}
 
 	// Walk each of task in the pipeline in the required order.
-	p.Spec.Dag.Walk(func(v dag.Vertex) *errors.MultiError {
+	errs := p.Spec.Dag.Walk(func(v dag.Vertex) *errors.MultiError {
 		errs := errors.NewMultiError()
 		task, ok := v.(*v1alpha1.TaskSpec)
 		if !ok {
@@ -87,6 +87,10 @@ func (p *PipelineExecutor) Run() {
 		}
 		return errs
 	})
+
+	if len(errs) > 0 {
+		p.log.Errorf("error while walking task graph: \n%v", errs)
+	}
 
 	err = p.re.Shutdown()
 	if err != nil {

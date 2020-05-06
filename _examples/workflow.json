@@ -16,21 +16,38 @@
         "temp-pipeline": {
           "trigger": "temp-trigger",
           "description": "temporary pipeline",
-          "executor": "docker",
+          "executor": {
+              "type": "container",
+              "containerConfig": {
+                  "image": "ubuntu"
+              }
+          },
           "tasks": {
+            "checkout-task": {
+                "description": "Checkout xene source code",
+                "workingDir": "/go/src/github.com/fristonio/",
+                "steps": [
+                  {
+                    "name": "checkout",
+                    "type": "shell",
+                    "cmd": ["git clone https://github.com/frsitonio/ping"]
+                  }
+                ]
+              },
               "build-task": {
                 "description": "Build xene",
                 "workingDir": "/go/src/github.com/fristonio/xene/",
+                "dependencies": ["checkout-task"],
                 "steps": [
                   {
                     "name": "format",
                     "type": "shell",
-                    "cmd": "make format"
+                    "cmd": ["make", "format"]
                   },
                   {
                     "name": "build",
                     "type": "shell",
-                    "cmd": "make build"
+                    "cmd": ["make", "build"]
                   }
                 ]
               },
@@ -42,7 +59,7 @@
                   {
                     "name": "test",
                     "type": "shell",
-                    "cmd": "make test"
+                    "cmd": ["./ping", "help"]
                   }
                 ]
               }
