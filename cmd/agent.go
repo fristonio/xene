@@ -76,6 +76,7 @@ var agentCmd = &cobra.Command{
 
 		err = server.RunServer()
 		if err != nil {
+			log.Errorf("error while running agent server: %s", err)
 			os.Exit(1)
 		}
 	},

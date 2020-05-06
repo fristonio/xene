@@ -1,0 +1,42 @@
+version: "3.2"
+
+networks:
+  xene:
+
+services:
+  xene-apiserver:
+    image: fristonio/xene:latest
+    hostname: xene-apiserver
+    volumes:
+      - "data-volume:/var/run/xene:rw"
+      - "./confs/xene.yaml:/etc/xene/conf/xene.yaml:rw"
+      - "./confs/xenectl.yaml:/etc/xene/conf/xenectl.yaml:rw"
+    ports:
+      - 6060:6060
+    networks:
+      - xene
+    # Right now we are using authless mode, figure out a way
+    # to propoagate authToken to the agent.
+    entrypoint:
+      - xene
+      - apiserver
+      - -n
+
+  xene-agent-1:
+    image: fristonio/xene-agent:latest
+    hostname: "xene-agent-1"
+    privileged: true
+    depends_on:
+      - xene-apiserver
+    volumes:
+      - "data-volume:/var/run/xene:rw"
+      - "./confs/xene.yaml:/etc/xene/conf/xene.yaml:rw"
+      - "./confs/xenectl.yaml:/etc/xene/conf/xenectl.yaml:rw"
+    ports:
+      - 6061:6061
+    networks:
+      - xene
+    # We are using entrypoint command for the container.
+
+volumes:
+  data-volume:
