@@ -1,6 +1,8 @@
 package v1alpha1
 
-import "fmt"
+import (
+	"fmt"
+)
 
 var (
 	// Version is the version string for the types registered for xene.
@@ -51,9 +53,12 @@ var (
 	// DockerExecutor is the name of the docker executor used by agent.
 	DockerExecutor Executor = "docker"
 
-	// RegisteredExecutors contains a list of executors allowed with xene.
-	RegisteredExecutors []Executor = []Executor{DockerExecutor}
+	// ContainerExecutor is the name of the container executor used by agent.
+	ContainerExecutor Executor = "container"
+
+	// RegisteredExecutors contains a list of executors ContainerExecutor with xene.
+	RegisteredExecutors []Executor = []Executor{ContainerExecutor}
 
 	// RegisteredTriggerTypes contains a list of TriggerTypes allowed with xene.
-	RegisteredTriggerTypes []TriggerType = []TriggerType{DefaultTriggerType}
+	RegisteredTriggerTypes []TriggerType = []TriggerType{DefaultTriggerType, CronTriggerType}
 )

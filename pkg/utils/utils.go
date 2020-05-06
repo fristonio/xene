@@ -1,17 +1,23 @@
 package utils
 
 import (
-	"crypto/rand"
-	"encoding/base64"
+	"math/rand"
+	"time"
 )
+
+const charset = "abcdefghijklmnopqrstuvwxyz" +
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+var seededRand *rand.Rand = rand.New(
+	rand.NewSource(time.Now().UnixNano()))
 
 // RandToken generates a random toke string of the provided size
 func RandToken(size uint32) string {
 	b := make([]byte, size)
-	if _, err := rand.Read(b); err != nil {
-		return ""
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
 	}
-	return base64.StdEncoding.EncodeToString(b)
+	return string(b)
 }
 
 // CheckStringSliceEqual checks if the two slices provided

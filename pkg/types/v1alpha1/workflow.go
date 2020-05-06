@@ -6,6 +6,7 @@ import (
 
 	"github.com/fristonio/xene/pkg/dag"
 	"github.com/fristonio/xene/pkg/utils"
+	log "github.com/sirupsen/logrus"
 )
 
 // Workflow is the type which contains workflow object definition.
@@ -259,6 +260,40 @@ func (t *TriggerSpecWithName) RemovePipeline(name string) {
 	t.Pipelines = newSlice
 }
 
+// ContainerConfig contains configuration corresponding to the container
+// executor of a pipeline.
+type ContainerConfig struct {
+	// Image contains the image to use for the container.
+	Image string `json:"image"`
+}
+
+// DeepEqual checks if the two pipeline executor objects are equal or not.
+func (c *ContainerConfig) DeepEqual(cz *ContainerConfig) bool {
+	return c.Image == cz.Image
+}
+
+// PipelineExecutor is a type which contains configuration for the executor of
+// of the pipeline.
+type PipelineExecutor struct {
+	// Type contains the type of the pipeline executor
+	Type string `json:"type"`
+
+	ContainerConfig ContainerConfig `json:"containerConfig,omitempty"`
+}
+
+// DeepEqual checks if the two pipeline executor objects are equal or not.
+func (p *PipelineExecutor) DeepEqual(pz *PipelineExecutor) bool {
+	if p.Type != pz.Type {
+		return false
+	}
+
+	if !p.ContainerConfig.DeepEqual(&pz.ContainerConfig) {
+		return false
+	}
+
+	return true
+}
+
 // PipelineSpec contains the spec of a pipeline associated with the workflow.
 type PipelineSpec struct {
 	// trigger contains the Trigger for the configured pipeline.
@@ -275,7 +310,7 @@ type PipelineSpec struct {
 
 	// Executor describes executor for the pipeline.
 	// Should be one of the preconfigured list of available executors.
-	Executor string `json:"executor"`
+	Executor PipelineExecutor `json:"executor"`
 
 	// RootTask contains the root task for the pipeline.
 	RootTask dag.Vertex `json:"-"`
@@ -300,7 +335,7 @@ func (p *PipelineSpec) DeepEqual(pz *PipelineSpec) bool {
 		return false
 	}
 
-	if p.Executor != pz.Executor {
+	if !p.Executor.DeepEqual(&pz.Executor) {
 		return false
 	}
 
@@ -342,6 +377,8 @@ func (p *PipelineSpec) Resolve(pipelineName string) error {
 		}
 	}
 
+	log.Infof("doing transitive reduction for pipeline")
+	p.Dag.TransitiveReduction()
 	root, err := p.Dag.Root()
 	if err != nil {
 		return fmt.Errorf("pipeline %s: error while resolving root: %s", pipelineName, err)
@@ -373,6 +410,11 @@ type TaskSpec struct {
 	// Step contains a list of steps to go through for the task.
 	// These are executed linear.
 	Steps []TaskStepSpec `json:"steps"`
+}
+
+// Name returns the name of the task.
+func (t *TaskSpec) Name() string {
+	return t.name
 }
 
 // DeepEqual checks if the two TaskSpec objects are equal or not.
@@ -423,14 +465,20 @@ type TaskStepSpec struct {
 
 	// Cmd defines the command to execute for a step, when the
 	// type of step is shell.
-	Cmd string `json:"cmd"`
+	Cmd []string `json:"cmd"`
 }
 
 // DeepEqual checks if the two TaskSteppec objects are equal or not.
 func (t *TaskStepSpec) DeepEqual(tz *TaskStepSpec) bool {
 	if t.Type != tz.Type &&
-		t.Cmd != tz.Cmd {
+		len(t.Cmd) != len(tz.Cmd) {
 		return false
+	}
+
+	for i := range t.Cmd {
+		if t.Cmd[i] != tz.Cmd[i] {
+			return false
+		}
 	}
 
 	return true
