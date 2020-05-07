@@ -30,7 +30,7 @@ func (m *MultiError) GetError() error {
 
 // Append appends the error with the multierror using the default
 // serverity of Error
-func (m MultiError) Append(err error) {
+func (m *MultiError) Append(err error) {
 	m.errors = append(m.errors, &errorWithSeverity{
 		err,
 		SeverityTypeError,
@@ -38,7 +38,7 @@ func (m MultiError) Append(err error) {
 }
 
 // AppendWithSeverity appends the error with the multierror using the provided severity
-func (m MultiError) AppendWithSeverity(err error, severity Severity) {
+func (m *MultiError) AppendWithSeverity(err error, severity Severity) {
 	m.errors = append(m.errors, &errorWithSeverity{
 		err,
 		severity,
