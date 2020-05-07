@@ -124,6 +124,13 @@ func (c *CRExecutor) Configure() error {
 
 	c.imageRef = res.ImageRef
 
+	envs := make([]*runtime.KeyValue, 0)
+	for key, val := range c.spec.Envs {
+		envs = append(envs, &runtime.KeyValue{
+			Key:   key,
+			Value: val,
+		})
+	}
 	// After pulling in the image for the container
 	// create the container with the configuration required.
 	ctx, cancel = context.WithTimeout(context.Background(), defaults.CreateContainerTimeout)
@@ -136,14 +143,15 @@ func (c *CRExecutor) Configure() error {
 			Image: &runtime.ImageSpec{
 				Image: res.ImageRef,
 			},
-			Command:    []string{"sleep", "100000"},
+			Command:    []string{"sleep", fmt.Sprintf("%d", int64(defaults.GlobalPipelineTimeout/time.Second))},
 			WorkingDir: "/",
 			Mounts: []*runtime.Mount{
 				{
-					ContainerPath: "/usr/local/bin/xene-cmd-run.sh",
+					ContainerPath: defaults.AgentMountContainerScript,
 					HostPath:      defaults.AgentMountScript,
 				},
 			},
+			Envs: envs,
 		},
 	})
 	if err != nil {

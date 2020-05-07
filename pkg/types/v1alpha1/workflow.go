@@ -318,6 +318,9 @@ type PipelineSpec struct {
 
 	// Tasks contains the list of the tasks in the pipeline.
 	Tasks map[string]*TaskSpec `json:"tasks"`
+
+	// Envs contains the environment variable for the pipeline.
+	Envs map[string]string `json:"envs"`
 }
 
 // DeepEqual checks if the two pipeline objects are equal or not.
@@ -347,6 +350,13 @@ func (p *PipelineSpec) DeepEqual(pz *PipelineSpec) bool {
 		}
 
 		if !task.DeepEqual(pzTask) {
+			return false
+		}
+	}
+
+	for key, val := range p.Envs {
+		val2, ok := pz.Envs[key]
+		if !ok || val2 != val {
 			return false
 		}
 	}

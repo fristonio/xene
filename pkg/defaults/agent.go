@@ -1,6 +1,9 @@
 package defaults
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 var (
 	// AgentHost is the default host to bind the Agent to.
@@ -28,4 +31,11 @@ var (
 	// AgentMountScript contains the path to agent mount script for containers
 	// on the agent.
 	AgentMountScript string = fmt.Sprintf("%s/agent-cmd-run.sh", AgentAssetsDir)
+
+	// AgentMountContainerScript is the path of the sciript of agent command runner
+	// inside the container.
+	AgentMountContainerScript string = "/usr/local/bin/xene-cmd-run.sh"
+
+	// GlobalPipelineTimeout is the global timeout of the pipeline run on agent.
+	GlobalPipelineTimeout time.Duration = time.Minute * 100
 )
