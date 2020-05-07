@@ -61,4 +61,13 @@ var (
 
 	// RegisteredTriggerTypes contains a list of TriggerTypes allowed with xene.
 	RegisteredTriggerTypes []TriggerType = []TriggerType{DefaultTriggerType, CronTriggerType}
+
+	// StatusError contains the error status
+	StatusError string = "Error"
+
+	// StatusSuccess contains the success status
+	StatusSuccess string = "Success"
+
+	// StatusNotExecuted contais the status when a component is not executed.
+	StatusNotExecuted string = "NotExecuted"
 )

@@ -58,6 +58,10 @@ func (l *logger) getLogWriter() io.WriteCloser {
 	return &loggerWriter{f, bufio.NewWriter(f)}
 }
 
+func (l *logger) getLogFileName() string {
+	return fmt.Sprintf("%s/%s/%s/%s/%s", defaults.AgentLogsDir, l.pipelineName, l.pipelineID, l.task, l.step)
+}
+
 func newLogger(pName, pID, tName, sName string) *logger {
 	return &logger{
 		pName,

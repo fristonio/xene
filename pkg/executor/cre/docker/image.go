@@ -148,7 +148,7 @@ func (e *RuntimeExecutor) RemoveImage(ctx context.Context, r *runtime.RemoveImag
 		return err
 	}
 
-	if imageInspect.ID == "" {
+	if isImageNotFoundError(err) {
 		// image is nil, assuming it doesn't exist.
 		return nil
 	}

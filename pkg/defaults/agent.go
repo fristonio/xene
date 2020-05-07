@@ -1,5 +1,7 @@
 package defaults
 
+import "fmt"
+
 var (
 	// AgentHost is the default host to bind the Agent to.
 	AgentHost string = "0.0.0.0"
@@ -19,4 +21,11 @@ var (
 
 	// AgentLogsDir is the path containing the logs for the agent.
 	AgentLogsDir string = "/var/run/xene/agent/logs/"
+
+	// AgentAssetsDir contains the directory path of the agent assets.
+	AgentAssetsDir string = "/var/run/xene/agent/assets"
+
+	// AgentMountScript contains the path to agent mount script for containers
+	// on the agent.
+	AgentMountScript string = fmt.Sprintf("%s/agent-cmd-run.sh", AgentAssetsDir)
 )

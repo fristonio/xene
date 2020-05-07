@@ -3,11 +3,16 @@ package cre
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"time"
 
 	"github.com/fristonio/xene/pkg/defaults"
 	"github.com/fristonio/xene/pkg/executor/cre/docker"
 	"github.com/fristonio/xene/pkg/executor/cre/runtime"
+	"github.com/fristonio/xene/pkg/templates"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
+	"github.com/fristonio/xene/pkg/utils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -88,6 +93,20 @@ func (c *CRExecutor) Configure() error {
 
 	c.cre = cre
 
+	if !utils.FileExists(defaults.AgentMountScript) {
+		if !utils.DirExists(defaults.AgentAssetsDir) {
+			if err := os.MkdirAll(defaults.AgentAssetsDir, os.ModePerm); err != nil {
+				return fmt.Errorf("error while creating mount script: %s", err)
+			}
+		}
+
+		data := templates.GetAgentMountScript()
+		err := ioutil.WriteFile(defaults.AgentMountScript, []byte(data), 0777)
+		if err != nil {
+			return fmt.Errorf("error while writing agent script: %s", err)
+		}
+	}
+
 	img := parseImageCanonicalURL(c.spec.Executor.ContainerConfig.Image)
 
 	// First set up the image for the container to run.
@@ -119,6 +138,12 @@ func (c *CRExecutor) Configure() error {
 			},
 			Command:    []string{"sleep", "100000"},
 			WorkingDir: "/",
+			Mounts: []*runtime.Mount{
+				{
+					ContainerPath: "/usr/local/bin/xene-cmd-run.sh",
+					HostPath:      defaults.AgentMountScript,
+				},
+			},
 		},
 	})
 	if err != nil {
@@ -147,8 +172,12 @@ func (s *StepExecError) Error() string {
 }
 
 // RunTask runs the task defined by the spec in the container.
-func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
+func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) (*v1alpha1.TaskRunStatus, error) {
 	c.log.Infof("Running task: %s", name)
+
+	status := v1alpha1.TaskRunStatus{
+		Steps: make(map[string]*v1alpha1.StepRunStatus),
+	}
 
 	for _, step := range task.Steps {
 		c.log.Infof("Running step: %s", step.Name)
@@ -157,25 +186,56 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 
 		ctx, cancel := context.WithTimeout(context.Background(), defaults.CreateContainerTimeout)
 		defer cancel()
+		start := time.Now()
 		res, err := c.cre.ExecSync(ctx, &runtime.ExecRequest{
 			ContainerID: c.getResName(),
-			Cmd:         step.Cmd,
+			Cmd:         []string{"xene-cmd-run.sh", task.WorkingDirectory, step.Cmd},
 			Tty:         false,
 			Stdin:       nil,
 			Stdout:      w,
 			Stderr:      w,
 		})
-		if err != nil {
+
+		if res != nil {
+			c.log.Debugf("exec info: %s: %d", res.ContainerID, res.ExitCode)
+		}
+
+		if err != nil || res == nil {
+			status.Steps[step.Name] = &v1alpha1.StepRunStatus{
+				Status:  v1alpha1.StatusError,
+				LogFile: l.getLogFileName(),
+				Time:    time.Since(start),
+			}
 			if w != nil {
 				w.Close()
 			}
-			return err
+
+			return &status, err
 		}
 
 		if res.ExitCode != 0 {
-			return &StepExecError{
+			status.Steps[step.Name] = &v1alpha1.StepRunStatus{
+				Status:  v1alpha1.StatusError,
+				LogFile: l.getLogFileName(),
+				Time:    time.Since(start),
+			}
+
+			for _, s := range task.Steps {
+				if _, ok := status.Steps[s.Name]; !ok {
+					status.Steps[s.Name] = &v1alpha1.StepRunStatus{
+						Status: v1alpha1.StatusNotExecuted,
+					}
+				}
+			}
+			return &status, &StepExecError{
 				name: step.Name,
 			}
+		}
+
+		status.Steps[step.Name] = &v1alpha1.StepRunStatus{
+			Status:  v1alpha1.StatusSuccess,
+			LogFile: l.getLogFileName(),
+			Time:    time.Since(start),
 		}
 
 		if w != nil {
@@ -184,12 +244,13 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 		c.log.Infof("Step completed: %s", step.Name)
 	}
 
-	return nil
+	return &status, nil
 }
 
 // Shutdown shuts down the container runtime executor.
 func (c *CRExecutor) Shutdown() error {
 	c.log.Infof("shutting down the container runtime executor")
+
 	ctx, cancel := context.WithTimeout(context.Background(), defaults.CreateContainerTimeout)
 	defer cancel()
 	err := c.cre.StopContainer(ctx, &runtime.StopContainerRequest{
@@ -215,6 +276,7 @@ func (c *CRExecutor) Shutdown() error {
 			Image: c.imageRef,
 		},
 	})
+
 	if err != nil {
 		return fmt.Errorf("error while removing image: %s", err)
 	}

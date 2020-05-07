@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/fristonio/xene/pkg/dag"
 	"github.com/fristonio/xene/pkg/utils"
@@ -465,22 +466,15 @@ type TaskStepSpec struct {
 
 	// Cmd defines the command to execute for a step, when the
 	// type of step is shell.
-	Cmd []string `json:"cmd"`
+	Cmd string `json:"cmd"`
 }
 
 // DeepEqual checks if the two TaskSteppec objects are equal or not.
 func (t *TaskStepSpec) DeepEqual(tz *TaskStepSpec) bool {
 	if t.Type != tz.Type &&
-		len(t.Cmd) != len(tz.Cmd) {
+		t.Cmd != tz.Cmd {
 		return false
 	}
-
-	for i := range t.Cmd {
-		if t.Cmd[i] != tz.Cmd[i] {
-			return false
-		}
-	}
-
 	return true
 }
 
@@ -534,6 +528,40 @@ func NewWorkflowStatus(wf *Workflow) (WorkflowStatus, error) {
 		WorkflowSpec: string(data),
 		Pipelines:    make(map[string]*PipelineStatus),
 	}, nil
+}
+
+// PipelineRunStatus contains the status of a pipeline run.
+type PipelineRunStatus struct {
+	Name string `json:"name"`
+
+	RunID string `json:"runID"`
+
+	Status string `json:"status"`
+
+	Tasks map[string]*TaskRunStatus `json:"tasks"`
+}
+
+// NewPipelineRunStatus returns a new instance of PipelineRunStatus object.
+func NewPipelineRunStatus() PipelineRunStatus {
+	return PipelineRunStatus{
+		Tasks: make(map[string]*TaskRunStatus),
+	}
+}
+
+// TaskRunStatus contains the status of a task run.
+type TaskRunStatus struct {
+	Status string `json:"status"`
+
+	Steps map[string]*StepRunStatus `json:"steps"`
+}
+
+// StepRunStatus contains the status of an individual step run.
+type StepRunStatus struct {
+	Status string `json:"status"`
+
+	Time time.Duration `json:"time"`
+
+	LogFile string `json:"logFile"`
 }
 
 // PipelineStatus contains the status of the pipeline in context

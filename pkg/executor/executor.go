@@ -10,7 +10,7 @@ type RuntimeExecutor interface {
 	Configure() error
 
 	// RunTask runs the task provided in the specification
-	RunTask(string, *v1alpha1.TaskSpec) error
+	RunTask(string, *v1alpha1.TaskSpec) (*v1alpha1.TaskRunStatus, error)
 
 	// Shutdown shuts down the RuntimeExecutor instance and environment.
 	Shutdown() error

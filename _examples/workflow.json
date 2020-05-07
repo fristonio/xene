@@ -2,69 +2,90 @@
     "kind": "Workflow",
     "apiVersion": "v1alpha1",
     "metadata": {
-      "name": "temp-workflow",
-      "description": "A test temporary workflow"
+        "name": "temp-workflow",
+        "description": "A test temporary workflow"
     },
     "spec": {
-      "triggers": {
-        "temp-trigger": {
-          "type": "cron",
-          "cronConfig": "* * * * *"
+        "triggers": {
+            "temp-trigger": {
+                "type": "cron",
+                "cronConfig": "* * * * *"
+            }
+        },
+        "pipelines": {
+            "temp-pipeline": {
+                "trigger": "temp-trigger",
+                "description": "temporary pipeline",
+                "executor": {
+                    "type": "container",
+                    "containerConfig": {
+                        "image": "golang"
+                    }
+                },
+                "tasks": {
+                    "setup-task": {
+                        "description": "Setup ping environment",
+                        "workingDir": "/go/src/github.com/fristonio/",
+                        "steps": [
+                            {
+                                "name": "update",
+                                "type": "shell",
+                                "cmd": "apt-get -y update"
+                            },
+                            {
+                                "name": "install-deps",
+                                "type": "shell",
+                                "cmd": "apt-get -y install git curl make"
+                            }
+                        ]
+                    },
+                    "checkout-task": {
+                        "description": "Checkout ping source code",
+                        "workingDir": "/go/src/github.com/fristonio/",
+                        "dependencies": ["setup-task"],
+                        "steps": [
+                            {
+                                "name": "checkout",
+                                "type": "shell",
+                                "cmd": "git clone https://github.com/fristonio/ping"
+                            }
+                        ]
+                    },
+                    "build-task": {
+                        "description": "Build ping",
+                        "workingDir": "/go/src/github.com/fristonio/ping/",
+                        "dependencies": [
+                            "checkout-task"
+                        ],
+                        "steps": [
+                            {
+                                "name": "format",
+                                "type": "shell",
+                                "cmd": "make format"
+                            },
+                            {
+                                "name": "build",
+                                "type": "shell",
+                                "cmd": "make build"
+                            }
+                        ]
+                    },
+                    "test-task": {
+                        "description": "Test ping",
+                        "workingDir": "/go/src/github.com/fristonio/ping/",
+                        "dependencies": [
+                            "build-task"
+                        ],
+                        "steps": [
+                            {
+                                "name": "test",
+                                "type": "shell",
+                                "cmd": "ls -la ping"
+                            }
+                        ]
+                    }
+                }
+            }
         }
-      },
-      "pipelines": {
-        "temp-pipeline": {
-          "trigger": "temp-trigger",
-          "description": "temporary pipeline",
-          "executor": {
-              "type": "container",
-              "containerConfig": {
-                  "image": "ubuntu"
-              }
-          },
-          "tasks": {
-            "checkout-task": {
-                "description": "Checkout xene source code",
-                "workingDir": "/go/src/github.com/fristonio/",
-                "steps": [
-                  {
-                    "name": "checkout",
-                    "type": "shell",
-                    "cmd": ["git clone https://github.com/frsitonio/ping"]
-                  }
-                ]
-              },
-              "build-task": {
-                "description": "Build xene",
-                "workingDir": "/go/src/github.com/fristonio/xene/",
-                "dependencies": ["checkout-task"],
-                "steps": [
-                  {
-                    "name": "format",
-                    "type": "shell",
-                    "cmd": ["make", "format"]
-                  },
-                  {
-                    "name": "build",
-                    "type": "shell",
-                    "cmd": ["make", "build"]
-                  }
-                ]
-              },
-              "test-task": {
-                "description": "Test xene",
-                "workingDir": "/go/src/github.com/fristonio/xene/",
-                "dependencies": ["build-task"],
-                "steps": [
-                  {
-                    "name": "test",
-                    "type": "shell",
-                    "cmd": ["./ping", "help"]
-                  }
-                ]
-              }
-          }
-        }
-      }
     }
-  }
+}

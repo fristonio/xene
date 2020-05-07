@@ -125,7 +125,9 @@ func (w *Walker) Wait() []error {
 			continue
 		}
 
-		diags = append(diags, vDiags)
+		if vDiags.GetError() != nil {
+			diags = append(diags, vDiags)
+		}
 	}
 
 	return diags
