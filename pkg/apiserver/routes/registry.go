@@ -66,6 +66,12 @@ func storeGetHandler(ctx *gin.Context, pre string) {
 	// prefix takes preference over name
 	if prefix != "" {
 		kvPairs, err := store.KVStore.ListPrefix(context.TODO(), pre)
+		if store.KVStore.KeyDoesNotExistError(err) {
+			ctx.JSON(http.StatusOK, response.RegistryItemsFromPrefix{
+				Count: 0,
+			})
+			return
+		}
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, response.HTTPError{
 				Error: fmt.Sprintf("error while listing prefixes for %s: %s", prefix, err),
@@ -101,6 +107,12 @@ func storeGetHandler(ctx *gin.Context, pre string) {
 
 	val, err := store.KVStore.Get(context.TODO(), fmt.Sprintf("%s/%s", pre, name))
 	if err != nil {
+		if store.KVStore.KeyDoesNotExistError(err) {
+			ctx.JSON(http.StatusOK, response.RegistryItem{
+				Item: "",
+			})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
 			Error: fmt.Sprintf("error while retriving value from store: %s", err),
 		})
@@ -135,6 +147,12 @@ func storeGetByNameHandler(ctx *gin.Context, prefix string) {
 	}
 	val, err := store.KVStore.Get(context.TODO(), fmt.Sprintf("%s/%s", prefix, name))
 	if err != nil {
+		if store.KVStore.KeyDoesNotExistError(err) {
+			ctx.JSON(http.StatusOK, response.RegistryItem{
+				Item: "",
+			})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
 			Error: fmt.Sprintf("error while getting the key: %s: %s", name, err),
 		})

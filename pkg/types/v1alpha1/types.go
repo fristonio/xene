@@ -23,6 +23,16 @@ func (t *TypeMeta) Validate(reqKind string) error {
 	return nil
 }
 
+// DeepEquals checks if the two TypeMeta objects are equal or not
+func (t *TypeMeta) DeepEquals(tz *TypeMeta) bool {
+	if t.Kind != tz.Kind ||
+		t.APIVersion != tz.APIVersion {
+		return false
+	}
+
+	return true
+}
+
 // ObjectMeta contains metadata which is common to all of the objects in xene.
 type ObjectMeta struct {
 	// Description for the type object.
@@ -35,6 +45,16 @@ type ObjectMeta struct {
 // GetName return the name of the object
 func (o *ObjectMeta) GetName() string {
 	return o.Name
+}
+
+// DeepEquals checks if the two ObjectMeta objects are equal or not
+func (o *ObjectMeta) DeepEquals(oz *ObjectMeta) bool {
+	if o.Name != oz.Name ||
+		o.Description != o.Description {
+		return false
+	}
+
+	return true
 }
 
 // Metadata corresponds to the metadata associated with the object.

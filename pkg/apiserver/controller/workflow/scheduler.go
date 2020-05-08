@@ -66,7 +66,18 @@ func (s *Scheduler) assignNewAgent(status *v1alpha1.PipelineStatus) error {
 		}
 	}
 
+	prevExec := []string{}
+	if status.Executor != "" {
+		prevExec = append(prevExec, status.Executor)
+	}
 	status.Executor = agent
+	for _, exec := range status.PreviousExecutors {
+		if exec != agent {
+			prevExec = append(prevExec, exec)
+		}
+	}
+
+	status.PreviousExecutors = prevExec
 	return nil
 }
 

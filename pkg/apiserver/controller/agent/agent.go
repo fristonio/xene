@@ -79,6 +79,18 @@ func (a *Controller) Type() string {
 func (a *Controller) Configure() {
 	a.storeInformer = a.newAgentStoreController()
 	a.name = a.storeInformer.Name()
+
+	ctrlFunc, err := controller.NewControllerFunction(a.blacklistedNodesController)
+	if err != nil {
+		log.Warnf("error while creating controller for balacklisted nodes: %s", err)
+	}
+	err = a.Manager.UpdateController("agent-blacklisted-nodes", "agent-controller", controller.Internal{
+		DoFunc:      ctrlFunc,
+		RunInterval: a.healthCheckInterval * 10,
+	})
+	if err != nil {
+		log.Warnf("error while updating blacklisted nodes controller: %s", err)
+	}
 }
 
 // Run starts running the agent controller.
@@ -256,4 +268,35 @@ func (a *Controller) ControllerFunc(_ctx context.Context, ag *v1alpha1.Agent) er
 
 	err := ag.CheckHealth(node.conn)
 	return err
+}
+
+func (a *Controller) blacklistedNodesController(_ctx context.Context) error {
+	for name, node := range a.blacklistedNodes {
+		conn, err := GetAgentConnection(node.Agent)
+		if err != nil {
+			continue
+		}
+		err = node.Agent.CheckHealth(conn)
+		if err == nil {
+			log.Infof("node %s back online", name)
+			node.conn = conn
+			ctrlFunc, err := controller.NewControllerFunction(a.ControllerFunc, node.Agent)
+			if err != nil {
+				log.Errorf("error while creating controller function: %s", err)
+				continue
+			}
+			err = a.Manager.UpdateController(name, "agent-controller", controller.Internal{
+				DoFunc:      ctrlFunc,
+				RunInterval: a.healthCheckInterval,
+			})
+			if err != nil {
+				log.Errorf("error while updating agent controller for : %s", name)
+				continue
+			}
+			a.Nodes[name] = node
+			delete(a.blacklistedNodes, name)
+		}
+	}
+
+	return nil
 }

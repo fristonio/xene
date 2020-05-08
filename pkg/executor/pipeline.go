@@ -8,6 +8,7 @@ import (
 	"github.com/fristonio/xene/pkg/dag"
 	"github.com/fristonio/xene/pkg/errors"
 	"github.com/fristonio/xene/pkg/executor/cre"
+	"github.com/fristonio/xene/pkg/option"
 	"github.com/fristonio/xene/pkg/store"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
 	"github.com/sirupsen/logrus"
@@ -63,6 +64,7 @@ func (p *PipelineExecutor) Run() {
 	status := v1alpha1.NewPipelineRunStatus()
 	status.Name = p.name
 	status.RunID = p.id
+	status.Agent = option.Config.Agent.Name
 
 	// Configure the pipeline runtime executor.
 	err := p.re.Configure()

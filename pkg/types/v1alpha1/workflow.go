@@ -548,6 +548,8 @@ type PipelineRunStatus struct {
 
 	Status string `json:"status"`
 
+	Agent string `json:"agent"`
+
 	Tasks map[string]*TaskRunStatus `json:"tasks"`
 }
 
@@ -576,12 +578,12 @@ type StepRunStatus struct {
 
 // PipelineStatus contains the status of the pipeline in context
 type PipelineStatus struct {
-	// LastRunTimestamp contains the timestamp of the time when the pipeline
-	// was last run.
-	LastRunTimestamp int64 `json:"lastRunTimestamp"`
-
 	// Executor is the name of the agent which ran this pipeline
 	Executor string `json:"executor"`
+
+	// PreviousExecutors contains a list of agents previously in use for the
+	// provided pipelines
+	PreviousExecutors []string `json:"previousExecutors"`
 
 	// Status contains the status information of the pipeline.
 	Status string `json:"status"`

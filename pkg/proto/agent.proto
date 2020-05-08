@@ -30,16 +30,12 @@ message Pipeline {
 }
 
 message PipelineStatus {
-    // LastRunTimestamp contains the timstamp corresponding to the last run
-    // of the pipeline.
-    int64 LastRunTimestamp = 1;
-
     // Executor contains the name of the agent which ran the pipeline.
-    string Executor = 2;
+    string Executor = 1;
 
     // status contains the current status of the pipeline.
     // It can be one of the preconfigured statuses for a pipeline.
-    string Status = 3;
+    string Status = 2;
 }
 
 message StatusOpts {
