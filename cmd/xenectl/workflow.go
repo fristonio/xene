@@ -65,6 +65,11 @@ var workflowGetCmd = &cobra.Command{
 			return
 		}
 
+		if res.Payload.Item == "" {
+			log.Infof("the requested workflow is not found")
+			return
+		}
+
 		var kv v1alpha1.KVPairStruct
 		err = json.Unmarshal([]byte(res.Payload.Item), &kv)
 		if err != nil {
@@ -76,7 +81,7 @@ var workflowGetCmd = &cobra.Command{
 
 var workflowDeleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Get the workflow with the provided name.",
+	Short: "Delete the workflow with the provided name.",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		if workflowName == "" {
@@ -88,7 +93,7 @@ var workflowDeleteCmd = &cobra.Command{
 			registry.NewDeleteAPIV1RegistryWorkflowNameParams().WithName(workflowName),
 			auth)
 		if err != nil {
-			log.Errorf("error while getting workflow document: %s", err)
+			log.Errorf("error while deleting workflow document: %s", err)
 			return
 		}
 

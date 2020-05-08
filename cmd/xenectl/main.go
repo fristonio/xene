@@ -40,6 +40,7 @@ func init() {
 	rootCmd.AddCommand(cmdrefCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(workflowCmd)
+	rootCmd.AddCommand(agentCmd)
 	rootCmd.AddCommand(workflowStatusCmd)
 }
 

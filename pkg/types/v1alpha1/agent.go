@@ -37,6 +37,17 @@ func (a *Agent) Validate() error {
 	return a.Spec.Validate()
 }
 
+// DeepEquals checks if the object provided is equal to the agent object.
+func (a *Agent) DeepEquals(ag *Agent) bool {
+	if a.TypeMeta.DeepEquals(&ag.TypeMeta) &&
+		a.Metadata.DeepEquals(&ag.Metadata.ObjectMeta) &&
+		a.Spec.DeepEquals(&ag.Spec) {
+		return true
+	}
+
+	return false
+}
+
 // CheckHealth checks for the health status of the provided agent in context.
 // If the agent is not healthy or there is some issue with the connectivity the
 // function returns an error.
@@ -92,4 +103,18 @@ func (a *AgentSpec) Validate() error {
 	}
 
 	return nil
+}
+
+// DeepEquals checks if the two AgentSpec objects are equal or not
+func (a *AgentSpec) DeepEquals(az *AgentSpec) bool {
+	if az.Address != a.Address ||
+		a.Insecure != az.Insecure ||
+		a.ClientKeySecret != az.ClientKeySecret ||
+		a.ClientCertSecret != az.ClientCertSecret ||
+		a.RootCASecret != az.RootCASecret ||
+		a.ServerName != az.ServerName {
+		return false
+	}
+
+	return true
 }

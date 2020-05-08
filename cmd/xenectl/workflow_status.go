@@ -65,6 +65,11 @@ var workflowStatusGetCmd = &cobra.Command{
 			return
 		}
 
+		if res.Payload.Item == "" {
+			log.Infof("the requested workflow status is not found")
+			return
+		}
+
 		var kv v1alpha1.KVPairStruct
 		err = json.Unmarshal([]byte(res.Payload.Item), &kv)
 		if err != nil {
@@ -76,7 +81,7 @@ var workflowStatusGetCmd = &cobra.Command{
 
 var workflowStatusDeleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Get the workflow with the provided name.",
+	Short: "Deleting the workflow with the provided name.",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		if workflowName == "" {
@@ -88,7 +93,7 @@ var workflowStatusDeleteCmd = &cobra.Command{
 			status.NewDeleteAPIV1StatusWorkflowNameParams().WithName(workflowName),
 			auth)
 		if err != nil {
-			log.Errorf("error while getting workflow document: %s", err)
+			log.Errorf("error while deleting workflow document: %s", err)
 			return
 		}
 

@@ -63,6 +63,7 @@ var agentCmd = &cobra.Command{
 		}()
 
 		log.Infof("Registered agent name is: %s", option.Config.Agent.Name)
+
 		// Join the agent pool in the API server
 		err := server.JoinAPIServer(
 			option.Config.Agent.APIServer,

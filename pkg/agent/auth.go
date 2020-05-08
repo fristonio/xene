@@ -27,6 +27,29 @@ func (s *Server) JoinAPIServer(apiServerAddr, agentName, agentAddr, authToken st
 		return fmt.Errorf("error while parsing Agent address: %s", err)
 	}
 
+	client := client.New(httptransport.New(addr.Host, "", nil), strfmt.Default)
+	bearerTokenAuth := httptransport.BearerToken(authToken)
+
+	res, err := client.Registry.GetAPIV1RegistryAgent(
+		registry.NewGetAPIV1RegistryAgentParams().WithName(&agentName), bearerTokenAuth)
+	if err != nil {
+		return fmt.Errorf("error getting current agent information: %s", err)
+	}
+
+	a := types.Agent{}
+	if res.Payload.Item != "" {
+		var kv v1alpha1.KVPairStruct
+		err = json.Unmarshal([]byte(res.Payload.Item), &kv)
+		if err != nil {
+			return fmt.Errorf("error while unmarshalling agent resp: %s", err)
+		}
+
+		err = json.Unmarshal([]byte(kv.Value), &a)
+		if err != nil {
+			return fmt.Errorf("error unmarshaling agent get response: %s", err)
+		}
+	}
+
 	agentManifest := types.Agent{
 		TypeMeta: types.TypeMeta{
 			Kind:       types.AgentKind,
@@ -57,13 +80,19 @@ func (s *Server) JoinAPIServer(apiServerAddr, agentName, agentAddr, authToken st
 		agentManifest.Spec.ServerName = option.Config.Agent.ServerName
 	}
 
+	log.Infof("%v", a)
+	log.Infof("%v", agentManifest)
+	if a.DeepEquals(&agentManifest) {
+		log.Infof("agent information is already up to date in apiserver")
+		return nil
+	}
+
+	log.Infof("creating agent object for apiserver")
+
 	ag, err := json.Marshal(agentManifest)
 	if err != nil {
 		return fmt.Errorf("error while marshaling agent manifest: %s", err)
 	}
-
-	client := client.New(httptransport.New(addr.Host, "", nil), strfmt.Default)
-	bearerTokenAuth := httptransport.BearerToken(authToken)
 
 	resp, err := client.Registry.
 		PostAPIV1RegistryAgent(registry.NewPostAPIV1RegistryAgentParams().WithAgent(string(ag)), bearerTokenAuth)
