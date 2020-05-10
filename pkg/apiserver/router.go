@@ -7,6 +7,7 @@ import (
 	"github.com/fristonio/xene/pkg/apiserver/routes"
 	"github.com/fristonio/xene/pkg/option"
 	"github.com/fristonio/xene/pkg/store"
+	"github.com/gin-contrib/cors"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -19,6 +20,14 @@ import (
 func (s *APIServer) NewAPIServerRouter(includeLogger bool) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	// Initialize store for xene apiserver.
 	err := store.Setup(option.Config.Store.StorageDirectory)

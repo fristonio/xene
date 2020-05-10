@@ -277,6 +277,96 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/registry/list/agents": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "List all the keys of items in the registry of the provided type agent.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.AgentInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/registry/list/secrets": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "List all the keys of items in the registry of the provided type agent.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.SecretInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/registry/list/workflows": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "Gather information about all the workflow objects managed by xene.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.WorkflowInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/registry/secret": {
             "get": {
                 "security": [
@@ -1053,6 +1143,23 @@ var doc = `{
         }
     },
     "definitions": {
+        "response.AgentInfo": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "available": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "secure": {
+                    "type": "boolean"
+                }
+            }
+        },
         "response.HTTPError": {
             "type": "object",
             "properties": {
@@ -1120,6 +1227,46 @@ var doc = `{
                 },
                 "items": {
                     "description": "Items contains the Serialized kvstore items",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "response.SecretInfo": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "restricted": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.WorkflowInfo": {
+            "type": "object",
+            "properties": {
+                "agents": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pipelines": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "triggers": {
                     "type": "array",
                     "items": {
                         "type": "string"

@@ -73,3 +73,6 @@ func (m *Metadata) Validate() error {
 
 	return nil
 }
+
+// RegistryItem is the type of registry item in xene.
+type RegistryItem string

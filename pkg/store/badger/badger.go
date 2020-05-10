@@ -248,6 +248,25 @@ func (b *Backend) ListPrefix(ctx context.Context, path string) (types.KeyValuePa
 	return list, nil
 }
 
+// ListPrefixKeys returns a list of keys matching the prefix
+// This is best effort.
+func (b *Backend) ListPrefixKeys(ctx context.Context, path string) ([]string, error) {
+	list := []string{}
+	txn := b.db.NewTransaction(false)
+	defer txn.Discard()
+
+	it := txn.NewIterator(badger.DefaultIteratorOptions)
+	defer it.Close()
+
+	prefix := []byte(path)
+	for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+		item := it.Item()
+		list = append(list, string(item.Key()))
+	}
+
+	return list, nil
+}
+
 // PrefixScanWithFunction scans the provided key prefix keys in the store and run
 // the provided function for each one of them.
 func (b *Backend) PrefixScanWithFunction(ctx context.Context,

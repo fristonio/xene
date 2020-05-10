@@ -50,6 +50,9 @@ type Backend interface {
 	// CreateIfExists creates a key with the value only if key condKey exists
 	CreateIfExists(ctx context.Context, condKey, key string, value []byte) error
 
+	// ListPrefixKeys list all the keys with the provided prefix.
+	ListPrefixKeys(ctx context.Context, path string) ([]string, error)
+
 	// ListPrefix returns a list of keys matching the prefix
 	ListPrefix(ctx context.Context, prefix string) (types.KeyValuePairs, error)
 

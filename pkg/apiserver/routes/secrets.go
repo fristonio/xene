@@ -131,3 +131,31 @@ func secretPatchHandler(ctx *gin.Context) {
 func secretRemoveHandler(ctx *gin.Context) {
 	storeDeleteHandler(ctx, v1alpha1.SecretKeyPrefix)
 }
+
+// @Summary List all the keys of items in the registry of the provided type agent.
+// @Tags registry
+// @Accept  json
+// @Produce json
+// @Success 200 {array} response.SecretInfo
+// @Security ApiKeyAuth
+// @Router /api/v1/registry/list/secrets [get]
+func secretsListHandler(ctx *gin.Context) {
+	resp := []response.SecretInfo{}
+
+	store.KVStore.PrefixScanWithFunction(
+		context.TODO(),
+		v1alpha1.SecretKeyPrefix,
+		func(kv *v1alpha1.KVPairStruct) {
+			var secret v1alpha1.Secret
+			err := json.Unmarshal([]byte(kv.Value), &secret)
+			if err == nil {
+				resp = append(resp, response.SecretInfo{
+					Name:       secret.Metadata.GetName(),
+					Type:       secret.Spec.Type,
+					Restricted: secret.Spec.Restricted,
+				})
+			}
+		})
+
+	ctx.JSON(http.StatusOK, resp)
+}

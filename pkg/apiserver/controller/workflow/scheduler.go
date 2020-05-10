@@ -45,7 +45,7 @@ func NewSchedulerWithDefaultAgentCtrl() *Scheduler {
 }
 
 func (s *Scheduler) assignNewAgent(status *v1alpha1.PipelineStatus) error {
-	agents := s.AgentController.GetAllAgents()
+	agents := s.AgentController.GetAllActiveAgents()
 	for _, agent := range agents {
 		if _, ok := s.agentsLoadMap[agent]; !ok {
 			s.agentsLoadMap[agent] = 0

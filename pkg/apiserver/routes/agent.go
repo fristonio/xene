@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
+	"github.com/fristonio/xene/pkg/apiserver/controller/agent"
 	"github.com/fristonio/xene/pkg/apiserver/response"
 	"github.com/fristonio/xene/pkg/store"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
@@ -130,4 +132,56 @@ func agentPatchHandler(ctx *gin.Context) {
 // @Router /api/v1/registry/agent/{name} [delete]
 func agentRemoveHandler(ctx *gin.Context) {
 	storeDeleteHandler(ctx, v1alpha1.AgentKeyPrefix)
+}
+
+// @Summary List all the keys of items in the registry of the provided type agent.
+// @Tags registry
+// @Accept  json
+// @Produce json
+// @Success 200 {array} response.AgentInfo
+// @Security ApiKeyAuth
+// @Router /api/v1/registry/list/agents [get]
+func agentsListHandler(ctx *gin.Context) {
+	resp := []response.AgentInfo{}
+	operating := agent.AgentCtrl.GetActiveAgentsWithInfo()
+	blacklisted := agent.AgentCtrl.GetBlacklistedAgentsWithInfo()
+
+	store.KVStore.PrefixScanWithFunction(
+		context.TODO(),
+		v1alpha1.AgentKeyPrefix,
+		func(kv *v1alpha1.KVPairStruct) {
+			ag := strings.TrimPrefix(kv.Key, v1alpha1.AgentKeyPrefix+"/")
+			if agInfo, ok := operating[ag]; ok {
+				resp = append(resp, response.AgentInfo{
+					Name:      ag,
+					Address:   agInfo.Spec.Address,
+					Secure:    !agInfo.Spec.Insecure,
+					Available: true,
+				})
+			}
+
+			if agInfo, ok := blacklisted[ag]; ok {
+				resp = append(resp, response.AgentInfo{
+					Name:      ag,
+					Address:   agInfo.Spec.Address,
+					Secure:    !agInfo.Spec.Insecure,
+					Available: false,
+				})
+			}
+		})
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// @Summary Returns verbose information about the agent.
+// @Tags registry
+// @Accept  json
+// @Produce json
+// @Param name path string true "Name of the workflow to get information about."
+// @Success 200 {array} response.AgentVerboseInfo
+// @Security ApiKeyAuth
+// @Router /api/v1/info/agent/{name} [get]
+func agentInfoHandler(ctx *gin.Context) {
+	resp := response.AgentVerboseInfo{}
+	ctx.JSON(http.StatusOK, resp)
 }

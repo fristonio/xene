@@ -1,5 +1,16 @@
 basePath: /
 definitions:
+  response.AgentInfo:
+    properties:
+      address:
+        type: string
+      available:
+        type: boolean
+      name:
+        type: string
+      secure:
+        type: boolean
+    type: object
   response.HTTPError:
     properties:
       error:
@@ -47,6 +58,32 @@ definitions:
         type: integer
       items:
         description: Items contains the Serialized kvstore items
+        items:
+          type: string
+        type: array
+    type: object
+  response.SecretInfo:
+    properties:
+      name:
+        type: string
+      restricted:
+        type: boolean
+      type:
+        type: string
+    type: object
+  response.WorkflowInfo:
+    properties:
+      agents:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      pipelines:
+        items:
+          type: string
+        type: array
+      triggers:
         items:
           type: string
         type: array
@@ -218,6 +255,60 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Patches the specified agent from the store.
+      tags:
+      - registry
+  /api/v1/registry/list/agents:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.AgentInfo'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: List all the keys of items in the registry of the provided type agent.
+      tags:
+      - registry
+  /api/v1/registry/list/secrets:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.SecretInfo'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: List all the keys of items in the registry of the provided type agent.
+      tags:
+      - registry
+  /api/v1/registry/list/workflows:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.WorkflowInfo'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Gather information about all the workflow objects managed by xene.
       tags:
       - registry
   /api/v1/registry/secret:

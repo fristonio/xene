@@ -14,6 +14,9 @@ func APIGroupRouter(r *gin.RouterGroup) {
 
 	statusGroup := r.Group("status")
 	StatusGroupRoutes(statusGroup)
+
+	pipelineGroup := r.Group("pipeline")
+	PipelineGroupRoutes(pipelineGroup)
 }
 
 // @Summary Handles ping event for api routes.

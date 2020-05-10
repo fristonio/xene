@@ -257,3 +257,70 @@ func workflowStatusPatchHandler(ctx *gin.Context) {
 func workflowStatusDeleteHandler(ctx *gin.Context) {
 	storeDeleteHandler(ctx, v1alpha1.WorkflowStatusKeyPrefix)
 }
+
+// @Summary Gather information about all the workflow objects managed by xene.
+// @Tags registry
+// @Accept  json
+// @Produce json
+// @Success 200 {array} response.WorkflowInfo
+// @Security ApiKeyAuth
+// @Router /api/v1/registry/list/workflows [get]
+func workflowsListHandler(ctx *gin.Context) {
+	resp := []response.WorkflowInfo{}
+
+	store.KVStore.PrefixScanWithFunction(
+		context.TODO(),
+		v1alpha1.WorkflowKeyPrefix,
+		func(kv *v1alpha1.KVPairStruct) {
+			var wf v1alpha1.Workflow
+			if err := json.Unmarshal([]byte(kv.Value), &wf); err == nil {
+				pipelines := []string{}
+				for name := range wf.Spec.Pipelines {
+					pipelines = append(pipelines, name)
+				}
+
+				triggers := []string{}
+				for name := range wf.Spec.Triggers {
+					triggers = append(triggers, name)
+				}
+
+				wfInfo := response.WorkflowInfo{
+					Name:      wf.Metadata.GetName(),
+					Pipelines: pipelines,
+					Triggers:  triggers,
+				}
+
+				val, err := store.KVStore.Get(
+					context.TODO(), fmt.Sprintf("%s/%s", v1alpha1.WorkflowStatusKeyPrefix, wf.Metadata.GetName()))
+				if err == nil {
+					var wfStatus v1alpha1.WorkflowStatus
+					err = json.Unmarshal(val.Data, &wfStatus)
+					if err == nil {
+						executors := []string{}
+						for _, status := range wfStatus.Pipelines {
+							executors = append(executors, status.Executor)
+						}
+
+						wfInfo.Agents = executors
+					}
+				}
+
+				resp = append(resp, wfInfo)
+			}
+		})
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// @Summary Returns verbose information about a workflow.
+// @Tags registry
+// @Accept  json
+// @Produce json
+// @Param name path string true "Name of the workflow to get information about."
+// @Success 200 {object} response.WorkflowVerboseInfo
+// @Security ApiKeyAuth
+// @Router /api/v1/info/workflow/{name} [get]
+func workflowInfoHandler(ctx *gin.Context) {
+	resp := response.WorkflowVerboseInfo{}
+	ctx.JSON(http.StatusOK, resp)
+}

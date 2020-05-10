@@ -118,11 +118,47 @@ func (a *Controller) Name() string {
 	return a.name
 }
 
-// GetAllAgents returns all the agent which are not blacklisted.
-func (a *Controller) GetAllAgents() []string {
+// GetAllActiveAgents returns all the agent which are not blacklisted.
+func (a *Controller) GetAllActiveAgents() []string {
 	agents := make([]string, 0)
 	for name := range a.Nodes {
 		agents = append(agents, name)
+	}
+
+	return agents
+}
+
+// GetAllAgentsWithInfo returns a list with info of all the agents
+// including blacklisted.
+func (a *Controller) GetAllAgentsWithInfo() map[string]*v1alpha1.Agent {
+	agents := make(map[string]*v1alpha1.Agent)
+	for name, node := range a.Nodes {
+		agents[name] = node.Agent
+	}
+
+	for name, node := range a.blacklistedNodes {
+		agents[name] = node.Agent
+	}
+
+	return agents
+}
+
+// GetActiveAgentsWithInfo returns a list with info of all active agents
+// not including blacklisted.
+func (a *Controller) GetActiveAgentsWithInfo() map[string]*v1alpha1.Agent {
+	agents := make(map[string]*v1alpha1.Agent)
+	for name, node := range a.Nodes {
+		agents[name] = node.Agent
+	}
+
+	return agents
+}
+
+// GetBlacklistedAgentsWithInfo returns a list with info of all the blacklisted agents
+func (a *Controller) GetBlacklistedAgentsWithInfo() map[string]*v1alpha1.Agent {
+	agents := make(map[string]*v1alpha1.Agent)
+	for name, node := range a.blacklistedNodes {
+		agents[name] = node.Agent
 	}
 
 	return agents

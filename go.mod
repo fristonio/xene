@@ -11,6 +11,7 @@ require (
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker v1.13.1
 	github.com/docker/go-connections v0.4.0 // indirect
+	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-openapi/errors v0.19.4
 	github.com/go-openapi/runtime v0.19.15

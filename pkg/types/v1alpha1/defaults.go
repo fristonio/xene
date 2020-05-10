@@ -8,23 +8,26 @@ var (
 	// Version is the version string for the types registered for xene.
 	Version string = "v1alpha1"
 
+	// RegistryPath contains the path of the registry key
+	RegistryPath string = fmt.Sprintf("%s/registry", Version)
+
 	// WorkflowKeyPrefix is the key prefix for all the workflow objects.
-	WorkflowKeyPrefix string = fmt.Sprintf("%s/registry/workflow", Version)
+	WorkflowKeyPrefix string = fmt.Sprintf("%s/workflow", RegistryPath)
 
 	// WorkflowStatusKeyPrefix is the key prefix for all the workflow status objects.
-	WorkflowStatusKeyPrefix string = fmt.Sprintf("%s/status/workflow", Version)
+	WorkflowStatusKeyPrefix string = fmt.Sprintf("%s/status/workflow", RegistryPath)
 
 	// PipelineStatusKeyPrefix is the key prefix for all the pipeline status objects.
-	PipelineStatusKeyPrefix string = fmt.Sprintf("%s/status/pipeline", Version)
+	PipelineStatusKeyPrefix string = fmt.Sprintf("%s/status/pipeline", RegistryPath)
 
 	// PipelineKeyPrefix is the key prefix for all the pipeline objects.
-	PipelineKeyPrefix string = fmt.Sprintf("%s/registry/pipeline", Version)
+	PipelineKeyPrefix string = fmt.Sprintf("%s/pipeline", RegistryPath)
 
 	// TriggerStatusKeyPrefix is the key prefix for all the trigger status objects.
-	TriggerStatusKeyPrefix string = fmt.Sprintf("%s/status/trigger", Version)
+	TriggerStatusKeyPrefix string = fmt.Sprintf("%s/status/trigger", RegistryPath)
 
 	// TriggerKeyPrefix is the key prefix for all the trigger objects.
-	TriggerKeyPrefix string = fmt.Sprintf("%s/registry/trigger", Version)
+	TriggerKeyPrefix string = fmt.Sprintf("%s/trigger", RegistryPath)
 
 	// WorkflowKind is the Kind when creating a Workflow
 	WorkflowKind string = "Workflow"
@@ -33,13 +36,13 @@ var (
 	WorkflowStatusKind string = "WorkflowStatus"
 
 	// AgentKeyPrefix is the key prefix for all the agent objects in xene.
-	AgentKeyPrefix string = fmt.Sprintf("%s/registry/agent", Version)
+	AgentKeyPrefix string = fmt.Sprintf("%s/agent", RegistryPath)
 
 	// AgentKind is the kind when creating Agent object
 	AgentKind string = "Agent"
 
 	// SecretKeyPrefix is the key prefix for all the workflow objects.
-	SecretKeyPrefix string = fmt.Sprintf("%s/registry/secret", Version)
+	SecretKeyPrefix string = fmt.Sprintf("%s/secret", RegistryPath)
 
 	// SecretKind is the kind when creating a secret object in xene.
 	SecretKind string = "Secret"
@@ -61,6 +64,18 @@ var (
 
 	// RegisteredTriggerTypes contains a list of TriggerTypes allowed with xene.
 	RegisteredTriggerTypes []TriggerType = []TriggerType{DefaultTriggerType, CronTriggerType}
+
+	// RegistryItemWorkflow contains the workflow registry item name
+	RegistryItemWorkflow RegistryItem = "workflow"
+
+	// RegistryItemAgent contains the Agent registry item name
+	RegistryItemAgent RegistryItem = "agent"
+
+	// RegistryItemSecret contains the secret registry item name
+	RegistryItemSecret RegistryItem = "secret"
+
+	// RegistryItems contains a list of all the available registry items
+	RegistryItems []RegistryItem = []RegistryItem{RegistryItemAgent, RegistryItemSecret, RegistryItemWorkflow}
 
 	// StatusError contains the error status
 	StatusError string = "Error"

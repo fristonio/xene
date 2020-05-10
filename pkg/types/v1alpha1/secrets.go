@@ -54,6 +54,9 @@ type SecretSpec struct {
 	// Content contains the base64 string representation of the secret
 	// content.
 	Content string `json:"content"`
+
+	// Restricted returns if the secret is restricted or not.
+	Restricted bool `json:"restricted"`
 }
 
 // Validate validates the integrity of the Secret object.
