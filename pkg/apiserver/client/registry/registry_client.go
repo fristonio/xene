@@ -37,6 +37,12 @@ type ClientService interface {
 
 	GetAPIV1RegistryAgentName(params *GetAPIV1RegistryAgentNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1RegistryAgentNameOK, error)
 
+	GetAPIV1RegistryListAgents(params *GetAPIV1RegistryListAgentsParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1RegistryListAgentsOK, error)
+
+	GetAPIV1RegistryListSecrets(params *GetAPIV1RegistryListSecretsParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1RegistryListSecretsOK, error)
+
+	GetAPIV1RegistryListWorkflows(params *GetAPIV1RegistryListWorkflowsParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1RegistryListWorkflowsOK, error)
+
 	GetAPIV1RegistrySecret(params *GetAPIV1RegistrySecretParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1RegistrySecretOK, error)
 
 	GetAPIV1RegistrySecretName(params *GetAPIV1RegistrySecretNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1RegistrySecretNameOK, error)
@@ -242,6 +248,111 @@ func (a *Client) GetAPIV1RegistryAgentName(params *GetAPIV1RegistryAgentNamePara
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for GetAPIV1RegistryAgentName: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+  GetAPIV1RegistryListAgents lists all the keys of items in the registry of the provided type agent
+*/
+func (a *Client) GetAPIV1RegistryListAgents(params *GetAPIV1RegistryListAgentsParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1RegistryListAgentsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAPIV1RegistryListAgentsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "GetAPIV1RegistryListAgents",
+		Method:             "GET",
+		PathPattern:        "/api/v1/registry/list/agents",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetAPIV1RegistryListAgentsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetAPIV1RegistryListAgentsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for GetAPIV1RegistryListAgents: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+  GetAPIV1RegistryListSecrets lists all the keys of items in the registry of the provided type agent
+*/
+func (a *Client) GetAPIV1RegistryListSecrets(params *GetAPIV1RegistryListSecretsParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1RegistryListSecretsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAPIV1RegistryListSecretsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "GetAPIV1RegistryListSecrets",
+		Method:             "GET",
+		PathPattern:        "/api/v1/registry/list/secrets",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetAPIV1RegistryListSecretsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetAPIV1RegistryListSecretsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for GetAPIV1RegistryListSecrets: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+  GetAPIV1RegistryListWorkflows gathers information about all the workflow objects managed by xene
+*/
+func (a *Client) GetAPIV1RegistryListWorkflows(params *GetAPIV1RegistryListWorkflowsParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1RegistryListWorkflowsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAPIV1RegistryListWorkflowsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "GetAPIV1RegistryListWorkflows",
+		Method:             "GET",
+		PathPattern:        "/api/v1/registry/list/workflows",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetAPIV1RegistryListWorkflowsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetAPIV1RegistryListWorkflowsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for GetAPIV1RegistryListWorkflows: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 
