@@ -11,6 +11,8 @@ definitions:
       secure:
         type: boolean
     type: object
+  response.AgentVerboseInfo:
+    type: object
   response.HTTPError:
     properties:
       error:
@@ -88,6 +90,8 @@ definitions:
           type: string
         type: array
     type: object
+  response.WorkflowVerboseInfo:
+    type: object
 host: localhost:6060
 info:
   contact:
@@ -118,6 +122,52 @@ paths:
       summary: Handles ping event for api routes.
       tags:
       - api
+  /api/v1/info/agent/{name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Name of the workflow to get information about.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.AgentVerboseInfo'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Returns verbose information about the agent.
+      tags:
+      - registry
+  /api/v1/info/workflow/{name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Name of the workflow to get information about.
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.WorkflowVerboseInfo'
+      security:
+      - ApiKeyAuth: []
+      summary: Returns verbose information about a workflow.
+      tags:
+      - registry
   /api/v1/registry/agent:
     get:
       consumes:

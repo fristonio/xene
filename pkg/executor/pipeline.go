@@ -31,6 +31,15 @@ type PipelineExecutor struct {
 
 	// re contains the runtime executor for the pipeline.
 	re RuntimeExecutor
+
+	// useStore specifies wheather to use kvstore interaction during the execution
+	// of the pipeline.
+	useStore bool
+
+	// status contains the status of the pipeline execution
+	// This is only set to a value if we are not using the store
+	// for save run status.
+	status *v1alpha1.PipelineRunStatus
 }
 
 // NewPipelineExecutor returns a new instance of PipelineExecutor for the provided
@@ -51,10 +60,18 @@ func NewPipelineExecutor(name, id string, spec *v1alpha1.PipelineSpecWithName) *
 		log: logrus.WithFields(logrus.Fields{
 			"pipeline": name,
 		}),
-		name: name,
-		id:   id,
-		re:   re,
+		name:     name,
+		id:       id,
+		re:       re,
+		useStore: true,
 	}
+}
+
+// WithoutStore sets the boolean useStore to false which will make the executor
+// not perform any KVStore interactions
+func (p *PipelineExecutor) WithoutStore() *PipelineExecutor {
+	p.useStore = false
+	return p
 }
 
 // Run starts running the pipeline.
@@ -129,9 +146,15 @@ func (p *PipelineExecutor) Run() {
 		status.Status = v1alpha1.StatusSuccess
 	}
 
-	err = p.saveStatusToStore(&status)
-	if err != nil {
-		p.log.Error(err)
+	// if we are using the store then store the status in the KVstore
+	// else store the status in the executor object
+	if p.useStore {
+		err = p.saveStatusToStore(&status)
+		if err != nil {
+			p.log.Error(err)
+		}
+	} else {
+		p.status = &status
 	}
 
 	err = p.re.Shutdown()
@@ -155,4 +178,9 @@ func (p *PipelineExecutor) saveStatusToStore(status *v1alpha1.PipelineRunStatus)
 	}
 
 	return nil
+}
+
+// GetStatus returns the status of the pipeline run.
+func (p *PipelineExecutor) GetStatus() *v1alpha1.PipelineRunStatus {
+	return p.status
 }

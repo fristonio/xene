@@ -6,7 +6,10 @@ import (
 	"io/ioutil"
 
 	"github.com/fristonio/xene/pkg/apiserver/client/registry"
+	"github.com/fristonio/xene/pkg/executor"
+	"github.com/fristonio/xene/pkg/executor/cre/docker"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
+	"github.com/fristonio/xene/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -101,9 +104,70 @@ var workflowDeleteCmd = &cobra.Command{
 	},
 }
 
+var workflowRunCmd = &cobra.Command{
+	Use:   "run",
+	Short: "run start running the workflow with the file name provided",
+
+	Run: func(cmd *cobra.Command, args []string) {
+		if workflowFileName == "" {
+			log.Fatalf("workflow file name(--file) is a required parameter and must be a valid one")
+		}
+
+		if !runLocal {
+			log.Fatalf("Currently only running workflow locally is supported")
+		}
+
+		// Try connecting to docker for the execution of pipelines
+		// else Die
+		docker.ConnectToDockerOrDie()
+
+		data, err := ioutil.ReadFile(workflowFileName)
+		if err != nil {
+			log.Fatalf("error while reading workflow manifest file: %s", err)
+		}
+
+		var workflow v1alpha1.Workflow
+		err = json.Unmarshal(data, &workflow)
+		if err != nil {
+			log.Fatalf("error while unmarshalling workflow manifest: %s", err)
+		}
+
+		err = workflow.Validate()
+		if err != nil {
+			log.Fatalf("workflow is not valid: %s", err)
+		}
+		err = workflow.Resolve()
+		if err != nil {
+			log.Fatalf("error while resolving workflow: %s", err)
+		}
+
+		for name, pipeline := range workflow.Spec.Pipelines {
+			log.Infof("\nProcessing pipeline: %s\n", name)
+
+			spec := &v1alpha1.PipelineSpecWithName{
+				PipelineSpec: *pipeline,
+				Name:         name,
+				Workflow:     workflow.Metadata.GetName(),
+			}
+			exec := executor.NewPipelineExecutor(name, fmt.Sprintf("%s-%s", name, utils.RandToken(10)), spec).WithoutStore()
+			exec.Run()
+
+			data, err := json.Marshal(exec.GetStatus())
+			if err != nil {
+				log.Fatalf("error while marshalling pipeline run status: %s", err)
+			}
+
+			log.Infof("\n\nPipeline processing finished")
+			log.Infof("----------------- STATUS REPORT -----------------")
+			prettyPrintJSON(string(data))
+		}
+	},
+}
+
 var (
 	workflowFileName string
 	workflowName     string
+	runLocal         bool
 )
 
 func init() {
@@ -113,8 +177,13 @@ func init() {
 		"", "name of the workflow definition to get.")
 	workflowDeleteCmd.Flags().StringVarP(&workflowName, "name", "n",
 		"", "name of the workflow definition to delete.")
+	workflowRunCmd.Flags().StringVarP(&workflowFileName, "file", "f",
+		"", "File to use for workflow manfiest.")
+	workflowRunCmd.Flags().BoolVarP(&runLocal, "local", "l",
+		true, "Run the workflow pipelines from the manifest locally")
 
 	workflowCmd.AddCommand(workflowCreateCmd)
 	workflowCmd.AddCommand(workflowGetCmd)
 	workflowCmd.AddCommand(workflowDeleteCmd)
+	workflowCmd.AddCommand(workflowRunCmd)
 }

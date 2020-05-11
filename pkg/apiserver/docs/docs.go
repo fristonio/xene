@@ -60,6 +60,81 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/info/agent/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "Returns verbose information about the agent.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the workflow to get information about.",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.AgentVerboseInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/info/workflow/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registry"
+                ],
+                "summary": "Returns verbose information about a workflow.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the workflow to get information about.",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.WorkflowVerboseInfo"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/registry/agent": {
             "get": {
                 "security": [
@@ -1160,6 +1235,9 @@ var doc = `{
                 }
             }
         },
+        "response.AgentVerboseInfo": {
+            "type": "object"
+        },
         "response.HTTPError": {
             "type": "object",
             "properties": {
@@ -1273,6 +1351,9 @@ var doc = `{
                     }
                 }
             }
+        },
+        "response.WorkflowVerboseInfo": {
+            "type": "object"
         }
     },
     "securityDefinitions": {
