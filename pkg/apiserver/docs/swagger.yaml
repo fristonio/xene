@@ -11,7 +11,36 @@ definitions:
       secure:
         type: boolean
     type: object
+  response.AgentTriggerInfo:
+    properties:
+      name:
+        type: string
+      pipelines:
+        items:
+          type: string
+        type: array
+    type: object
   response.AgentVerboseInfo:
+    properties:
+      address:
+        type: string
+      healthy:
+        type: boolean
+      name:
+        type: string
+      workflows:
+        items:
+          $ref: '#/definitions/response.AgentWorkflowInfo'
+        type: array
+    type: object
+  response.AgentWorkflowInfo:
+    properties:
+      name:
+        type: string
+      triggers:
+        items:
+          $ref: '#/definitions/response.AgentTriggerInfo'
+        type: array
     type: object
   response.HTTPError:
     properties:
@@ -127,7 +156,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: Name of the workflow to get information about.
+      - description: Name of the agent to get information about.
         in: path
         name: name
         required: true
@@ -138,14 +167,20 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/response.AgentVerboseInfo'
-            type: array
+            $ref: '#/definitions/response.AgentVerboseInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
       security:
       - ApiKeyAuth: []
       summary: Returns verbose information about the agent.
       tags:
-      - registry
+      - info
   /api/v1/info/workflow/{name}:
     get:
       consumes:
@@ -167,7 +202,7 @@ paths:
       - ApiKeyAuth: []
       summary: Returns verbose information about a workflow.
       tags:
-      - registry
+      - info
   /api/v1/registry/agent:
     get:
       consumes:

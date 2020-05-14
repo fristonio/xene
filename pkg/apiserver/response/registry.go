@@ -25,8 +25,29 @@ type AgentInfo struct {
 	Secure bool `json:"secure"`
 }
 
+// AgentTriggerInfo is the info about trigger on the agent.
+type AgentTriggerInfo struct {
+	Name string `json:"name"`
+
+	Pipelines []string `json:"pipelines"`
+}
+
+// AgentWorkflowInfo contains the info about the workflow on the agent.
+type AgentWorkflowInfo struct {
+	Name string `json:"name"`
+
+	Triggers []AgentTriggerInfo `json:"triggers"`
+}
+
 // AgentVerboseInfo contains verbose information about the agent.
 type AgentVerboseInfo struct {
+	Name string `json:"name"`
+
+	Healthy bool `json:"healthy"`
+
+	Address string `json:"address"`
+
+	Workflows []AgentWorkflowInfo `json:"workflows"`
 }
 
 // SecretInfo contains information about a secret

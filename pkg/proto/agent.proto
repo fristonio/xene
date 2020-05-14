@@ -48,6 +48,42 @@ message AgentStatus {
     bool Healthy = 1;
 }
 
+message AgentTriggerInfo {
+    // Name contains the name of the trigger.
+    string Name = 1;
+
+    // Pipelines contains the name of the pipelines.
+    repeated string Pipelines = 2;
+}
+
+message AgentWorkflowInfo {
+    // Name contains the name of the workflow.
+    string Name = 1;
+
+    repeated AgentTriggerInfo Triggers = 2;
+}
+
+message AgentInfo {
+    // Healthy specifies wheather the agent is healthy or not.
+    bool Healthy = 1;
+
+    // Name contains the name of the agent.
+    string Name = 2;
+
+    // Address contains the address of the agent.
+    string Address = 3;
+
+    // Workflows contains the information about individual
+    // workflow components scheduled on the agent.
+    // The information for the workflow type is restricted for the scope of the agent
+    // only.
+    // Which means it only contains the triggers and pipelines scheduled on the agent.
+    repeated AgentWorkflowInfo Workflows = 4;
+}
+
+message AgentInfoOpts {
+}
+
 // AgentService describes the grpc service running in the agent
 service AgentService {
     // Status returns the status of the agent service running.
@@ -61,4 +97,7 @@ service AgentService {
 
     // RemovePipeline is the RPC to remove a pipeline from the agent.
     rpc RemovePipeline(Pipeline) returns (PipelineStatus) {}
+
+    // Info returns the information about the agent.
+    rpc Info(AgentInfoOpts) returns (AgentInfo) {}
 }

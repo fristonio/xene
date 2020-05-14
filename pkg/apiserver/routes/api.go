@@ -15,6 +15,9 @@ func APIGroupRouter(r *gin.RouterGroup) {
 	statusGroup := r.Group("status")
 	StatusGroupRoutes(statusGroup)
 
+	infoGroup := r.Group("info")
+	InfoGroupRoutes(infoGroup)
+
 	pipelineGroup := r.Group("pipeline")
 	PipelineGroupRoutes(pipelineGroup)
 }

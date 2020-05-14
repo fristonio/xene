@@ -9,6 +9,8 @@ import (
 
 	"github.com/fristonio/xene/pkg/apiserver/controller/agent"
 	"github.com/fristonio/xene/pkg/apiserver/response"
+	"github.com/fristonio/xene/pkg/proto"
+	"github.com/fristonio/xene/pkg/proto/protoutils"
 	"github.com/fristonio/xene/pkg/store"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
 	"github.com/gin-gonic/gin"
@@ -174,14 +176,40 @@ func agentsListHandler(ctx *gin.Context) {
 }
 
 // @Summary Returns verbose information about the agent.
-// @Tags registry
+// @Tags info
 // @Accept  json
 // @Produce json
-// @Param name path string true "Name of the workflow to get information about."
-// @Success 200 {array} response.AgentVerboseInfo
+// @Param name path string true "Name of the agent to get information about."
+// @Success 200 {object} response.AgentVerboseInfo
+// @Failure 400 {object} response.HTTPError
+// @Failure 500 {object} response.HTTPError
 // @Security ApiKeyAuth
 // @Router /api/v1/info/agent/{name} [get]
 func agentInfoHandler(ctx *gin.Context) {
-	resp := response.AgentVerboseInfo{}
-	ctx.JSON(http.StatusOK, resp)
+	name := ctx.Param("name")
+	if name == "" {
+		ctx.JSON(http.StatusBadRequest, response.HTTPError{
+			Error: "agent name is required in the route",
+		})
+		return
+	}
+
+	conn := agent.AgentCtrl.AgentConnection(name)
+	if conn == nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: "Agent connection not found",
+		})
+		return
+	}
+
+	client := proto.NewAgentServiceClient(conn)
+	info, err := client.Info(context.TODO(), &proto.AgentInfoOpts{})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: "Error getting agent info",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, protoutils.GetAgentVerboseInfoFromProtoAgentInfo(info))
 }

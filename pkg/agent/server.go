@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
+	"github.com/fristonio/xene/pkg/defaults"
 	"github.com/fristonio/xene/pkg/option"
 	"github.com/fristonio/xene/pkg/proto"
 	"github.com/fristonio/xene/pkg/store"
@@ -193,4 +195,50 @@ func (a *agentServer) updatePipeline(ctx context.Context, pipeline *proto.Pipeli
 		Status:   "Scheduled",
 		Executor: a.name,
 	}, nil
+}
+
+// Info is the RPC to return the info about the agent.
+func (a *agentServer) Info(ctx context.Context, opts *proto.AgentInfoOpts) (*proto.AgentInfo, error) {
+	var info = proto.AgentInfo{
+		Healthy:   true,
+		Name:      option.Config.Agent.Name,
+		Address:   option.Config.Agent.Address,
+		Workflows: []*proto.AgentWorkflowInfo{},
+	}
+
+	var wfInfo = make(map[string]*proto.AgentWorkflowInfo)
+	store.KVStore.PrefixScanWithFunction(ctx, v1alpha1.TriggerKeyPrefix, func(kv *v1alpha1.KVPairStruct) {
+		tName := strings.TrimPrefix(kv.Key, fmt.Sprintf("%s/", v1alpha1.TriggerKeyPrefix))
+		wfName := strings.Split(tName, defaults.Seperator)[0]
+		trigger := strings.Split(tName, defaults.Seperator)[1]
+
+		var spec v1alpha1.TriggerSpecWithName
+		err := json.Unmarshal([]byte(kv.Value), &spec)
+		if err != nil {
+			return
+		}
+
+		if _, ok := wfInfo[wfName]; ok {
+			wfInfo[wfName].Triggers = append(wfInfo[wfName].Triggers, &proto.AgentTriggerInfo{
+				Name:      trigger,
+				Pipelines: spec.Pipelines,
+			})
+		} else {
+			wfInfo[wfName] = &proto.AgentWorkflowInfo{
+				Name: wfName,
+				Triggers: []*proto.AgentTriggerInfo{
+					{
+						Name:      trigger,
+						Pipelines: spec.Pipelines,
+					},
+				},
+			}
+		}
+	})
+
+	for _, i := range wfInfo {
+		info.Workflows = append(info.Workflows, i)
+	}
+
+	return &info, nil
 }

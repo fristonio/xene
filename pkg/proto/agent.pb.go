@@ -272,6 +272,236 @@ func (x *AgentStatus) GetHealthy() bool {
 	return false
 }
 
+type AgentTriggerInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Name contains the name of the trigger.
+	Name string `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
+	// Pipelines contains the name of the pipelines.
+	Pipelines []string `protobuf:"bytes,2,rep,name=Pipelines,proto3" json:"Pipelines,omitempty"`
+}
+
+func (x *AgentTriggerInfo) Reset() {
+	*x = AgentTriggerInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_agent_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AgentTriggerInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AgentTriggerInfo) ProtoMessage() {}
+
+func (x *AgentTriggerInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_agent_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AgentTriggerInfo.ProtoReflect.Descriptor instead.
+func (*AgentTriggerInfo) Descriptor() ([]byte, []int) {
+	return file_agent_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *AgentTriggerInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AgentTriggerInfo) GetPipelines() []string {
+	if x != nil {
+		return x.Pipelines
+	}
+	return nil
+}
+
+type AgentWorkflowInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Name contains the name of the workflow.
+	Name     string              `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
+	Triggers []*AgentTriggerInfo `protobuf:"bytes,2,rep,name=Triggers,proto3" json:"Triggers,omitempty"`
+}
+
+func (x *AgentWorkflowInfo) Reset() {
+	*x = AgentWorkflowInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_agent_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AgentWorkflowInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AgentWorkflowInfo) ProtoMessage() {}
+
+func (x *AgentWorkflowInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_agent_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AgentWorkflowInfo.ProtoReflect.Descriptor instead.
+func (*AgentWorkflowInfo) Descriptor() ([]byte, []int) {
+	return file_agent_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *AgentWorkflowInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AgentWorkflowInfo) GetTriggers() []*AgentTriggerInfo {
+	if x != nil {
+		return x.Triggers
+	}
+	return nil
+}
+
+type AgentInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Healthy specifies wheather the agent is healthy or not.
+	Healthy bool `protobuf:"varint,1,opt,name=Healthy,proto3" json:"Healthy,omitempty"`
+	// Name contains the name of the agent.
+	Name string `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
+	// Address contains the address of the agent.
+	Address string `protobuf:"bytes,3,opt,name=Address,proto3" json:"Address,omitempty"`
+	// Workflows contains the information about individual
+	// workflow components scheduled on the agent.
+	// The information for the workflow type is restricted for the scope of the agent
+	// only.
+	// Which means it only contains the triggers and pipelines scheduled on the agent.
+	Workflows []*AgentWorkflowInfo `protobuf:"bytes,4,rep,name=Workflows,proto3" json:"Workflows,omitempty"`
+}
+
+func (x *AgentInfo) Reset() {
+	*x = AgentInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_agent_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AgentInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AgentInfo) ProtoMessage() {}
+
+func (x *AgentInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_agent_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AgentInfo.ProtoReflect.Descriptor instead.
+func (*AgentInfo) Descriptor() ([]byte, []int) {
+	return file_agent_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *AgentInfo) GetHealthy() bool {
+	if x != nil {
+		return x.Healthy
+	}
+	return false
+}
+
+func (x *AgentInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AgentInfo) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *AgentInfo) GetWorkflows() []*AgentWorkflowInfo {
+	if x != nil {
+		return x.Workflows
+	}
+	return nil
+}
+
+type AgentInfoOpts struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *AgentInfoOpts) Reset() {
+	*x = AgentInfoOpts{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_agent_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AgentInfoOpts) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AgentInfoOpts) ProtoMessage() {}
+
+func (x *AgentInfoOpts) ProtoReflect() protoreflect.Message {
+	mi := &file_agent_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AgentInfoOpts.ProtoReflect.Descriptor instead.
+func (*AgentInfoOpts) Descriptor() ([]byte, []int) {
+	return file_agent_proto_rawDescGZIP(), []int{7}
+}
+
 var File_agent_proto protoreflect.FileDescriptor
 
 var file_agent_proto_rawDesc = []byte{
@@ -295,23 +525,47 @@ var file_agent_proto_rawDesc = []byte{
 	0x56, 0x65, 0x72, 0x62, 0x6f, 0x73, 0x65, 0x22, 0x27, 0x0a, 0x0b, 0x41, 0x67, 0x65, 0x6e, 0x74,
 	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x18, 0x0a, 0x07, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68,
 	0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x79,
-	0x32, 0xf7, 0x01, 0x0a, 0x0c, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
-	0x65, 0x12, 0x31, 0x0a, 0x06, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x11, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x4f, 0x70, 0x74, 0x73, 0x1a, 0x12,
-	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x53, 0x74, 0x61, 0x74,
-	0x75, 0x73, 0x22, 0x00, 0x12, 0x3a, 0x0a, 0x0e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x69,
-	0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x12, 0x0f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x50,
-	0x69, 0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x1a, 0x15, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
-	0x50, 0x69, 0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x00,
-	0x12, 0x3c, 0x0a, 0x10, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75, 0x6c, 0x65, 0x50, 0x69, 0x70, 0x65,
-	0x6c, 0x69, 0x6e, 0x65, 0x12, 0x0f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x50, 0x69, 0x70,
-	0x65, 0x6c, 0x69, 0x6e, 0x65, 0x1a, 0x15, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x50, 0x69,
-	0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x00, 0x12, 0x3a,
-	0x0a, 0x0e, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x50, 0x69, 0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65,
-	0x12, 0x0f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x50, 0x69, 0x70, 0x65, 0x6c, 0x69, 0x6e,
-	0x65, 0x1a, 0x15, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x50, 0x69, 0x70, 0x65, 0x6c, 0x69,
-	0x6e, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x00, 0x42, 0x09, 0x5a, 0x07, 0x2e, 0x3b,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x22, 0x44, 0x0a, 0x10, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x54, 0x72, 0x69, 0x67, 0x67, 0x65, 0x72,
+	0x49, 0x6e, 0x66, 0x6f, 0x12, 0x12, 0x0a, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x50, 0x69, 0x70, 0x65,
+	0x6c, 0x69, 0x6e, 0x65, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x09, 0x50, 0x69, 0x70,
+	0x65, 0x6c, 0x69, 0x6e, 0x65, 0x73, 0x22, 0x5c, 0x0a, 0x11, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x57,
+	0x6f, 0x72, 0x6b, 0x66, 0x6c, 0x6f, 0x77, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x12, 0x0a, 0x04, 0x4e,
+	0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x12,
+	0x33, 0x0a, 0x08, 0x54, 0x72, 0x69, 0x67, 0x67, 0x65, 0x72, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28,
+	0x0b, 0x32, 0x17, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x54,
+	0x72, 0x69, 0x67, 0x67, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x08, 0x54, 0x72, 0x69, 0x67,
+	0x67, 0x65, 0x72, 0x73, 0x22, 0x8b, 0x01, 0x0a, 0x09, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x49, 0x6e,
+	0x66, 0x6f, 0x12, 0x18, 0x0a, 0x07, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x79, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x08, 0x52, 0x07, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x79, 0x12, 0x12, 0x0a, 0x04,
+	0x4e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x4e, 0x61, 0x6d, 0x65,
+	0x12, 0x18, 0x0a, 0x07, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x07, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x12, 0x36, 0x0a, 0x09, 0x57, 0x6f,
+	0x72, 0x6b, 0x66, 0x6c, 0x6f, 0x77, 0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x18, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x57, 0x6f, 0x72, 0x6b, 0x66,
+	0x6c, 0x6f, 0x77, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x09, 0x57, 0x6f, 0x72, 0x6b, 0x66, 0x6c, 0x6f,
+	0x77, 0x73, 0x22, 0x0f, 0x0a, 0x0d, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x4f,
+	0x70, 0x74, 0x73, 0x32, 0xa9, 0x02, 0x0a, 0x0c, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x53, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x12, 0x31, 0x0a, 0x06, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x11,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x4f, 0x70, 0x74,
+	0x73, 0x1a, 0x12, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x53,
+	0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x00, 0x12, 0x3a, 0x0a, 0x0e, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x50, 0x69, 0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x12, 0x0f, 0x2e, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x2e, 0x50, 0x69, 0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x1a, 0x15, 0x2e, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x2e, 0x50, 0x69, 0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75,
+	0x73, 0x22, 0x00, 0x12, 0x3c, 0x0a, 0x10, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75, 0x6c, 0x65, 0x50,
+	0x69, 0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x12, 0x0f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
+	0x50, 0x69, 0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x1a, 0x15, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x2e, 0x50, 0x69, 0x70, 0x65, 0x6c, 0x69, 0x6e, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22,
+	0x00, 0x12, 0x3a, 0x0a, 0x0e, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x50, 0x69, 0x70, 0x65, 0x6c,
+	0x69, 0x6e, 0x65, 0x12, 0x0f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x50, 0x69, 0x70, 0x65,
+	0x6c, 0x69, 0x6e, 0x65, 0x1a, 0x15, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x50, 0x69, 0x70,
+	0x65, 0x6c, 0x69, 0x6e, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x00, 0x12, 0x30, 0x0a,
+	0x04, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x14, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x41, 0x67,
+	0x65, 0x6e, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x4f, 0x70, 0x74, 0x73, 0x1a, 0x10, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x2e, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x22, 0x00, 0x42,
+	0x09, 0x5a, 0x07, 0x2e, 0x3b, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -326,27 +580,35 @@ func file_agent_proto_rawDescGZIP() []byte {
 	return file_agent_proto_rawDescData
 }
 
-var file_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_agent_proto_goTypes = []interface{}{
-	(*Pipeline)(nil),       // 0: proto.Pipeline
-	(*PipelineStatus)(nil), // 1: proto.PipelineStatus
-	(*StatusOpts)(nil),     // 2: proto.StatusOpts
-	(*AgentStatus)(nil),    // 3: proto.AgentStatus
+	(*Pipeline)(nil),          // 0: proto.Pipeline
+	(*PipelineStatus)(nil),    // 1: proto.PipelineStatus
+	(*StatusOpts)(nil),        // 2: proto.StatusOpts
+	(*AgentStatus)(nil),       // 3: proto.AgentStatus
+	(*AgentTriggerInfo)(nil),  // 4: proto.AgentTriggerInfo
+	(*AgentWorkflowInfo)(nil), // 5: proto.AgentWorkflowInfo
+	(*AgentInfo)(nil),         // 6: proto.AgentInfo
+	(*AgentInfoOpts)(nil),     // 7: proto.AgentInfoOpts
 }
 var file_agent_proto_depIdxs = []int32{
-	2, // 0: proto.AgentService.Status:input_type -> proto.StatusOpts
-	0, // 1: proto.AgentService.UpdatePipeline:input_type -> proto.Pipeline
-	0, // 2: proto.AgentService.SchedulePipeline:input_type -> proto.Pipeline
-	0, // 3: proto.AgentService.RemovePipeline:input_type -> proto.Pipeline
-	3, // 4: proto.AgentService.Status:output_type -> proto.AgentStatus
-	1, // 5: proto.AgentService.UpdatePipeline:output_type -> proto.PipelineStatus
-	1, // 6: proto.AgentService.SchedulePipeline:output_type -> proto.PipelineStatus
-	1, // 7: proto.AgentService.RemovePipeline:output_type -> proto.PipelineStatus
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: proto.AgentWorkflowInfo.Triggers:type_name -> proto.AgentTriggerInfo
+	5, // 1: proto.AgentInfo.Workflows:type_name -> proto.AgentWorkflowInfo
+	2, // 2: proto.AgentService.Status:input_type -> proto.StatusOpts
+	0, // 3: proto.AgentService.UpdatePipeline:input_type -> proto.Pipeline
+	0, // 4: proto.AgentService.SchedulePipeline:input_type -> proto.Pipeline
+	0, // 5: proto.AgentService.RemovePipeline:input_type -> proto.Pipeline
+	7, // 6: proto.AgentService.Info:input_type -> proto.AgentInfoOpts
+	3, // 7: proto.AgentService.Status:output_type -> proto.AgentStatus
+	1, // 8: proto.AgentService.UpdatePipeline:output_type -> proto.PipelineStatus
+	1, // 9: proto.AgentService.SchedulePipeline:output_type -> proto.PipelineStatus
+	1, // 10: proto.AgentService.RemovePipeline:output_type -> proto.PipelineStatus
+	6, // 11: proto.AgentService.Info:output_type -> proto.AgentInfo
+	7, // [7:12] is the sub-list for method output_type
+	2, // [2:7] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_agent_proto_init() }
@@ -403,6 +665,54 @@ func file_agent_proto_init() {
 				return nil
 			}
 		}
+		file_agent_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AgentTriggerInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_agent_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AgentWorkflowInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_agent_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AgentInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_agent_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AgentInfoOpts); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -410,7 +720,7 @@ func file_agent_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_agent_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -444,6 +754,8 @@ type AgentServiceClient interface {
 	SchedulePipeline(ctx context.Context, in *Pipeline, opts ...grpc.CallOption) (*PipelineStatus, error)
 	// RemovePipeline is the RPC to remove a pipeline from the agent.
 	RemovePipeline(ctx context.Context, in *Pipeline, opts ...grpc.CallOption) (*PipelineStatus, error)
+	// Info returns the information about the agent.
+	Info(ctx context.Context, in *AgentInfoOpts, opts ...grpc.CallOption) (*AgentInfo, error)
 }
 
 type agentServiceClient struct {
@@ -490,6 +802,15 @@ func (c *agentServiceClient) RemovePipeline(ctx context.Context, in *Pipeline, o
 	return out, nil
 }
 
+func (c *agentServiceClient) Info(ctx context.Context, in *AgentInfoOpts, opts ...grpc.CallOption) (*AgentInfo, error) {
+	out := new(AgentInfo)
+	err := c.cc.Invoke(ctx, "/proto.AgentService/Info", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AgentServiceServer is the server API for AgentService service.
 type AgentServiceServer interface {
 	// Status returns the status of the agent service running.
@@ -500,6 +821,8 @@ type AgentServiceServer interface {
 	SchedulePipeline(context.Context, *Pipeline) (*PipelineStatus, error)
 	// RemovePipeline is the RPC to remove a pipeline from the agent.
 	RemovePipeline(context.Context, *Pipeline) (*PipelineStatus, error)
+	// Info returns the information about the agent.
+	Info(context.Context, *AgentInfoOpts) (*AgentInfo, error)
 }
 
 // UnimplementedAgentServiceServer can be embedded to have forward compatible implementations.
@@ -517,6 +840,9 @@ func (*UnimplementedAgentServiceServer) SchedulePipeline(context.Context, *Pipel
 }
 func (*UnimplementedAgentServiceServer) RemovePipeline(context.Context, *Pipeline) (*PipelineStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemovePipeline not implemented")
+}
+func (*UnimplementedAgentServiceServer) Info(context.Context, *AgentInfoOpts) (*AgentInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Info not implemented")
 }
 
 func RegisterAgentServiceServer(s *grpc.Server, srv AgentServiceServer) {
@@ -595,6 +921,24 @@ func _AgentService_RemovePipeline_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AgentService_Info_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AgentInfoOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentServiceServer).Info(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.AgentService/Info",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentServiceServer).Info(ctx, req.(*AgentInfoOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _AgentService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.AgentService",
 	HandlerType: (*AgentServiceServer)(nil),
@@ -614,6 +958,10 @@ var _AgentService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemovePipeline",
 			Handler:    _AgentService_RemovePipeline_Handler,
+		},
+		{
+			MethodName: "Info",
+			Handler:    _AgentService_Info_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -313,7 +313,7 @@ func workflowsListHandler(ctx *gin.Context) {
 }
 
 // @Summary Returns verbose information about a workflow.
-// @Tags registry
+// @Tags info
 // @Accept  json
 // @Produce json
 // @Param name path string true "Name of the workflow to get information about."

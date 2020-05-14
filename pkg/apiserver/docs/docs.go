@@ -74,13 +74,13 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "registry"
+                    "info"
                 ],
                 "summary": "Returns verbose information about the agent.",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Name of the workflow to get information about.",
+                        "description": "Name of the agent to get information about.",
                         "name": "name",
                         "in": "path",
                         "required": true
@@ -90,10 +90,19 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/response.AgentVerboseInfo"
-                            }
+                            "$ref": "#/definitions/response.AgentVerboseInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     }
                 }
@@ -113,7 +122,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "registry"
+                    "info"
                 ],
                 "summary": "Returns verbose information about a workflow.",
                 "parameters": [
@@ -1235,8 +1244,53 @@ var doc = `{
                 }
             }
         },
+        "response.AgentTriggerInfo": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "pipelines": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "response.AgentVerboseInfo": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "healthy": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "workflows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.AgentWorkflowInfo"
+                    }
+                }
+            }
+        },
+        "response.AgentWorkflowInfo": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "triggers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.AgentTriggerInfo"
+                    }
+                }
+            }
         },
         "response.HTTPError": {
             "type": "object",

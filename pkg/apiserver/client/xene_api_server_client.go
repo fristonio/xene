@@ -13,6 +13,7 @@ import (
 	apiops "github.com/fristonio/xene/pkg/apiserver/client/api"
 	"github.com/fristonio/xene/pkg/apiserver/client/auth"
 	"github.com/fristonio/xene/pkg/apiserver/client/health"
+	"github.com/fristonio/xene/pkg/apiserver/client/info"
 	"github.com/fristonio/xene/pkg/apiserver/client/registry"
 	"github.com/fristonio/xene/pkg/apiserver/client/status"
 )
@@ -62,6 +63,7 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *XeneAPISer
 	cli.API = apiops.New(transport, formats)
 	cli.Auth = auth.New(transport, formats)
 	cli.Health = health.New(transport, formats)
+	cli.Info = info.New(transport, formats)
 	cli.Registry = registry.New(transport, formats)
 	cli.Status = status.New(transport, formats)
 	return cli
@@ -114,6 +116,8 @@ type XeneAPIServer struct {
 
 	Health health.ClientService
 
+	Info info.ClientService
+
 	Registry registry.ClientService
 
 	Status status.ClientService
@@ -127,6 +131,7 @@ func (c *XeneAPIServer) SetTransport(transport runtime.ClientTransport) {
 	c.API.SetTransport(transport)
 	c.Auth.SetTransport(transport)
 	c.Health.SetTransport(transport)
+	c.Info.SetTransport(transport)
 	c.Registry.SetTransport(transport)
 	c.Status.SetTransport(transport)
 }
