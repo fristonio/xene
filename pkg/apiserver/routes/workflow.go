@@ -296,12 +296,19 @@ func workflowsListHandler(ctx *gin.Context) {
 					var wfStatus v1alpha1.WorkflowStatus
 					err = json.Unmarshal(val.Data, &wfStatus)
 					if err == nil {
-						executors := []string{}
+						executors := make(map[string]struct{})
 						for _, status := range wfStatus.Pipelines {
-							executors = append(executors, status.Executor)
+							if _, ok := executors[status.Executor]; !ok {
+								executors[status.Executor] = struct{}{}
+							}
 						}
 
-						wfInfo.Agents = executors
+						execs := []string{}
+						for name := range executors {
+							execs = append(execs, name)
+						}
+
+						wfInfo.Agents = execs
 					}
 				}
 
