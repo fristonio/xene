@@ -39,6 +39,13 @@ type AgentWorkflowInfo struct {
 	Triggers []AgentTriggerInfo `json:"triggers"`
 }
 
+// AgentSecretInfo contains the info about the secret for the agent.
+type AgentSecretInfo struct {
+	Name string `json:"name"`
+
+	Type string `json:"type"`
+}
+
 // AgentVerboseInfo contains verbose information about the agent.
 type AgentVerboseInfo struct {
 	Name string `json:"name"`
@@ -47,7 +54,13 @@ type AgentVerboseInfo struct {
 
 	Address string `json:"address"`
 
+	Secure bool `json:"secure"`
+
+	ServerName string `json:"serverName"`
+
 	Workflows []AgentWorkflowInfo `json:"workflows"`
+
+	Secrets []AgentSecretInfo `json:"secrets"`
 }
 
 // SecretInfo contains information about a secret

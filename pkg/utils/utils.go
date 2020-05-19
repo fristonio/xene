@@ -2,6 +2,7 @@ package utils
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -35,4 +36,14 @@ func CheckStringSliceEqual(a, b []string) bool {
 	}
 
 	return true
+}
+
+// TrimWorkflowPrefix returns the list removing the prefix associated in each entry.
+func TrimWorkflowPrefix(list []string, prefix string) []string {
+	res := make([]string, len(list))
+	for i, item := range list {
+		res[i] = strings.TrimPrefix(item, prefix)
+	}
+
+	return res
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/fristonio/xene/pkg/proto"
 	"github.com/fristonio/xene/pkg/store"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
+	"github.com/fristonio/xene/pkg/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -200,10 +201,13 @@ func (a *agentServer) updatePipeline(ctx context.Context, pipeline *proto.Pipeli
 // Info is the RPC to return the info about the agent.
 func (a *agentServer) Info(ctx context.Context, opts *proto.AgentInfoOpts) (*proto.AgentInfo, error) {
 	var info = proto.AgentInfo{
-		Healthy:   true,
-		Name:      option.Config.Agent.Name,
-		Address:   option.Config.Agent.Address,
-		Workflows: []*proto.AgentWorkflowInfo{},
+		Healthy:    true,
+		Name:       option.Config.Agent.Name,
+		Secure:     !option.Config.Agent.Insecure,
+		Address:    option.Config.Agent.Address,
+		ServerName: option.Config.Agent.ServerName,
+		Workflows:  []*proto.AgentWorkflowInfo{},
+		Secrets:    getAgentSecretsList(option.Config.Agent.Name),
 	}
 
 	var wfInfo = make(map[string]*proto.AgentWorkflowInfo)
@@ -218,10 +222,11 @@ func (a *agentServer) Info(ctx context.Context, opts *proto.AgentInfoOpts) (*pro
 			return
 		}
 
+		pipelines := utils.TrimWorkflowPrefix(spec.Pipelines, fmt.Sprintf("%s%s", wfName, defaults.Seperator))
 		if _, ok := wfInfo[wfName]; ok {
 			wfInfo[wfName].Triggers = append(wfInfo[wfName].Triggers, &proto.AgentTriggerInfo{
 				Name:      trigger,
-				Pipelines: spec.Pipelines,
+				Pipelines: pipelines,
 			})
 		} else {
 			wfInfo[wfName] = &proto.AgentWorkflowInfo{
@@ -229,7 +234,7 @@ func (a *agentServer) Info(ctx context.Context, opts *proto.AgentInfoOpts) (*pro
 				Triggers: []*proto.AgentTriggerInfo{
 					{
 						Name:      trigger,
-						Pipelines: spec.Pipelines,
+						Pipelines: pipelines,
 					},
 				},
 			}

@@ -66,5 +66,5 @@ $$  /\$$\ \$$$$$$$\ $$ |  $$ |\$$$$$$$\
 	ImagePullDeadline time.Duration = time.Minute * 5
 
 	// CreateContainerTimeout is the timeout for a create container request.
-	CreateContainerTimeout time.Duration = time.Second * 15
+	CreateContainerTimeout time.Duration = time.Second * 10
 )

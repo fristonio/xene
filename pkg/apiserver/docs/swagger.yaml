@@ -11,6 +11,13 @@ definitions:
       secure:
         type: boolean
     type: object
+  response.AgentSecretInfo:
+    properties:
+      name:
+        type: string
+      type:
+        type: string
+    type: object
   response.AgentTriggerInfo:
     properties:
       name:
@@ -27,6 +34,14 @@ definitions:
       healthy:
         type: boolean
       name:
+        type: string
+      secrets:
+        items:
+          $ref: '#/definitions/response.AgentSecretInfo'
+        type: array
+      secure:
+        type: boolean
+      serverName:
         type: string
       workflows:
         items:

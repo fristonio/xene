@@ -63,6 +63,14 @@ message AgentWorkflowInfo {
     repeated AgentTriggerInfo Triggers = 2;
 }
 
+message AgentSecretInfo {
+    // Name contains the name of the secret.
+    string Name = 1;
+
+    // Type contains the type of the secret associated.
+    string Type = 2;
+}
+
 message AgentInfo {
     // Healthy specifies wheather the agent is healthy or not.
     bool Healthy = 1;
@@ -73,12 +81,21 @@ message AgentInfo {
     // Address contains the address of the agent.
     string Address = 3;
 
+    // Secure shows if the agent is running in secure mode or not.
+    bool Secure = 4;
+
+    // ServerName contains the server name of the running agent.
+    string ServerName = 5;
+
     // Workflows contains the information about individual
     // workflow components scheduled on the agent.
     // The information for the workflow type is restricted for the scope of the agent
     // only.
     // Which means it only contains the triggers and pipelines scheduled on the agent.
-    repeated AgentWorkflowInfo Workflows = 4;
+    repeated AgentWorkflowInfo Workflows = 6;
+
+    // Secrets contains the list of secrets associated with the agent.
+    repeated AgentSecretInfo Secrets = 7;
 }
 
 message AgentInfoOpts {

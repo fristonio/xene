@@ -1244,6 +1244,17 @@ var doc = `{
                 }
             }
         },
+        "response.AgentSecretInfo": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "response.AgentTriggerInfo": {
             "type": "object",
             "properties": {
@@ -1268,6 +1279,18 @@ var doc = `{
                     "type": "boolean"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "secrets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.AgentSecretInfo"
+                    }
+                },
+                "secure": {
+                    "type": "boolean"
+                },
+                "serverName": {
                     "type": "string"
                 },
                 "workflows": {

@@ -179,7 +179,8 @@ func (e *RuntimeExecutor) StopContainer(ctx context.Context, r *runtime.StopCont
 // runtime.
 func (e *RuntimeExecutor) RemoveContainer(ctx context.Context, r *runtime.RemoveContainerRequest) error {
 	err := e.client.ContainerRemove(ctx, r.ContainerID, dockertypes.ContainerRemoveOptions{
-		Force: true,
+		Force:       true,
+		RemoveLinks: true,
 	})
 	if ctxErr := contextError(ctx); ctxErr != nil {
 		return ctxErr

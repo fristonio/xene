@@ -15,9 +15,11 @@ func UpdatePipelineStatusSpecFromGRPCTransport(ps *v1alpha1.PipelineStatus, p *p
 // GetAgentVerboseInfoFromProtoAgentInfo returns the info of the agent from the proto information.
 func GetAgentVerboseInfoFromProtoAgentInfo(info *proto.AgentInfo) *response.AgentVerboseInfo {
 	var res = response.AgentVerboseInfo{
-		Name:    info.Name,
-		Healthy: info.Healthy,
-		Address: info.Address,
+		Name:       info.Name,
+		Healthy:    info.Healthy,
+		Secure:     info.Secure,
+		Address:    info.Address,
+		ServerName: info.ServerName,
 	}
 
 	wf := []response.AgentWorkflowInfo{}
@@ -36,6 +38,15 @@ func GetAgentVerboseInfoFromProtoAgentInfo(info *proto.AgentInfo) *response.Agen
 		})
 	}
 
+	secs := []response.AgentSecretInfo{}
+	for _, s := range info.Secrets {
+		secs = append(secs, response.AgentSecretInfo{
+			Name: s.Name,
+			Type: s.Type,
+		})
+	}
+
 	res.Workflows = wf
+	res.Secrets = secs
 	return &res
 }

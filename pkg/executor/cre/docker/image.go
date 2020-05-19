@@ -162,7 +162,10 @@ func (e *RuntimeExecutor) RemoveImage(ctx context.Context, r *runtime.RemoveImag
 	images = append(images, image.Image)
 
 	for _, image := range images {
-		_, err := e.client.ImageRemove(ctx, image, dockertypes.ImageRemoveOptions{PruneChildren: true})
+		_, err := e.client.ImageRemove(ctx, image, dockertypes.ImageRemoveOptions{
+			PruneChildren: true,
+			Force:         true,
+		})
 		if ctxErr := contextError(ctx); ctxErr != nil {
 			return ctxErr
 		}
