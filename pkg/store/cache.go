@@ -135,6 +135,7 @@ func (c *Cache) RunController() error {
 func (c *Cache) cacheControllerDoFunc(_ctx context.Context) error {
 	log.Infof("running cache controller do func.")
 	mErr := errors.NewMultiError()
+	c.mux.Lock()
 	for key := range c.cache {
 		errs := errors.NewMultiError()
 		ok, err := KVStore.Exists(context.TODO(), key)
@@ -165,6 +166,7 @@ func (c *Cache) cacheControllerDoFunc(_ctx context.Context) error {
 			mErr.Append(errs.GetError())
 		}
 	}
+	c.mux.Unlock()
 
 	return mErr.GetError()
 }
