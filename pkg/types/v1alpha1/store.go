@@ -24,7 +24,7 @@ type KeyValuePairs map[string]Value
 // This is used when we serialize KeyValue to string.
 type KVPairStruct struct {
 	Key   string `json:"key" example:"registry/workflow/xxdfdihdfai=="`
-	Value string `json:"workflow" example:"Workflow Document"`
+	Value string `json:"value" example:"Workflow Document"`
 
 	Version          uint64 `json:"version"`
 	ExpiresAt        uint64 `json:"expiresAt"`
