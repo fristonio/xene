@@ -222,8 +222,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: If a name is provided return the corresponding agent object, if
-        prefix is set to some value
+      description: If a name is provided return the corresponding agent object, if prefix is set to some value
       parameters:
       - description: Prefix based get for agent.
         in: query
@@ -282,8 +281,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Deletes the agent specified by the name parameter, if the agent
-        is not
+      description: Deletes the agent specified by the name parameter, if the agent is not
       parameters:
       - description: Name of the agent to be deleted.
         in: path
@@ -332,8 +330,7 @@ paths:
             $ref: '#/definitions/response.HTTPError'
       security:
       - ApiKeyAuth: []
-      summary: Returns the specified agent object from the store with the name in
-        params.
+      summary: Returns the specified agent object from the store with the name in params.
       tags:
       - registry
     patch:
@@ -415,8 +412,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: If a name is provided return the corresponding secret object, if
-        prefix is set to some value
+      description: If a name is provided return the corresponding secret object, if prefix is set to some value
       parameters:
       - description: Prefix based get for secret.
         in: query
@@ -475,8 +471,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Deletes the secret specified by the name parameter, if the secret
-        is not
+      description: Deletes the secret specified by the name parameter, if the secret is not
       parameters:
       - description: Name of the secret to be deleted.
         in: path
@@ -525,8 +520,7 @@ paths:
             $ref: '#/definitions/response.HTTPError'
       security:
       - ApiKeyAuth: []
-      summary: Returns the specified secret object from the store with the name in
-        params.
+      summary: Returns the specified secret object from the store with the name in params.
       tags:
       - registry
     patch:
@@ -554,8 +548,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: If a name is provided return the corresponding workflow object,
-        if prefix  is set to some value
+      description: If a name is provided return the corresponding workflow object, if prefix  is set to some value
       parameters:
       - description: Prefix based get for workflow.
         in: query
@@ -584,8 +577,7 @@ paths:
     post:
       consumes:
       - application/x-www-form-urlencoded
-      description: This route creates a new workflow for xene to operate on, if the
-        workflow already exists
+      description: This route creates a new workflow for xene to operate on, if the workflow already exists
       parameters:
       - description: Workflow manifest to be created.
         in: formData
@@ -616,8 +608,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Deletes the workflow specified by the name parameter, if the workflow
-        is not
+      description: Deletes the workflow specified by the name parameter, if the workflow is not
       parameters:
       - description: Name of the workflow to be deleted.
         in: path
@@ -666,8 +657,7 @@ paths:
             $ref: '#/definitions/response.HTTPError'
       security:
       - ApiKeyAuth: []
-      summary: Returns the specified workflow object from the store with the name
-        in params.
+      summary: Returns the specified workflow object from the store with the name in params.
       tags:
       - registry
     patch:
@@ -723,8 +713,7 @@ paths:
     post:
       consumes:
       - application/x-www-form-urlencoded
-      description: This route creates a new workflow status for xene to operate on,
-        if the workflow already exists
+      description: This route creates a new workflow status for xene to operate on, if the workflow already exists
       parameters:
       - description: WorkflowStatus manifest to be created.
         in: formData
@@ -755,8 +744,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Deletes the workflow status specified by the name parameter, if
-        the workflow is not
+      description: Deletes the workflow status specified by the name parameter, if the workflow is not
       parameters:
       - description: Name of the workflow status to be deleted.
         in: path
@@ -805,8 +793,7 @@ paths:
             $ref: '#/definitions/response.HTTPError'
       security:
       - ApiKeyAuth: []
-      summary: Returns the specified workflow object from the store with the name
-        in params.
+      summary: Returns the specified workflow object from the store with the name in params.
       tags:
       - status
     patch:
@@ -870,8 +857,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: redirectHandler handles the redirect from the Oauth provider after
-        the authentication process has
+      description: redirectHandler handles the redirect from the Oauth provider after the authentication process has
       parameters:
       - description: Provider for the oauth redirect
         in: query

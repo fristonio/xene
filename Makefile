@@ -83,10 +83,10 @@ proto:
 > @protoc -I pkg/proto pkg/proto/agent.proto --go_out=plugins=grpc:pkg/proto
 
 apiserver-gen:
-> @cd pkg/apiserver
 > @echo "[*] Generating swagger documentation"
-> @swag init --generatedTime=false
+> @swag init --generatedTime=false --dir pkg/apiserver/ --output pkg/apiserver/docs/
 > @echo "[*] Generating swagger apiserver clients"
+> @cd pkg/apiserver
 > @swagger generate client -f docs/swagger.yaml
 
 docker:
