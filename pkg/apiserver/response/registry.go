@@ -1,17 +1,24 @@
 package response
 
+// KVPair contains a key value pair.
+type KVPair struct {
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+}
+
 // RegistryItemsFromPrefix is the response of list prefix query on registry items.
 type RegistryItemsFromPrefix struct {
 	Count int `json:"count" example:"2"`
 
 	// Items contains the Serialized kvstore items
-	Items []string `json:"items"`
+	Items []KVPair `json:"items"`
 }
 
 // RegistryItem is the reponse of registry item get on the apiserver.
 type RegistryItem struct {
 	// Items contains the Serialized kvstore item
-	Item string `json:"item"`
+	Item KVPair `json:"item"`
 }
 
 // AgentInfo contains a list of registry items keys

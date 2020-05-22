@@ -37,14 +37,8 @@ func (s *Server) JoinAPIServer(apiServerAddr, agentName, agentAddr, authToken st
 	}
 
 	a := types.Agent{}
-	if res.Payload.Item != "" {
-		var kv v1alpha1.KVPairStruct
-		err = json.Unmarshal([]byte(res.Payload.Item), &kv)
-		if err != nil {
-			return fmt.Errorf("error while unmarshalling agent resp: %s", err)
-		}
-
-		err = json.Unmarshal([]byte(kv.Value), &a)
+	if res.Payload.Item.Value != "" {
+		err = json.Unmarshal([]byte(res.Payload.Item.Value), &a)
 		if err != nil {
 			return fmt.Errorf("error unmarshaling agent get response: %s", err)
 		}

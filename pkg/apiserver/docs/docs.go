@@ -1354,6 +1354,17 @@ var doc = `{
                 }
             }
         },
+        "response.KVPair": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "response.OauthLogin": {
             "type": "object",
             "properties": {
@@ -1369,7 +1380,8 @@ var doc = `{
             "properties": {
                 "item": {
                     "description": "Items contains the Serialized kvstore item",
-                    "type": "string"
+                    "type": "object",
+                    "$ref": "#/definitions/response.KVPair"
                 }
             }
         },
@@ -1384,7 +1396,7 @@ var doc = `{
                     "description": "Items contains the Serialized kvstore items",
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/response.KVPair"
                     }
                 }
             }

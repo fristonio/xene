@@ -9,6 +9,7 @@ import (
 
 	"github.com/fristonio/xene/pkg/controller"
 	"github.com/fristonio/xene/pkg/defaults"
+	"github.com/fristonio/xene/pkg/proto"
 	"github.com/fristonio/xene/pkg/store"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
 	"google.golang.org/grpc"
@@ -53,6 +54,23 @@ type Node struct {
 	Name string
 
 	conn *grpc.ClientConn
+}
+
+// CheckHealth checks for the health status of the provided agent in context.
+// If the agent is not healthy or there is some issue with the connectivity the
+// function returns an error.
+func (n *Node) CheckHealth() error {
+	client := proto.NewAgentServiceClient(n.conn)
+	status, err := client.Status(context.TODO(), &proto.StatusOpts{Verbose: true})
+	if err != nil {
+		return fmt.Errorf("error while fetching status: %s", err)
+	}
+
+	if !status.Healthy {
+		return fmt.Errorf("agent is not healthy")
+	}
+
+	return nil
 }
 
 // AgentCtrl is the global instance of the agent controller running for the API server.
@@ -302,7 +320,7 @@ func (a *Controller) ControllerFunc(_ctx context.Context, ag *v1alpha1.Agent) er
 		return fmt.Errorf("agent health check failed too many time, keeping agent in blacklist")
 	}
 
-	err := ag.CheckHealth(node.conn)
+	err := node.CheckHealth()
 	return err
 }
 
@@ -312,7 +330,7 @@ func (a *Controller) blacklistedNodesController(_ctx context.Context) error {
 		if err != nil {
 			continue
 		}
-		err = node.Agent.CheckHealth(conn)
+		err = node.CheckHealth()
 		if err == nil {
 			log.Infof("node %s back online", name)
 			node.conn = conn

@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
@@ -16,11 +17,38 @@ import (
 type ResponseRegistryItem struct {
 
 	// Items contains the Serialized kvstore item
-	Item string `json:"item,omitempty"`
+	Item *ResponseKVPair `json:"item,omitempty"`
 }
 
 // Validate validates this response registry item
 func (m *ResponseRegistryItem) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateItem(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ResponseRegistryItem) validateItem(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Item) { // not required
+		return nil
+	}
+
+	if m.Item != nil {
+		if err := m.Item.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("item")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

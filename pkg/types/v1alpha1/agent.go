@@ -1,12 +1,8 @@
 package v1alpha1
 
 import (
-	"context"
 	"fmt"
 	"net/url"
-
-	"github.com/fristonio/xene/pkg/proto"
-	"google.golang.org/grpc"
 )
 
 // Executor is a type for representing an executor on the agent.
@@ -46,23 +42,6 @@ func (a *Agent) DeepEquals(ag *Agent) bool {
 	}
 
 	return false
-}
-
-// CheckHealth checks for the health status of the provided agent in context.
-// If the agent is not healthy or there is some issue with the connectivity the
-// function returns an error.
-func (a *Agent) CheckHealth(conn *grpc.ClientConn) error {
-	client := proto.NewAgentServiceClient(conn)
-	status, err := client.Status(context.TODO(), &proto.StatusOpts{Verbose: true})
-	if err != nil {
-		return fmt.Errorf("error while fetching status: %s", err)
-	}
-
-	if !status.Healthy {
-		return fmt.Errorf("agent is not healthy")
-	}
-
-	return nil
 }
 
 // AgentSpec contains the spec of the workflow.

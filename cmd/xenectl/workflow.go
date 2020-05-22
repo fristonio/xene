@@ -68,17 +68,12 @@ var workflowGetCmd = &cobra.Command{
 			return
 		}
 
-		if res.Payload.Item == "" {
+		if res.Payload.Item.Value == "" {
 			log.Infof("the requested workflow is not found")
 			return
 		}
 
-		var kv v1alpha1.KVPairStruct
-		err = json.Unmarshal([]byte(res.Payload.Item), &kv)
-		if err != nil {
-			log.Errorf("error while unmarshalling json: %s", err)
-		}
-		prettyPrintJSON(string(kv.Value))
+		prettyPrintJSON(res.Payload.Item.Value)
 	},
 }
 

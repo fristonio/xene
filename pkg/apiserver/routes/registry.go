@@ -2,13 +2,11 @@ package routes
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/fristonio/xene/pkg/apiserver/response"
 	"github.com/fristonio/xene/pkg/store"
-	types "github.com/fristonio/xene/pkg/types/v1alpha1"
 	"github.com/gin-gonic/gin"
 )
 
@@ -91,23 +89,13 @@ func storeGetHandler(ctx *gin.Context, pre string) {
 		resp := response.RegistryItemsFromPrefix{
 			Count: len(kvPairs),
 		}
-		wf := make([]string, 0)
+		wf := make([]response.KVPair, 0)
 		for key, value := range kvPairs {
-			data, err := json.Marshal(types.KVPairStruct{
+			data := response.KVPair{
 				Key:   key,
 				Value: string(value.Data),
-
-				Version:          value.Version,
-				ExpiresAt:        value.ExpiresAt,
-				DeletedOrExpired: value.DeletedOrExpired,
-			})
-			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, response.HTTPError{
-					Error: fmt.Sprintf("error while unmarshaling objects %s: %s", key, err),
-				})
-				return
 			}
-			wf = append(wf, string(data))
+			wf = append(wf, data)
 		}
 		resp.Items = wf
 		ctx.JSON(http.StatusOK, resp)
@@ -118,7 +106,7 @@ func storeGetHandler(ctx *gin.Context, pre string) {
 	if err != nil {
 		if store.KVStore.KeyDoesNotExistError(err) {
 			ctx.JSON(http.StatusOK, response.RegistryItem{
-				Item: "",
+				Item: response.KVPair{},
 			})
 			return
 		}
@@ -128,22 +116,12 @@ func storeGetHandler(ctx *gin.Context, pre string) {
 		return
 	}
 
-	data, err := json.Marshal(types.KVPairStruct{
+	data := response.KVPair{
 		Key:   name,
 		Value: string(val.Data),
-
-		Version:          val.Version,
-		ExpiresAt:        val.ExpiresAt,
-		DeletedOrExpired: val.DeletedOrExpired,
-	})
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
-			Error: fmt.Sprintf("error while unmarshaling objects %s: %s", name, err),
-		})
-		return
 	}
 	ctx.JSON(http.StatusOK, response.RegistryItem{
-		Item: string(data),
+		Item: data,
 	})
 }
 
@@ -158,7 +136,7 @@ func storeGetByNameHandler(ctx *gin.Context, prefix string) {
 	if err != nil {
 		if store.KVStore.KeyDoesNotExistError(err) {
 			ctx.JSON(http.StatusOK, response.RegistryItem{
-				Item: "",
+				Item: response.KVPair{},
 			})
 			return
 		}
@@ -168,14 +146,10 @@ func storeGetByNameHandler(ctx *gin.Context, prefix string) {
 		return
 	}
 
-	data, err := json.Marshal(types.KVPairStruct{
+	data := response.KVPair{
 		Key:   name,
 		Value: string(val.Data),
-
-		Version:          val.Version,
-		ExpiresAt:        val.ExpiresAt,
-		DeletedOrExpired: val.DeletedOrExpired,
-	})
+	}
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
 			Error: fmt.Sprintf("error while unmarshaling objects %s: %s", name, err),
@@ -183,7 +157,7 @@ func storeGetByNameHandler(ctx *gin.Context, prefix string) {
 		return
 	}
 	resp := response.RegistryItem{
-		Item: string(data),
+		Item: data,
 	}
 
 	ctx.JSON(http.StatusOK, resp)

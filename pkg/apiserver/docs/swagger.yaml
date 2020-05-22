@@ -84,6 +84,13 @@ definitions:
         example: fristonio
         type: string
     type: object
+  response.KVPair:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    type: object
   response.OauthLogin:
     properties:
       loginURL:
@@ -94,8 +101,9 @@ definitions:
   response.RegistryItem:
     properties:
       item:
+        $ref: '#/definitions/response.KVPair'
         description: Items contains the Serialized kvstore item
-        type: string
+        type: object
     type: object
   response.RegistryItemsFromPrefix:
     properties:
@@ -105,7 +113,7 @@ definitions:
       items:
         description: Items contains the Serialized kvstore items
         items:
-          type: string
+          $ref: '#/definitions/response.KVPair'
         type: array
     type: object
   response.SecretInfo:
