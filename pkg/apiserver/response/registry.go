@@ -90,6 +90,24 @@ type WorkflowInfo struct {
 	Agents []string `json:"agents"`
 }
 
-// WorkflowVerboseInfo contains verbose information about a particular workflow.
-type WorkflowVerboseInfo struct {
+// PipelineRunInfo contains information about a particular pipeline run.
+type PipelineRunInfo struct {
+	RunID string `json:"runID"`
+
+	Status string `json:"status"`
+
+	Agent string `json:"agent"`
+}
+
+// PipelineInfo contains verbose information about a particular pipeline.
+type PipelineInfo struct {
+	Workflow string `json:"workflow"`
+
+	Name string `json:"name"`
+
+	Spec string `json:"spec"`
+
+	Runs []PipelineRunInfo `json:"runs"`
+
+	Warnings []string `json:"warnings"`
 }

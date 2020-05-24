@@ -17,9 +17,6 @@ func APIGroupRouter(r *gin.RouterGroup) {
 
 	infoGroup := r.Group("info")
 	InfoGroupRoutes(infoGroup)
-
-	pipelineGroup := r.Group("pipeline")
-	PipelineGroupRoutes(pipelineGroup)
 }
 
 // @Summary Handles ping event for api routes.

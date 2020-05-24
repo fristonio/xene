@@ -589,6 +589,11 @@ type PipelineStatus struct {
 	Status string `json:"status"`
 }
 
+// GetAllExecutors returns all the executors that were associated with pipeline
+func (p *PipelineStatus) GetAllExecutors() []string {
+	return append(p.PreviousExecutors, p.Executor)
+}
+
 // TriggerType is the type to specify the type of trigger.
 type TriggerType string
 

@@ -98,6 +98,32 @@ definitions:
         example: https://xxxx.io/login
         type: string
     type: object
+  response.PipelineInfo:
+    properties:
+      name:
+        type: string
+      runs:
+        items:
+          $ref: '#/definitions/response.PipelineRunInfo'
+        type: array
+      spec:
+        type: string
+      warnings:
+        items:
+          type: string
+        type: array
+      workflow:
+        type: string
+    type: object
+  response.PipelineRunInfo:
+    properties:
+      agent:
+        type: string
+      runID:
+        type: string
+      status:
+        type: string
+    type: object
   response.RegistryItem:
     properties:
       item:
@@ -141,8 +167,6 @@ definitions:
         items:
           type: string
         type: array
-    type: object
-  response.WorkflowVerboseInfo:
     type: object
 host: localhost:6060
 info:
@@ -204,7 +228,7 @@ paths:
       summary: Returns verbose information about the agent.
       tags:
       - info
-  /api/v1/info/workflow/{name}:
+  /api/v1/info/workflow/{name}/pipeline/{pipeline}:
     get:
       consumes:
       - application/json
@@ -214,13 +238,26 @@ paths:
         name: name
         required: true
         type: string
+      - description: Name of the pipeline to return the info about.
+        in: path
+        name: pipeline
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.WorkflowVerboseInfo'
+            $ref: '#/definitions/response.PipelineInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
       security:
       - ApiKeyAuth: []
       summary: Returns verbose information about a workflow.

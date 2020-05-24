@@ -318,16 +318,3 @@ func workflowsListHandler(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, resp)
 }
-
-// @Summary Returns verbose information about a workflow.
-// @Tags info
-// @Accept  json
-// @Produce json
-// @Param name path string true "Name of the workflow to get information about."
-// @Success 200 {object} response.WorkflowVerboseInfo
-// @Security ApiKeyAuth
-// @Router /api/v1/info/workflow/{name} [get]
-func workflowInfoHandler(ctx *gin.Context) {
-	resp := response.WorkflowVerboseInfo{}
-	ctx.JSON(http.StatusOK, resp)
-}

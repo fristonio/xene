@@ -108,7 +108,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/info/workflow/{name}": {
+        "/api/v1/info/workflow/{name}/pipeline/{pipeline}": {
             "get": {
                 "security": [
                     {
@@ -132,13 +132,32 @@ var doc = `{
                         "name": "name",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name of the pipeline to return the info about.",
+                        "name": "pipeline",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.WorkflowVerboseInfo"
+                            "$ref": "#/definitions/response.PipelineInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     }
                 }
@@ -1375,6 +1394,46 @@ var doc = `{
                 }
             }
         },
+        "response.PipelineInfo": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "runs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.PipelineRunInfo"
+                    }
+                },
+                "spec": {
+                    "type": "string"
+                },
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "workflow": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.PipelineRunInfo": {
+            "type": "object",
+            "properties": {
+                "agent": {
+                    "type": "string"
+                },
+                "runID": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "response.RegistryItem": {
             "type": "object",
             "properties": {
@@ -1440,9 +1499,6 @@ var doc = `{
                     }
                 }
             }
-        },
-        "response.WorkflowVerboseInfo": {
-            "type": "object"
         }
     },
     "securityDefinitions": {

@@ -60,6 +60,9 @@ type Node struct {
 // If the agent is not healthy or there is some issue with the connectivity the
 // function returns an error.
 func (n *Node) CheckHealth() error {
+	if n.conn == nil {
+		return fmt.Errorf("cannot retrive node connection")
+	}
 	client := proto.NewAgentServiceClient(n.conn)
 	status, err := client.Status(context.TODO(), &proto.StatusOpts{Verbose: true})
 	if err != nil {

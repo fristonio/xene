@@ -83,6 +83,9 @@ var (
 	// StatusSuccess contains the success status
 	StatusSuccess string = "Success"
 
+	// StatusRunning contains the running  status
+	StatusRunning string = "Running"
+
 	// StatusNotExecuted contais the status when a component is not executed.
 	StatusNotExecuted string = "NotExecuted"
 )
