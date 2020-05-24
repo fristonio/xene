@@ -3,10 +3,12 @@ package agent
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/fristonio/xene/pkg/defaults"
+	xerr "github.com/fristonio/xene/pkg/errors"
 	"github.com/fristonio/xene/pkg/option"
 	"github.com/fristonio/xene/pkg/proto"
 	"github.com/fristonio/xene/pkg/store"
@@ -246,4 +248,40 @@ func (a *agentServer) Info(ctx context.Context, opts *proto.AgentInfoOpts) (*pro
 	}
 
 	return &info, nil
+}
+
+func (a *agentServer) GetPipelinesRunInfo(ctx context.Context, opts *proto.PipelineInfoOpts) (*proto.PipelinesRunInfo, error) {
+	if opts.Name == "" || opts.Workflow == "" {
+		return nil, errors.New("pipeline name is a required option")
+	}
+
+	merr := xerr.NewMultiError()
+
+	resp := proto.PipelinesRunInfo{
+		Name: opts.Name,
+	}
+
+	infos := []*proto.PipelineRunInfo{}
+
+	store.KVStore.PrefixScanWithFunction(
+		context.TODO(),
+		fmt.Sprintf("%s/%s/", v1alpha1.PipelineStatusKeyPrefix, v1alpha1.GetWorkflowPrefixedName(opts.Workflow, opts.Name)),
+		func(kv *v1alpha1.KVPairStruct) {
+			pipeline := v1alpha1.PipelineRunStatus{}
+			err := json.Unmarshal([]byte(kv.Value), &pipeline)
+			if err != nil {
+				merr.Append(fmt.Errorf("error unmarshalling %s", kv.Key))
+				return
+			}
+
+			infos = append(infos, &proto.PipelineRunInfo{
+				RunID:  pipeline.RunID,
+				Agent:  pipeline.Agent,
+				Status: pipeline.Status,
+			})
+		})
+
+	resp.Pipelines = infos
+	resp.ErrorMessage = merr.String()
+	return &resp, nil
 }
