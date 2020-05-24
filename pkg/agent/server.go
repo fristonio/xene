@@ -275,9 +275,11 @@ func (a *agentServer) GetPipelinesRunInfo(ctx context.Context, opts *proto.Pipel
 			}
 
 			infos = append(infos, &proto.PipelineRunInfo{
-				RunID:  pipeline.RunID,
-				Agent:  pipeline.Agent,
-				Status: pipeline.Status,
+				RunID:     pipeline.RunID,
+				Agent:     pipeline.Agent,
+				Status:    pipeline.Status,
+				StartTime: pipeline.StartTime,
+				EndTime:   pipeline.EndTime,
 			})
 		})
 

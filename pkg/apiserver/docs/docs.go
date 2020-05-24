@@ -1426,8 +1426,14 @@ var doc = `{
                 "agent": {
                     "type": "string"
                 },
+                "endTime": {
+                    "type": "integer"
+                },
                 "runID": {
                     "type": "string"
+                },
+                "startTime": {
+                    "type": "integer"
                 },
                 "status": {
                     "type": "string"

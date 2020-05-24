@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/fristonio/xene/pkg/dag"
 	"github.com/fristonio/xene/pkg/errors"
 	"github.com/fristonio/xene/pkg/executor/cre"
-	"github.com/fristonio/xene/pkg/option"
 	"github.com/fristonio/xene/pkg/store"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
 	"github.com/sirupsen/logrus"
@@ -75,13 +75,8 @@ func (p *PipelineExecutor) WithoutStore() *PipelineExecutor {
 }
 
 // Run starts running the pipeline.
-func (p *PipelineExecutor) Run() {
+func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 	p.log.Debugf("running PipelineExecutor")
-
-	status := v1alpha1.NewPipelineRunStatus()
-	status.Name = p.name
-	status.RunID = p.id
-	status.Agent = option.Config.Agent.Name
 
 	// Configure the pipeline runtime executor.
 	err := p.re.Configure()
@@ -145,6 +140,8 @@ func (p *PipelineExecutor) Run() {
 	} else {
 		status.Status = v1alpha1.StatusSuccess
 	}
+
+	status.EndTime = time.Now().Unix()
 
 	// if we are using the store then store the status in the KVstore
 	// else store the status in the executor object

@@ -113,6 +113,10 @@ message PipelineRunInfo {
     string Agent = 2;
 
     string Status = 3;
+
+    int64 StartTime = 4;
+
+    int64 EndTime = 5;
 }
 
 message PipelinesRunInfo {

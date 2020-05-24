@@ -97,6 +97,10 @@ type PipelineRunInfo struct {
 	Status string `json:"status"`
 
 	Agent string `json:"agent"`
+
+	StartTime int64 `json:"startTime"`
+
+	EndTime int64 `json:"endTime"`
 }
 
 // PipelineInfo contains verbose information about a particular pipeline.

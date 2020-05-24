@@ -128,9 +128,11 @@ func pipelineInfoHandler(ctx *gin.Context) {
 		info := <-results
 		for _, i := range info.Pipelines {
 			infos = append(infos, response.PipelineRunInfo{
-				RunID:  i.RunID,
-				Agent:  i.Agent,
-				Status: i.Status,
+				RunID:     i.RunID,
+				Agent:     i.Agent,
+				Status:    i.Status,
+				StartTime: i.StartTime,
+				EndTime:   i.EndTime,
 			})
 		}
 	}

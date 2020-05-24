@@ -18,8 +18,14 @@ type ResponsePipelineRunInfo struct {
 	// agent
 	Agent string `json:"agent,omitempty"`
 
+	// end time
+	EndTime int64 `json:"endTime,omitempty"`
+
 	// run ID
 	RunID string `json:"runID,omitempty"`
+
+	// start time
+	StartTime int64 `json:"startTime,omitempty"`
 
 	// status
 	Status string `json:"status,omitempty"`

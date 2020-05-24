@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"time"
 
 	"github.com/fristonio/xene/pkg/apiserver/client/registry"
 	"github.com/fristonio/xene/pkg/executor"
@@ -144,8 +145,17 @@ var workflowRunCmd = &cobra.Command{
 				Name:         name,
 				Workflow:     workflow.Metadata.GetName(),
 			}
-			exec := executor.NewPipelineExecutor(name, fmt.Sprintf("%s-%s", name, utils.RandToken(10)), spec).WithoutStore()
-			exec.Run()
+
+			id := fmt.Sprintf("%s-%s", name, utils.RandToken(10))
+			exec := executor.NewPipelineExecutor(name, id, spec).WithoutStore()
+			status := v1alpha1.PipelineRunStatus{
+				Name:      name,
+				RunID:     id,
+				Status:    "Running",
+				Agent:     "XENECTL",
+				StartTime: time.Now().Unix(),
+			}
+			exec.Run(status)
 
 			data, err := json.Marshal(exec.GetStatus())
 			if err != nil {

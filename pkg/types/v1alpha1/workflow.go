@@ -550,6 +550,12 @@ type PipelineRunStatus struct {
 
 	Agent string `json:"agent"`
 
+	// StartTime is the start time of the pipeline run.
+	StartTime int64 `json:"startTime"`
+
+	// EndTime is the time of the pipeline end.
+	EndTime int64 `json:"endTime"`
+
 	Tasks map[string]*TaskRunStatus `json:"tasks"`
 }
 
