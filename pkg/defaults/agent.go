@@ -23,7 +23,7 @@ var (
 	PipelineIDSize uint32 = 20
 
 	// AgentLogsDir is the path containing the logs for the agent.
-	AgentLogsDir string = "/var/run/xene/agent/logs/"
+	AgentLogsDir string = "/var/run/xene/agent/logs"
 
 	// AgentAssetsDir contains the directory path of the agent assets.
 	AgentAssetsDir string = "/var/run/xene/agent/assets"

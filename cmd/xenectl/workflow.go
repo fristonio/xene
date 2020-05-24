@@ -147,6 +147,8 @@ var workflowRunCmd = &cobra.Command{
 			}
 
 			id := fmt.Sprintf("%s-%s", name, utils.RandToken(10))
+
+			log.Infof("PIPELINE_RUN_ID: %s", id)
 			exec := executor.NewPipelineExecutor(name, id, spec).WithoutStore()
 			status := v1alpha1.PipelineRunStatus{
 				Name:      name,
@@ -154,6 +156,7 @@ var workflowRunCmd = &cobra.Command{
 				Status:    "Running",
 				Agent:     "XENECTL",
 				StartTime: time.Now().Unix(),
+				Tasks:     make(map[string]*v1alpha1.TaskRunStatus),
 			}
 			exec.Run(status)
 
