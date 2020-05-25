@@ -519,6 +519,10 @@ func NewPipelineRunStatus() PipelineRunStatus {
 type TaskRunStatus struct {
 	Status string `json:"status"`
 
+	// Dependencies is a list of task names which this particular
+	// task depends on.
+	Dependencies []string `json:"dependencies"`
+
 	Steps map[string]*StepRunStatus `json:"steps"`
 }
 

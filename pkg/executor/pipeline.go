@@ -111,6 +111,8 @@ func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 			tStatus.Status = v1alpha1.StatusSuccess
 		}
 
+		tStatus.Dependencies = task.Dependencies
+
 		status.Tasks[task.Name()] = tStatus
 		return errs
 	})
@@ -128,8 +130,9 @@ func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 			}
 
 			status.Tasks[name] = &v1alpha1.TaskRunStatus{
-				Status: v1alpha1.StatusNotExecuted,
-				Steps:  stepStatus,
+				Status:       v1alpha1.StatusNotExecuted,
+				Dependencies: task.Dependencies,
+				Steps:        stepStatus,
 			}
 		}
 	}

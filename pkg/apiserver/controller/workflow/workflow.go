@@ -303,6 +303,8 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 		return fmt.Errorf("error while updating workflow status: %s", err)
 	}
 
+	log.Debugf("Workflow status saved: %s", wfName)
+
 	if len(errs) > 0 {
 		return fmt.Errorf("error while operating pipelines: %v", strings.Join(errs, " :::: "))
 	}

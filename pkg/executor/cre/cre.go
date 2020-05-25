@@ -263,9 +263,10 @@ func (c *CRExecutor) Shutdown() error {
 	defer cancel()
 	err := c.cre.StopContainer(ctx, &runtime.StopContainerRequest{
 		ContainerID: c.getResName(),
+		Timeout:     int64(defaults.CreateContainerTimeout / time.Second),
 	})
 	if err != nil {
-		return fmt.Errorf("error while stopping container: %s", err)
+		c.log.Warnf("error while stopping container: %s", err)
 	}
 
 	ctx, cancel = context.WithTimeout(context.Background(), defaults.CreateContainerTimeout)

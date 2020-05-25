@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/fristonio/xene/pkg/agent/controller"
@@ -230,6 +231,9 @@ func (s *Server) runLocalLogServer() error {
 			}
 
 			taskStatus := pipelineStatus.Tasks[task.Name()]
+			if taskStatus.Steps == nil {
+				return errs
+			}
 			for stepName, step := range taskStatus.Steps {
 				if step.LogFile != "" {
 					logFiles = append(logFiles, struct {
@@ -263,7 +267,8 @@ func (s *Server) runLocalLogServer() error {
     Step: %s
     ***************************************************************************
 `, workflow, pipeline, runID, logFile.task, logFile.step))
-			f, err := os.Open(logFile.path)
+			path := filepath.Join(defaults.AgentLogsDir, logFile.path)
+			f, err := os.Open(path)
 			if err != nil {
 				r := strings.NewReader(fmt.Sprintf("\nError while opening logfile path: %s\n", err))
 				readers = append(readers, r)
@@ -271,7 +276,7 @@ func (s *Server) runLocalLogServer() error {
 				continue
 			}
 
-			info, err := os.Stat(logFile.path)
+			info, err := os.Stat(path)
 			if err != nil {
 				r := strings.NewReader(fmt.Sprintf("\nError while stat on logfile path: %s\n", err))
 				readers = append(readers, r)

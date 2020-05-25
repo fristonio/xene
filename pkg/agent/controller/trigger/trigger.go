@@ -108,6 +108,7 @@ func (t *Trigger) RunPipelines(ctx context.Context, manager *controller.Manager)
 			Status:    v1alpha1.StatusRunning,
 			Agent:     option.Config.Agent.Name,
 			StartTime: time.Now().Unix(),
+			EndTime:   0,
 			Tasks:     make(map[string]*v1alpha1.TaskRunStatus),
 		}
 		v, err := json.Marshal(&pipelineStatus)

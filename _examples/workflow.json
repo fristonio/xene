@@ -9,11 +9,11 @@
         "triggers": {
             "github-trigger": {
                 "type": "cron",
-                "cronConfig": "* * * * *"
+                "cronConfig": "*/5 * * * *"
             },
             "cron-trigger": {
                 "type": "cron",
-                "cronConfig": "* * * * *"
+                "cronConfig": "*/5 * * * *"
             }
         },
         "pipelines": {
@@ -118,13 +118,13 @@
                     },
                     "checkout-task": {
                         "description": "Checkout docker rust source code",
-                        "workingDir": "/docker-rs",
+                        "workingDir": "/",
                         "dependencies": ["setup-task"],
                         "steps": [
                             {
                                 "name": "checkout",
                                 "type": "shell",
-                                "cmd": "git clone https://github.com/fristonio/docker.rs"
+                                "cmd": "git clone https://github.com/fristonio/docker.rs docker-rs"
                             }
                         ]
                     },
@@ -138,7 +138,7 @@
                             {
                                 "name": "build",
                                 "type": "shell",
-                                "cmd": "make build"
+                                "cmd": "cargo build"
                             }
                         ]
                     }
@@ -172,13 +172,13 @@
                     },
                     "checkout-task": {
                         "description": "Checkout docker rust source code",
-                        "workingDir": "/docker-rs",
+                        "workingDir": "/",
                         "dependencies": ["setup-task"],
                         "steps": [
                             {
                                 "name": "checkout",
                                 "type": "shell",
-                                "cmd": "git clone https://github.com/fristonio/docker.rs"
+                                "cmd": "git clone https://github.com/fristonio/docker.rs docker-rs"
                             }
                         ]
                     },
@@ -192,7 +192,7 @@
                             {
                                 "name": "build",
                                 "type": "shell",
-                                "cmd": "make build"
+                                "cmd": "cargo build"
                             }
                         ]
                     }
