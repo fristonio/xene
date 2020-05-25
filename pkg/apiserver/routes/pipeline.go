@@ -136,7 +136,6 @@ func pipelineInfoHandler(ctx *gin.Context) {
 			})
 		}
 	}
-
 	pipelineInfo.Runs = infos
 	ctx.JSON(http.StatusOK, pipelineInfo)
 }

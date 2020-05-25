@@ -38,4 +38,7 @@ var (
 
 	// GlobalPipelineTimeout is the global timeout of the pipeline run on agent.
 	GlobalPipelineTimeout time.Duration = time.Minute * 100
+
+	// AgentLogServerPort is the port to bind the agent log server on.
+	AgentLogServerPort uint32 = 6062
 )

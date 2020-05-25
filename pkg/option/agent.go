@@ -49,4 +49,10 @@ type AgentOpts struct {
 
 	// StorageDir contains the storage directory of badger database.
 	StorageDir string `yaml:"storageDir"`
+
+	// LocalLogServer runs a log server for local files
+	LocalLogServer bool `yaml:"localLogServer"`
+
+	// LogServerPort is the port to run the log server
+	LogServerPort uint32 `yaml:"logServerPort"`
 }

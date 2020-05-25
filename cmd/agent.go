@@ -117,6 +117,10 @@ func init() {
 		"", "JWT secret to use for authentication purpose for GRPC server")
 	agentFlags.StringVarP(&option.Config.Agent.StorageDir, "storage-directory", "d",
 		defaults.AgentStorageDir, "Storage directory to use for xene agent.")
+	agentFlags.BoolVarP(&option.Config.Agent.LocalLogServer, "local-log-server", "",
+		true, "Run xene agent with embedded log server for handling log files.")
+	agentFlags.Uint32VarP(&option.Config.Agent.LogServerPort, "log-server-port", "",
+		defaults.AgentLogServerPort, "Run xene agent with embedded log server for handling log files.")
 
 	_ = agentCmd.MarkPersistentFlagRequired("name")
 	_ = agentCmd.MarkPersistentFlagRequired("address")

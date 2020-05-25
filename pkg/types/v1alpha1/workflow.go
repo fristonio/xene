@@ -107,57 +107,6 @@ func (w *Workflow) CheckTriggerRequired(name string) bool {
 	return false
 }
 
-// ResolveActions takes into consideration the two workflows
-// and returns a strategy that can help us reach the current workflow
-// manifest from the provided one.
-func (w *Workflow) ResolveActions(old *Workflow) WorkflowActions {
-	actions := WorkflowActions{
-		Pipelines: Actions{},
-		Triggers:  Actions{},
-	}
-
-	for name, pipeline := range w.Spec.Pipelines {
-		// The pipeline already exists in the old workflow.
-		if p, ok := old.Spec.Pipelines[name]; ok {
-			// This DeepEquals check also checks if the two pipelines
-			// have the same trigger configured.
-			// Here we check if the two trigger specs are equal or not, if they
-			// are equal but the names of the trigger differ we remove and recreate the
-			// trigger with the new name.
-			if pipeline.TriggerName != p.TriggerName {
-				actions.Triggers.Reset = append(actions.Triggers.Reset, OldNewPair{
-					Old: p.TriggerName,
-					New: pipeline.TriggerName,
-				})
-				continue
-			} else if !pipeline.Trigger.DeepEqual(p.Trigger) {
-				actions.Triggers.Update = append(actions.Triggers.Update, pipeline.TriggerName)
-			}
-
-			if !pipeline.DeepEqual(p) {
-				actions.Pipelines.Update = append(actions.Pipelines.Update, name)
-			}
-		} else {
-			actions.Pipelines.Add = append(actions.Pipelines.Add, name)
-		}
-	}
-
-	// Finally loop through all the pipelines which are supposed to be configured
-	// using the workflow status manifest and remove them if they don't exist in the
-	// new workflow.
-	for name, p := range old.Spec.Pipelines {
-		if _, ok := w.Spec.Pipelines[name]; !ok {
-			actions.Pipelines.Delete = append(actions.Pipelines.Delete, name)
-		}
-
-		if w.CheckTriggerRequired(p.TriggerName) {
-			actions.Triggers.Delete = append(actions.Triggers.Delete, p.TriggerName)
-		}
-	}
-
-	return actions
-}
-
 // WorkflowSpec contains the spec of the workflow.
 type WorkflowSpec struct {
 	// Triggers contains a list of trigger.
@@ -602,40 +551,3 @@ func (p *PipelineStatus) GetAllExecutors() []string {
 
 // TriggerType is the type to specify the type of trigger.
 type TriggerType string
-
-// WorkflowActions defines a workflow document action that needs to be
-// performed on pipelines and triggers.
-type WorkflowActions struct {
-	Pipelines Actions
-	Triggers  Actions
-}
-
-func (wa *WorkflowActions) String() string {
-	return fmt.Sprintf(`Pipelines:
-* Add: %s
-* Delete: %s,
-* Update: %s
-* Reset: %s
-
-Triggers:
-* Add: %s
-* Delete: %s,
-* Update: %s
-* Reset: %s`, wa.Pipelines.Add, wa.Pipelines.Delete, wa.Pipelines.Update, wa.Pipelines.Reset,
-		wa.Triggers.Add, wa.Triggers.Delete, wa.Triggers.Update, wa.Triggers.Reset)
-}
-
-// Actions contains a list of names corresponding to the opeartion we have
-// to perform on them
-type Actions struct {
-	Add    []string
-	Delete []string
-	Update []string
-	Reset  []OldNewPair
-}
-
-// OldNewPair contains a pair of old and new identifier for a given object
-type OldNewPair struct {
-	Old string
-	New string
-}
