@@ -30,7 +30,7 @@ func main() {
 
 func init() {
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.InfoLevel)
 
 	cobra.OnInitialize(initConfig)
 

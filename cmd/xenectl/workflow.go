@@ -3,9 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"os"
 	"time"
 
+	"github.com/fristonio/xene/pkg/agent"
 	"github.com/fristonio/xene/pkg/apiserver/client/registry"
 	"github.com/fristonio/xene/pkg/executor"
 	"github.com/fristonio/xene/pkg/executor/cre/docker"
@@ -113,6 +116,18 @@ var workflowRunCmd = &cobra.Command{
 			log.Fatalf("Currently only running workflow locally is supported")
 		}
 
+		var file *os.File
+		file, err := os.OpenFile(outputLogFile, os.O_RDWR|os.O_CREATE, 0644)
+		if outputLogFile != "" {
+			if err != nil {
+				log.Fatalf("Error creating the log file")
+			}
+		} else {
+			if file != nil {
+				file.Close()
+			}
+		}
+
 		// Try connecting to docker for the execution of pipelines
 		// else Die
 		docker.ConnectToDockerOrDie()
@@ -168,6 +183,26 @@ var workflowRunCmd = &cobra.Command{
 			log.Infof("\n\nPipeline processing finished")
 			log.Infof("----------------- STATUS REPORT -----------------")
 			prettyPrintJSON(string(data))
+			log.Infof("-------------------------------------------------")
+
+			p := v1alpha1.GetWorkflowPrefixedName(workflow.Metadata.GetName(), name)
+			if outputLogFile != "" {
+				r, _, err := agent.GetPipelineRunLogReader(
+					workflow.Metadata.GetName(),
+					p, id,
+					pipeline, exec.GetStatus())
+				if err != nil {
+					log.Errorf("%s", err)
+					file.WriteString("\nError getting pipeline run log reader\n")
+					continue
+				}
+
+				_, err = io.Copy(file, r)
+				if err != nil {
+					log.Errorf("Error writing pipelines run log: %s", err)
+				}
+				file.WriteString("\n -------------------------- END --------------------------\n")
+			}
 		}
 	},
 }
@@ -176,6 +211,7 @@ var (
 	workflowFileName string
 	workflowName     string
 	runLocal         bool
+	outputLogFile    string
 )
 
 func init() {
@@ -189,6 +225,8 @@ func init() {
 		"", "File to use for workflow manfiest.")
 	workflowRunCmd.Flags().BoolVarP(&runLocal, "local", "l",
 		true, "Run the workflow pipelines from the manifest locally")
+	workflowRunCmd.Flags().StringVarP(&outputLogFile, "output-log-file", "o",
+		"", "Name of the file to write the logs to.")
 
 	workflowCmd.AddCommand(workflowCreateCmd)
 	workflowCmd.AddCommand(workflowGetCmd)

@@ -192,7 +192,7 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) (*v1alpha1.Ta
 		l := newLogger(c.name, c.id, name, step.Name)
 		w := l.getLogWriter()
 
-		ctx, cancel := context.WithTimeout(context.Background(), defaults.CreateContainerTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute*30)
 		defer cancel()
 		start := time.Now()
 		res, err := c.cre.ExecSync(ctx, &runtime.ExecRequest{
@@ -202,6 +202,7 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) (*v1alpha1.Ta
 			Stdin:       nil,
 			Stdout:      w,
 			Stderr:      w,
+			Timeout:     time.Minute * 30,
 		})
 
 		if res != nil {
