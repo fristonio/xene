@@ -250,7 +250,8 @@ func (a *agentServer) Info(ctx context.Context, opts *proto.AgentInfoOpts) (*pro
 	return &info, nil
 }
 
-func (a *agentServer) GetPipelinesRunInfo(ctx context.Context, opts *proto.PipelineInfoOpts) (*proto.PipelinesRunInfo, error) {
+func (a *agentServer) GetPipelinesRunInfo(
+	ctx context.Context, opts *proto.PipelineInfoOpts) (*proto.PipelinesRunInfo, error) {
 	if opts.Name == "" || opts.Workflow == "" {
 		return nil, errors.New("pipeline name is a required option")
 	}
@@ -285,5 +286,26 @@ func (a *agentServer) GetPipelinesRunInfo(ctx context.Context, opts *proto.Pipel
 
 	resp.Pipelines = infos
 	resp.ErrorMessage = merr.String()
+	return &resp, nil
+}
+
+func (a *agentServer) GetPipelineRunStatus(
+	ctx context.Context, opts *proto.PipelineInfoOpts) (*proto.PipelineRunStatus, error) {
+	if opts.Name == "" || opts.Workflow == "" || opts.RunID == "" {
+		return nil, errors.New("workflow, pipeline and runID are required option")
+	}
+
+	resp := proto.PipelineRunStatus{}
+	val, err := store.KVStore.Get(
+		context.TODO(),
+		fmt.Sprintf("%s/%s/%s",
+			v1alpha1.PipelineStatusKeyPrefix,
+			v1alpha1.GetWorkflowPrefixedName(opts.Workflow, opts.Name),
+			opts.RunID))
+	if err != nil {
+		return nil, fmt.Errorf("error while getting run status from store: %s", err)
+	}
+
+	resp.Spec = string(val.Data)
 	return &resp, nil
 }

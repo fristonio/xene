@@ -103,6 +103,17 @@ type PipelineRunInfo struct {
 	EndTime int64 `json:"endTime"`
 }
 
+// PipelineRunVerboseInfo contains verbose information about a particular pipeline run.
+type PipelineRunVerboseInfo struct {
+	RunID string `json:"runID"`
+
+	Status string `json:"status"`
+
+	RunInfo string `json:"runInfo"`
+
+	BaseLogURL string `json:"baseLogURL"`
+}
+
 // PipelineInfo contains verbose information about a particular pipeline.
 type PipelineInfo struct {
 	Workflow string `json:"workflow"`

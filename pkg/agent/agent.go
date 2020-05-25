@@ -290,6 +290,11 @@ func (s *Server) runLocalLogServer() error {
 
 	r.StaticFS("/logs/workflow/", http.Dir(defaults.AgentLogsDir))
 
-	go server.ListenAndServe()
+	go func() {
+		err := server.ListenAndServe()
+		if err != nil {
+			log.Fatalf("error running log server.")
+		}
+	}()
 	return nil
 }

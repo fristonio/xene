@@ -128,6 +128,17 @@ definitions:
       status:
         type: string
     type: object
+  response.PipelineRunVerboseInfo:
+    properties:
+      baseLogURL:
+        type: string
+      runID:
+        type: string
+      runInfo:
+        type: string
+      status:
+        type: string
+    type: object
   response.RegistryItem:
     properties:
       item:
@@ -232,14 +243,14 @@ paths:
       summary: Returns verbose information about the agent.
       tags:
       - info
-  /api/v1/info/workflow/{name}/pipeline/{pipeline}:
+  /api/v1/info/workflow/{workflow}/pipeline/{pipeline}:
     get:
       consumes:
       - application/json
       parameters:
       - description: Name of the workflow to get information about.
         in: path
-        name: name
+        name: workflow
         required: true
         type: string
       - description: Name of the pipeline to return the info about.
@@ -265,6 +276,46 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Returns verbose information about a workflow.
+      tags:
+      - info
+  /api/v1/info/workflow/{workflow}/pipeline/{pipeline}/runs/{runID}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Name of the workflow to get information about.
+        in: path
+        name: workflow
+        required: true
+        type: string
+      - description: Name of the pipeline to return the info about.
+        in: path
+        name: pipeline
+        required: true
+        type: string
+      - description: RUN ID of the pipeline run.
+        in: path
+        name: runID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.PipelineRunVerboseInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Returns verbose information about a pipeline run.
       tags:
       - info
   /api/v1/registry/agent:

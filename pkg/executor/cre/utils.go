@@ -59,7 +59,7 @@ func (l *logger) getLogWriter() io.WriteCloser {
 }
 
 func (l *logger) getLogFileName() string {
-	return fmt.Sprintf("%s/%s/%s/%s/%s", defaults.AgentLogsDir, l.pipelineName, l.pipelineID, l.task, l.step)
+	return fmt.Sprintf("/%s/%s/%s/%s", l.pipelineName, l.pipelineID, l.task, l.step)
 }
 
 func newLogger(pName, pID, tName, sName string) *logger {

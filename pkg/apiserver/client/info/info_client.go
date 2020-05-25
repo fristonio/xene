@@ -29,7 +29,9 @@ type Client struct {
 type ClientService interface {
 	GetAPIV1InfoAgentName(params *GetAPIV1InfoAgentNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1InfoAgentNameOK, error)
 
-	GetAPIV1InfoWorkflowNamePipelinePipeline(params *GetAPIV1InfoWorkflowNamePipelinePipelineParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1InfoWorkflowNamePipelinePipelineOK, error)
+	GetAPIV1InfoWorkflowWorkflowPipelinePipeline(params *GetAPIV1InfoWorkflowWorkflowPipelinePipelineParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1InfoWorkflowWorkflowPipelinePipelineOK, error)
+
+	GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunID(params *GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunIDParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunIDOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -70,23 +72,23 @@ func (a *Client) GetAPIV1InfoAgentName(params *GetAPIV1InfoAgentNameParams, auth
 }
 
 /*
-  GetAPIV1InfoWorkflowNamePipelinePipeline returns verbose information about a workflow
+  GetAPIV1InfoWorkflowWorkflowPipelinePipeline returns verbose information about a workflow
 */
-func (a *Client) GetAPIV1InfoWorkflowNamePipelinePipeline(params *GetAPIV1InfoWorkflowNamePipelinePipelineParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1InfoWorkflowNamePipelinePipelineOK, error) {
+func (a *Client) GetAPIV1InfoWorkflowWorkflowPipelinePipeline(params *GetAPIV1InfoWorkflowWorkflowPipelinePipelineParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1InfoWorkflowWorkflowPipelinePipelineOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetAPIV1InfoWorkflowNamePipelinePipelineParams()
+		params = NewGetAPIV1InfoWorkflowWorkflowPipelinePipelineParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "GetAPIV1InfoWorkflowNamePipelinePipeline",
+		ID:                 "GetAPIV1InfoWorkflowWorkflowPipelinePipeline",
 		Method:             "GET",
-		PathPattern:        "/api/v1/info/workflow/{name}/pipeline/{pipeline}",
+		PathPattern:        "/api/v1/info/workflow/{workflow}/pipeline/{pipeline}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &GetAPIV1InfoWorkflowNamePipelinePipelineReader{formats: a.formats},
+		Reader:             &GetAPIV1InfoWorkflowWorkflowPipelinePipelineReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -94,13 +96,48 @@ func (a *Client) GetAPIV1InfoWorkflowNamePipelinePipeline(params *GetAPIV1InfoWo
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*GetAPIV1InfoWorkflowNamePipelinePipelineOK)
+	success, ok := result.(*GetAPIV1InfoWorkflowWorkflowPipelinePipelineOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for GetAPIV1InfoWorkflowNamePipelinePipeline: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	msg := fmt.Sprintf("unexpected success response for GetAPIV1InfoWorkflowWorkflowPipelinePipeline: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+  GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunID returns verbose information about a pipeline run
+*/
+func (a *Client) GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunID(params *GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunIDParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunIDOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunIDParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunID",
+		Method:             "GET",
+		PathPattern:        "/api/v1/info/workflow/{workflow}/pipeline/{pipeline}/runs/{runID}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunIDReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunIDOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunID: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

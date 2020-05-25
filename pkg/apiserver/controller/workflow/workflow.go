@@ -260,6 +260,15 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 			return err
 		}
 
+		data, err := json.Marshal(&wf)
+		if err != nil {
+			return fmt.Errorf("error while marshalling workflow status")
+		}
+		err = store.KVStore.Set(context.TODO(), fmt.Sprintf("%s/%s", v1alpha1.WorkflowStatusKeyPrefix, wfName), data)
+		if err != nil {
+			return fmt.Errorf("error while create workflow status entry in the store: %s", err)
+		}
+
 		for name, pipeline := range wf.Spec.Pipelines {
 			err = a.Scheduler.SchedulePipeline(wfName, name, pipeline, &wfStatus)
 			if err != nil {
@@ -274,6 +283,7 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 	}
 
 	// Save the workflow status.
+	log.Infof("Saving the workflow status")
 	spec, err := json.Marshal(&updatedWfSpec)
 	if err != nil {
 		log.Errorf("error while marshaling workflow spec for status")

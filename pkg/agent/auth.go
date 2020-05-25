@@ -56,8 +56,10 @@ func (s *Server) JoinAPIServer(apiServerAddr, agentName, agentAddr, authToken st
 			},
 		},
 		Spec: types.AgentSpec{
-			Address:  agentAddr,
-			Insecure: option.Config.Agent.Insecure,
+			Address:          agentAddr,
+			Insecure:         option.Config.Agent.Insecure,
+			LogServerEnabled: option.Config.Agent.LocalLogServer,
+			LogServerPort:    option.Config.Agent.LogServerPort,
 		},
 	}
 

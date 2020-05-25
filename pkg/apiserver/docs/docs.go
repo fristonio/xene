@@ -108,7 +108,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/info/workflow/{name}/pipeline/{pipeline}": {
+        "/api/v1/info/workflow/{workflow}/pipeline/{pipeline}": {
             "get": {
                 "security": [
                     {
@@ -129,7 +129,7 @@ var doc = `{
                     {
                         "type": "string",
                         "description": "Name of the workflow to get information about.",
-                        "name": "name",
+                        "name": "workflow",
                         "in": "path",
                         "required": true
                     },
@@ -146,6 +146,68 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/response.PipelineInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/info/workflow/{workflow}/pipeline/{pipeline}/runs/{runID}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "info"
+                ],
+                "summary": "Returns verbose information about a pipeline run.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the workflow to get information about.",
+                        "name": "workflow",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name of the pipeline to return the info about.",
+                        "name": "pipeline",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "RUN ID of the pipeline run.",
+                        "name": "runID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.PipelineRunVerboseInfo"
                         }
                     },
                     "400": {
@@ -1434,6 +1496,23 @@ var doc = `{
                 },
                 "startTime": {
                     "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.PipelineRunVerboseInfo": {
+            "type": "object",
+            "properties": {
+                "baseLogURL": {
+                    "type": "string"
+                },
+                "runID": {
+                    "type": "string"
+                },
+                "runInfo": {
+                    "type": "string"
                 },
                 "status": {
                     "type": "string"

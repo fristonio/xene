@@ -66,6 +66,13 @@ type AgentSpec struct {
 	// ServerName is the hostname of the server, this is used in case
 	// of mTLS authentication between apiserver and the agent.
 	ServerName string `json:"serverName"`
+
+	// LogServerEnabled specifies if the log server is enabled for the agent.
+	LogServerEnabled bool `json:"logServerEnabled"`
+
+	// LogServerPort contains the port of the http log file handler run with
+	// the agent.
+	LogServerPort uint32 `json:"logServerPort"`
 }
 
 // Validate validates the specification provided for the agent..
@@ -81,6 +88,12 @@ func (a *AgentSpec) Validate() error {
 		}
 	}
 
+	if a.LogServerEnabled {
+		if a.LogServerPort == 0 {
+			return fmt.Errorf("If the log server is enabled then port must be specified")
+		}
+	}
+
 	return nil
 }
 
@@ -91,7 +104,9 @@ func (a *AgentSpec) DeepEquals(az *AgentSpec) bool {
 		a.ClientKeySecret != az.ClientKeySecret ||
 		a.ClientCertSecret != az.ClientCertSecret ||
 		a.RootCASecret != az.RootCASecret ||
-		a.ServerName != az.ServerName {
+		a.ServerName != az.ServerName ||
+		a.LogServerEnabled != az.LogServerEnabled ||
+		a.LogServerPort != az.LogServerPort {
 		return false
 	}
 

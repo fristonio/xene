@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/fristonio/xene/pkg/apiserver/controller/agent"
 	"github.com/fristonio/xene/pkg/apiserver/response"
@@ -18,15 +19,15 @@ import (
 // @Tags info
 // @Accept  json
 // @Produce json
-// @Param name path string true "Name of the workflow to get information about."
+// @Param workflow path string true "Name of the workflow to get information about."
 // @Param pipeline path string true "Name of the pipeline to return the info about."
 // @Success 200 {object} response.PipelineInfo
 // @Failure 400 {object} response.HTTPError
 // @Failure 500 {object} response.HTTPError
 // @Security ApiKeyAuth
-// @Router /api/v1/info/workflow/{name}/pipeline/{pipeline} [get]
+// @Router /api/v1/info/workflow/{workflow}/pipeline/{pipeline} [get]
 func pipelineInfoHandler(ctx *gin.Context) {
-	wfName := ctx.Param("name")
+	wfName := ctx.Param("workflow")
 	pipeline := ctx.Param("pipeline")
 	if wfName == "" || pipeline == "" {
 		ctx.JSON(http.StatusBadRequest, response.HTTPError{
@@ -140,7 +141,8 @@ func pipelineInfoHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, pipelineInfo)
 }
 
-func getPipelineInfoFromAgent(id int, jobs <-chan string, results chan<- *proto.PipelinesRunInfo, pName, wfName string) {
+func getPipelineInfoFromAgent(id int,
+	jobs <-chan string, results chan<- *proto.PipelinesRunInfo, pName, wfName string) {
 	for ag := range jobs {
 		conn := agent.AgentCtrl.AgentConnection(ag)
 		if conn == nil {
@@ -166,4 +168,108 @@ func getPipelineInfoFromAgent(id int, jobs <-chan string, results chan<- *proto.
 
 		results <- info
 	}
+}
+
+// @Summary Returns verbose information about a pipeline run.
+// @Tags info
+// @Accept  json
+// @Produce json
+// @Param workflow path string true "Name of the workflow to get information about."
+// @Param pipeline path string true "Name of the pipeline to return the info about."
+// @Param runID path string true "RUN ID of the pipeline run."
+// @Success 200 {object} response.PipelineRunVerboseInfo
+// @Failure 400 {object} response.HTTPError
+// @Failure 500 {object} response.HTTPError
+// @Security ApiKeyAuth
+// @Router /api/v1/info/workflow/{workflow}/pipeline/{pipeline}/runs/{runID} [get]
+func pipelineRunInfoHandler(ctx *gin.Context) {
+	workflow := ctx.Param("workflow")
+	pipeline := ctx.Param("pipeline")
+	runID := ctx.Param("runID")
+
+	val, err := store.KVStore.Get(context.TODO(), fmt.Sprintf("%s/%s", v1alpha1.WorkflowStatusKeyPrefix, workflow))
+	if err != nil {
+		if store.KVStore.KeyDoesNotExistError(err) {
+			ctx.JSON(http.StatusBadRequest, response.HTTPError{
+				Error: fmt.Sprintf("requested workflow status(%s) does not exist", workflow),
+			})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while getting the workflow statu(%s): %s", workflow, err),
+		})
+		return
+	}
+
+	wf := v1alpha1.WorkflowStatus{}
+	err = json.Unmarshal(val.Data, &wf)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while unmarshalling the workflow(%s): %s", workflow, err),
+		})
+		return
+	}
+
+	pStatus, ok := wf.Pipelines[pipeline]
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("the pipeline %s does not exist in workflow status manifest", pipeline),
+		})
+		return
+	}
+
+	conn := agent.AgentCtrl.AgentConnection(pStatus.Executor)
+	if conn == nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while retriving agent(%s) connection", pStatus.Executor),
+		})
+		return
+	}
+
+	client := proto.NewAgentServiceClient(conn)
+	info, err := client.GetPipelineRunStatus(context.TODO(), &proto.PipelineInfoOpts{
+		Name:     pipeline,
+		Workflow: workflow,
+		RunID:    runID,
+	})
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while retriving run status: %s", err),
+		})
+		return
+	}
+
+	runStatus := v1alpha1.PipelineRunStatus{}
+	err = json.Unmarshal([]byte(info.Spec), &runStatus)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while unmarshalling the pipeline run status: %s: %s", pipeline, err),
+		})
+		return
+	}
+
+	resp := response.PipelineRunVerboseInfo{
+		RunID:   runID,
+		Status:  runStatus.Status,
+		RunInfo: info.Spec,
+	}
+	ag := agent.AgentCtrl.Agent(pStatus.Executor)
+	if ag == nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while getting agent manifest"),
+		})
+		return
+	}
+
+	addr, err := url.Parse(ag.Spec.Address)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error parsing agent address"),
+		})
+		return
+	}
+
+	resp.BaseLogURL = fmt.Sprintf("%s:%d", addr.Hostname(), ag.Spec.LogServerPort)
+	ctx.JSON(http.StatusOK, resp)
 }

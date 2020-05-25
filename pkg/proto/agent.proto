@@ -105,6 +105,8 @@ message PipelineInfoOpts {
     string Name = 1;
 
     string Workflow = 2;
+
+    string RunID = 3;
 }
 
 message PipelineRunInfo {
@@ -127,6 +129,10 @@ message PipelinesRunInfo {
     repeated PipelineRunInfo Pipelines = 3;
 }
 
+message PipelineRunStatus {
+    string Spec = 2;
+}
+
 // AgentService describes the grpc service running in the agent
 service AgentService {
     // Status returns the status of the agent service running.
@@ -146,4 +152,7 @@ service AgentService {
 
     // GetPipelinesRunInfo returns the list of run info for the requested pipeline.
     rpc GetPipelinesRunInfo(PipelineInfoOpts) returns (PipelinesRunInfo) {}
+
+    // GetPipelineRunStatus returns the info about a particular pipeline run.
+    rpc GetPipelineRunStatus(PipelineInfoOpts) returns (PipelineRunStatus) {}
 }

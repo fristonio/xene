@@ -139,6 +139,16 @@ func (a *Controller) Name() string {
 	return a.name
 }
 
+// Agent returns the agent manifest of the provided name
+func (a *Controller) Agent(name string) *v1alpha1.Agent {
+	agent, ok := a.Nodes[name]
+	if !ok {
+		return nil
+	}
+
+	return agent.Agent
+}
+
 // GetAllActiveAgents returns all the agent which are not blacklisted.
 func (a *Controller) GetAllActiveAgents() []string {
 	agents := make([]string, 0)
