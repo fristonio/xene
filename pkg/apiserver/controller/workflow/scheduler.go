@@ -171,7 +171,9 @@ func (s *Scheduler) SchedulePipeline(wfName, name string, pipeline *v1alpha1.Pip
 	status *v1alpha1.WorkflowStatus) error {
 	log.Debugf("in scheduler schedule pipeline step")
 	ps := v1alpha1.PipelineStatus{}
+
+	err := s.performPipelineAction(ActionTypeSchedule, wfName, name, pipeline, &ps)
 	status.Pipelines[name] = &ps
 
-	return s.performPipelineAction(ActionTypeSchedule, wfName, name, pipeline, &ps)
+	return err
 }

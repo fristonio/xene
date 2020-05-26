@@ -255,12 +255,12 @@ func (a *Controller) addWorkflow(kv *v1alpha1.KVPairStruct) error {
 		log.Infof("workflow status not found for: %s", wfName)
 		log.Infof("scheduling the pipelines for the workflow")
 
-		wfStatus, err := v1alpha1.NewWorkflowStatus(&wf)
+		wfStatus, err = v1alpha1.NewWorkflowStatus(&wf)
 		if err != nil {
 			return err
 		}
 
-		data, err := json.Marshal(&wf)
+		data, err := json.Marshal(&wfStatus)
 		if err != nil {
 			return fmt.Errorf("error while marshalling workflow status")
 		}
