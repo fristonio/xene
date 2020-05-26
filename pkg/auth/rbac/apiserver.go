@@ -39,17 +39,21 @@ var APIServerRBACMap RBACMapT = RBACMapT{
 		"post": []regex{
 			getRegex(`/api/v1/registry/.*`),
 			getRegex(`/api/v1/status/.*`),
+			getRegex(`/api/v1/info/.*`),
 		},
 		"put": []regex{
 			getRegex(`/api/v1/registry/.*`),
 			getRegex(`/api/v1/status/.*`),
+			getRegex(`/api/v1/info/.*`),
 		},
 		"delete": []regex{
 			getRegex(`/api/v1/registry/.*`),
 			getRegex(`/api/v1/status/.*`),
+			getRegex(`/api/v1/info/.*`),
 		},
 		"patch": []regex{
 			getRegex(`/api/v1/registry/.*`),
+			getRegex(`/api/v1/status/.*`),
 			getRegex(`/api/v1/status/.*`),
 		},
 	},

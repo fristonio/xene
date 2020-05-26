@@ -211,7 +211,8 @@ func (s *Server) runLocalLogServer() error {
 			log.Errorf("error while resolving pipeline spec: %s", err)
 		}
 
-		reader, contentLength, err := GetPipelineRunLogReader(workflow, pipeline, runID, &pipelineSpec.PipelineSpec, &pipelineStatus)
+		reader, contentLength, err := GetPipelineRunLogReader(
+			workflow, pipeline, runID, &pipelineSpec.PipelineSpec, &pipelineStatus)
 		if err != nil {
 			ctx.Abort()
 			log.Errorf("%s", err)

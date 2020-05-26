@@ -193,7 +193,7 @@ var workflowRunCmd = &cobra.Command{
 					pipeline, exec.GetStatus())
 				if err != nil {
 					log.Errorf("%s", err)
-					file.WriteString("\nError getting pipeline run log reader\n")
+					_, _ = file.WriteString("\nError getting pipeline run log reader\n")
 					continue
 				}
 
@@ -201,7 +201,7 @@ var workflowRunCmd = &cobra.Command{
 				if err != nil {
 					log.Errorf("Error writing pipelines run log: %s", err)
 				}
-				file.WriteString("\n -------------------------- END --------------------------\n")
+				_, _ = file.WriteString("\n -------------------------- END --------------------------\n")
 			}
 		}
 	},

@@ -1,12 +1,15 @@
 package apiserver
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/fristonio/xene/pkg/apiserver/response"
 	"github.com/fristonio/xene/pkg/auth"
 	"github.com/fristonio/xene/pkg/auth/rbac"
 	"github.com/fristonio/xene/pkg/defaults"
+	"github.com/fristonio/xene/pkg/option"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,6 +37,29 @@ func (s *APIServer) JWTVerficationMiddleware(ctx *gin.Context) {
 	if !rbac.APIServerRBACMap.ValidateAccessI(claims.Roles, ctx.Request.Method, ctx.FullPath()) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.HTTPError{
 			Error: "Role not valid for the provided API endpoint",
+		})
+		return
+	}
+
+	emailComps := strings.Split(claims.Email, "@")
+	if len(emailComps) != 2 {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.HTTPError{
+			Error: "Invalid email address in token",
+		})
+		return
+	}
+
+	emailValid := false
+	for _, domain := range option.Config.APIServer.AllowedDomains {
+		if emailComps[1] == domain {
+			emailValid = true
+			break
+		}
+	}
+
+	if !emailValid {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.HTTPError{
+			Error: fmt.Sprintf("Email must conform to a valid domain: %s", option.Config.APIServer.AllowedDomains),
 		})
 		return
 	}

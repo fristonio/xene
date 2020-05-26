@@ -33,6 +33,10 @@ type APIServerOpts struct {
 	// JWTSecret is the secret to use for issuing JWT tokens by the API server.
 	JWTSecret string `yaml:"jwtSecret"`
 
+	// AllowedDomains contains a list of domain which are allowed to be logged in using the
+	// OAUTH provider
+	AllowedDomains []string `yaml:"allowedDomains"`
+
 	// Oauth contains oauth providers configuration for the API server, multiple
 	// oauth providers can be configured at the same time.
 	Oauth map[string]OauthProvider `yaml:"oauth"`
