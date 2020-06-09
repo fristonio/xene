@@ -8,5 +8,7 @@ import (
 func InfoGroupRoutes(r *gin.RouterGroup) {
 	r.GET("/agent/:name", agentInfoHandler)
 	r.GET("/workflow/:workflow/pipeline/:pipeline", pipelineInfoHandler)
+	r.GET("/workflow/:workflow/pipeline/:pipeline/spec", pipelineSpecGetHandler)
 	r.GET("/workflow/:workflow/pipeline/:pipeline/runs/:runID", pipelineRunInfoHandler)
+
 }

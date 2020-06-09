@@ -16,6 +16,7 @@ import (
 	"github.com/fristonio/xene/pkg/apiserver/client/info"
 	"github.com/fristonio/xene/pkg/apiserver/client/registry"
 	"github.com/fristonio/xene/pkg/apiserver/client/status"
+	"github.com/fristonio/xene/pkg/apiserver/client/webhook"
 )
 
 // Default xene API server HTTP client.
@@ -66,6 +67,7 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *XeneAPISer
 	cli.Info = info.New(transport, formats)
 	cli.Registry = registry.New(transport, formats)
 	cli.Status = status.New(transport, formats)
+	cli.Webhook = webhook.New(transport, formats)
 	return cli
 }
 
@@ -122,6 +124,8 @@ type XeneAPIServer struct {
 
 	Status status.ClientService
 
+	Webhook webhook.ClientService
+
 	Transport runtime.ClientTransport
 }
 
@@ -134,4 +138,5 @@ func (c *XeneAPIServer) SetTransport(transport runtime.ClientTransport) {
 	c.Info.SetTransport(transport)
 	c.Registry.SetTransport(transport)
 	c.Status.SetTransport(transport)
+	c.Webhook.SetTransport(transport)
 }

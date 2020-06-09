@@ -210,6 +210,61 @@
                 }
             }
         },
+        "/api/v1/info/workflow/{workflow}/pipeline/{pipeline}/spec": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "info"
+                ],
+                "summary": "Returns spec of the provided workflow pipeline.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the workflow to get information about.",
+                        "name": "workflow",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name of the pipeline to return the info about.",
+                        "name": "pipeline",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.RegistryItem"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/registry/agent": {
             "get": {
                 "security": [
@@ -1162,6 +1217,55 @@
                 "responses": {
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/webhook/trigger/{workflow}/pipeline/{pipeline}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "webhook"
+                ],
+                "summary": "Webhook endpoints to trigger the pipelines of a particular workflow.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the workflow.",
+                        "name": "workflow",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name of the pipeline to be triggered.",
+                        "name": "pipeline",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/response.HTTPError"
                         }

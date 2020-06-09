@@ -33,6 +33,8 @@ type ClientService interface {
 
 	GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunID(params *GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunIDParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunIDOK, error)
 
+	GetAPIV1InfoWorkflowWorkflowPipelinePipelineSpec(params *GetAPIV1InfoWorkflowWorkflowPipelinePipelineSpecParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1InfoWorkflowWorkflowPipelinePipelineSpecOK, error)
+
 	SetTransport(transport runtime.ClientTransport)
 }
 
@@ -138,6 +140,41 @@ func (a *Client) GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunID(params *G
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for GetAPIV1InfoWorkflowWorkflowPipelinePipelineRunsRunID: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+  GetAPIV1InfoWorkflowWorkflowPipelinePipelineSpec returns spec of the provided workflow pipeline
+*/
+func (a *Client) GetAPIV1InfoWorkflowWorkflowPipelinePipelineSpec(params *GetAPIV1InfoWorkflowWorkflowPipelinePipelineSpecParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1InfoWorkflowWorkflowPipelinePipelineSpecOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAPIV1InfoWorkflowWorkflowPipelinePipelineSpecParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "GetAPIV1InfoWorkflowWorkflowPipelinePipelineSpec",
+		Method:             "GET",
+		PathPattern:        "/api/v1/info/workflow/{workflow}/pipeline/{pipeline}/spec",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetAPIV1InfoWorkflowWorkflowPipelinePipelineSpecReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetAPIV1InfoWorkflowWorkflowPipelinePipelineSpecOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for GetAPIV1InfoWorkflowWorkflowPipelinePipelineSpec: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

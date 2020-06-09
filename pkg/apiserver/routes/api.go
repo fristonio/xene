@@ -17,6 +17,9 @@ func APIGroupRouter(r *gin.RouterGroup) {
 
 	infoGroup := r.Group("info")
 	InfoGroupRoutes(infoGroup)
+
+	webhookGroup := r.Group("webhook")
+	WebhookGroupRoutes(webhookGroup)
 }
 
 // @Summary Handles ping event for api routes.

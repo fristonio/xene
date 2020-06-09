@@ -15,6 +15,85 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func getPipelineSpecFromStore(ctx *gin.Context, wfName, pipeline string) []byte {
+	var spec []byte
+
+	if wfName == "" || pipeline == "" {
+		ctx.JSON(http.StatusBadRequest, response.HTTPError{
+			Error: "name and pipeline are required parameters",
+		})
+		return spec
+	}
+
+	val, err := store.KVStore.Get(context.TODO(), fmt.Sprintf("%s/%s", v1alpha1.WorkflowKeyPrefix, wfName))
+	if err != nil {
+		if store.KVStore.KeyDoesNotExistError(err) {
+			ctx.JSON(http.StatusBadRequest, response.HTTPError{
+				Error: fmt.Sprintf("requested workflow: %s does not exist", wfName),
+			})
+			return spec
+		}
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while getting the workflow: %s: %s", wfName, err),
+		})
+		return spec
+	}
+
+	wf := v1alpha1.Workflow{}
+	err = json.Unmarshal(val.Data, &wf)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while unmarshalling the workflow: %s: %s", wfName, err),
+		})
+		return spec
+	}
+
+	if _, ok := wf.Spec.Pipelines[pipeline]; !ok {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("the pipeline %s does not exist in workflow manifest", pipeline),
+		})
+		return spec
+	}
+
+	spec, err = json.Marshal(wf.Spec.Pipelines[pipeline])
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
+			Error: fmt.Sprintf("error while marshalling the pipeline: %s: %s", pipeline, err),
+		})
+		spec = make([]byte, 0)
+	}
+
+	return spec
+}
+
+// @Summary Returns spec of the provided workflow pipeline.
+// @Tags info
+// @Accept  json
+// @Produce json
+// @Param workflow path string true "Name of the workflow to get information about."
+// @Param pipeline path string true "Name of the pipeline to return the info about."
+// @Success 200 {object} response.RegistryItem
+// @Failure 400 {object} response.HTTPError
+// @Failure 500 {object} response.HTTPError
+// @Security ApiKeyAuth
+// @Router /api/v1/info/workflow/{workflow}/pipeline/{pipeline}/spec [get]
+func pipelineSpecGetHandler(ctx *gin.Context) {
+	wfName := ctx.Param("workflow")
+	pipeline := ctx.Param("pipeline")
+
+	spec := getPipelineSpecFromStore(ctx, wfName, pipeline)
+	if len(spec) == 0 {
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response.RegistryItem{
+		Item: response.KVPair{
+			Key:   fmt.Sprintf("%s/%s", wfName, pipeline),
+			Value: string(spec),
+		},
+	})
+}
+
 // @Summary Returns verbose information about a workflow.
 // @Tags info
 // @Accept  json
@@ -29,50 +108,12 @@ import (
 func pipelineInfoHandler(ctx *gin.Context) {
 	wfName := ctx.Param("workflow")
 	pipeline := ctx.Param("pipeline")
-	if wfName == "" || pipeline == "" {
-		ctx.JSON(http.StatusBadRequest, response.HTTPError{
-			Error: "name and pipeline are required parameters",
-		})
+
+	spec := getPipelineSpecFromStore(ctx, wfName, pipeline)
+	if len(spec) == 0 {
 		return
 	}
 
-	val, err := store.KVStore.Get(context.TODO(), fmt.Sprintf("%s/%s", v1alpha1.WorkflowKeyPrefix, wfName))
-	if err != nil {
-		if store.KVStore.KeyDoesNotExistError(err) {
-			ctx.JSON(http.StatusBadRequest, response.HTTPError{
-				Error: fmt.Sprintf("requested workflow: %s does not exist", wfName),
-			})
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
-			Error: fmt.Sprintf("error while getting the workflow: %s: %s", wfName, err),
-		})
-		return
-	}
-
-	wf := v1alpha1.Workflow{}
-	err = json.Unmarshal(val.Data, &wf)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
-			Error: fmt.Sprintf("error while unmarshalling the workflow: %s: %s", wfName, err),
-		})
-		return
-	}
-
-	if _, ok := wf.Spec.Pipelines[pipeline]; !ok {
-		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
-			Error: fmt.Sprintf("the pipeline %s does not exist in workflow manifest", pipeline),
-		})
-		return
-	}
-
-	spec, err := json.Marshal(wf.Spec.Pipelines[pipeline])
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
-			Error: fmt.Sprintf("error while marshalling the pipeline: %s: %s", pipeline, err),
-		})
-		return
-	}
 	pipelineInfo := response.PipelineInfo{
 		Workflow: wfName,
 		Name:     pipeline,

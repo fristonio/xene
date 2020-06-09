@@ -318,6 +318,41 @@ paths:
       summary: Returns verbose information about a pipeline run.
       tags:
       - info
+  /api/v1/info/workflow/{workflow}/pipeline/{pipeline}/spec:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Name of the workflow to get information about.
+        in: path
+        name: workflow
+        required: true
+        type: string
+      - description: Name of the pipeline to return the info about.
+        in: path
+        name: pipeline
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RegistryItem'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Returns spec of the provided workflow pipeline.
+      tags:
+      - info
   /api/v1/registry/agent:
     get:
       consumes:
@@ -917,6 +952,37 @@ paths:
       summary: Patches the specified workflow status from the store.
       tags:
       - registry
+  /api/v1/webhook/trigger/{workflow}/pipeline/{pipeline}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Name of the workflow.
+        in: path
+        name: workflow
+        required: true
+        type: string
+      - description: Name of the pipeline to be triggered.
+        in: path
+        name: pipeline
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Webhook endpoints to trigger the pipelines of a particular workflow.
+      tags:
+      - webhook
   /health:
     get:
       consumes:
