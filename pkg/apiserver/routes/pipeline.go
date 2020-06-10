@@ -298,7 +298,7 @@ func pipelineRunInfoHandler(ctx *gin.Context) {
 	ag := agent.AgentCtrl.Agent(pStatus.Executor)
 	if ag == nil {
 		ctx.JSON(http.StatusInternalServerError, response.HTTPError{
-			Error: fmt.Sprintf("error while getting agent manifest"),
+			Error: fmt.Sprintf("error while getting agent connection"),
 		})
 		return
 	}

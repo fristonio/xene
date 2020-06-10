@@ -58,6 +58,8 @@ type CRExecutor struct {
 	// log contains the logger for the pipeline executor
 	log *logrus.Entry
 
+	// useStore specifies wheather to use kvstore interaction during the execution
+	// of the pipeline.
 	useStore bool
 
 	mux *sync.Mutex
@@ -206,7 +208,10 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 
 	c.mux.Lock()
 	c.status.Tasks[name].Status = v1alpha1.StatusRunning
-	c.SaveStatusToStore()
+	err := c.SaveStatusToStore()
+	if err != nil {
+		c.log.Errorf("error while saving status to the store: %s", err)
+	}
 	c.mux.Unlock()
 
 	for _, step := range task.Steps {
@@ -218,7 +223,10 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 		c.mux.Lock()
 		c.status.Tasks[name].Steps[step.Name].Status = v1alpha1.StatusRunning
 		c.status.Tasks[name].Steps[step.Name].LogFile = l.getLogFileName()
-		c.SaveStatusToStore()
+		err := c.SaveStatusToStore()
+		if err != nil {
+			c.log.Errorf("error while saving status to the store: %s", err)
+		}
 		c.mux.Unlock()
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute*30)
@@ -246,7 +254,10 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 				Time:    time.Since(start),
 			}
 			c.status.Tasks[name].Status = v1alpha1.StatusError
-			c.SaveStatusToStore()
+			err := c.SaveStatusToStore()
+			if err != nil {
+				c.log.Errorf("error while saving status to the store: %s", err)
+			}
 			c.mux.Unlock()
 			if w != nil {
 				w.Close()
@@ -263,7 +274,10 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 				Time:    time.Since(start),
 			}
 			c.status.Tasks[name].Status = v1alpha1.StatusError
-			c.SaveStatusToStore()
+			err := c.SaveStatusToStore()
+			if err != nil {
+				c.log.Errorf("error while saving status to the store: %s", err)
+			}
 			c.mux.Unlock()
 
 			return &StepExecError{
@@ -277,7 +291,10 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 			LogFile: l.getLogFileName(),
 			Time:    time.Since(start),
 		}
-		c.SaveStatusToStore()
+		err = c.SaveStatusToStore()
+		if err != nil {
+			c.log.Errorf("error while saving status to the store: %s", err)
+		}
 		c.mux.Unlock()
 
 		if w != nil {
@@ -288,7 +305,10 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 
 	c.mux.Lock()
 	c.status.Tasks[name].Status = v1alpha1.StatusSuccess
-	c.SaveStatusToStore()
+	err = c.SaveStatusToStore()
+	if err != nil {
+		c.log.Errorf("error while saving status to the store: %s", err)
+	}
 	c.mux.Unlock()
 
 	return nil

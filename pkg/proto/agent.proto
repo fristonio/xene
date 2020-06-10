@@ -133,6 +133,20 @@ message PipelineRunStatus {
     string Spec = 2;
 }
 
+message TriggerOpts {
+    string Name = 1;
+
+    string Workflow = 2;
+
+    string Pipeline = 3;
+}
+
+message TriggerRunInfo {
+    string Agent = 1;
+
+    string Status = 2;
+}
+
 // AgentService describes the grpc service running in the agent
 service AgentService {
     // Status returns the status of the agent service running.
@@ -155,4 +169,7 @@ service AgentService {
 
     // GetPipelineRunStatus returns the info about a particular pipeline run.
     rpc GetPipelineRunStatus(PipelineInfoOpts) returns (PipelineRunStatus) {}
+
+    // InvokeTrigger invokes a particular trigger
+    rpc InvokeTrigger(TriggerOpts) returns (TriggerRunInfo) {}
 }

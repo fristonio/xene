@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/fristonio/xene/pkg/agent/controller/trigger"
 	"github.com/fristonio/xene/pkg/defaults"
 	xerr "github.com/fristonio/xene/pkg/errors"
 	"github.com/fristonio/xene/pkg/option"
@@ -307,5 +308,34 @@ func (a *agentServer) GetPipelineRunStatus(
 	}
 
 	resp.Spec = string(val.Data)
+	return &resp, nil
+}
+
+func (a *agentServer) InvokeTrigger(
+	ctx context.Context, opts *proto.TriggerOpts) (*proto.TriggerRunInfo, error) {
+	if opts.Name == "" || opts.Workflow == "" {
+		return nil, errors.New("workflow and trigger name are required option")
+	}
+
+	resp := proto.TriggerRunInfo{
+		Agent: option.Config.Agent.Name,
+	}
+
+	var err error
+	if opts.Pipeline != "" {
+		err = trigger.TriggerCtrl.TriggerPipelineRun(
+			ctx, v1alpha1.GetWorkflowPrefixedName(opts.Workflow, opts.Name),
+			opts.Pipeline)
+	} else {
+		err = trigger.TriggerCtrl.InvokeTrigger(
+			ctx, v1alpha1.GetWorkflowPrefixedName(opts.Workflow, opts.Name))
+	}
+
+	if err != nil {
+		resp.Status = "Error while Triggering"
+		return &resp, err
+	}
+
+	resp.Status = "Triggered"
 	return &resp, nil
 }

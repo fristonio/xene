@@ -6,6 +6,8 @@ package webhook
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"fmt"
+
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 )
@@ -25,37 +27,44 @@ type Client struct {
 
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetAPIV1WebhookTriggerWorkflowPipelinePipeline(params *GetAPIV1WebhookTriggerWorkflowPipelinePipelineParams, authInfo runtime.ClientAuthInfoWriter) error
+	GetAPIV1WebhookTriggerWorkflowTriggerPipeline(params *GetAPIV1WebhookTriggerWorkflowTriggerPipelineParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1WebhookTriggerWorkflowTriggerPipelineOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
 
 /*
-  GetAPIV1WebhookTriggerWorkflowPipelinePipeline webhooks endpoints to trigger the pipelines of a particular workflow
+  GetAPIV1WebhookTriggerWorkflowTriggerPipeline webhooks endpoints to trigger the pipelines of a particular workflow
 */
-func (a *Client) GetAPIV1WebhookTriggerWorkflowPipelinePipeline(params *GetAPIV1WebhookTriggerWorkflowPipelinePipelineParams, authInfo runtime.ClientAuthInfoWriter) error {
+func (a *Client) GetAPIV1WebhookTriggerWorkflowTriggerPipeline(params *GetAPIV1WebhookTriggerWorkflowTriggerPipelineParams, authInfo runtime.ClientAuthInfoWriter) (*GetAPIV1WebhookTriggerWorkflowTriggerPipelineOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetAPIV1WebhookTriggerWorkflowPipelinePipelineParams()
+		params = NewGetAPIV1WebhookTriggerWorkflowTriggerPipelineParams()
 	}
 
-	_, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "GetAPIV1WebhookTriggerWorkflowPipelinePipeline",
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "GetAPIV1WebhookTriggerWorkflowTriggerPipeline",
 		Method:             "GET",
-		PathPattern:        "/api/v1/webhook/trigger/{workflow}/pipeline/{pipeline}",
+		PathPattern:        "/api/v1/webhook/trigger/{workflow}/{trigger}/{pipeline}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &GetAPIV1WebhookTriggerWorkflowPipelinePipelineReader{formats: a.formats},
+		Reader:             &GetAPIV1WebhookTriggerWorkflowTriggerPipelineReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	success, ok := result.(*GetAPIV1WebhookTriggerWorkflowTriggerPipelineOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for GetAPIV1WebhookTriggerWorkflowTriggerPipeline: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 // SetTransport changes the transport on the client

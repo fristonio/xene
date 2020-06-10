@@ -1239,7 +1239,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/webhook/trigger/{workflow}/pipeline/{pipeline}": {
+        "/api/v1/webhook/trigger/{workflow}/{trigger}/{pipeline}": {
             "get": {
                 "security": [
                     {
@@ -1270,9 +1270,22 @@ var doc = `{
                         "name": "pipeline",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name of the trigger associated with the pipeline",
+                        "name": "trigger",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPMessage"
+                        }
+                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {

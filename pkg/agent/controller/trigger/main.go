@@ -82,7 +82,7 @@ func (c *Controller) Configure() {
 func (c *Controller) Run() error {
 	f, err := controller.NewControllerFunction(c.triggerUpdateControllerFunc)
 	if err != nil {
-		return fmt.Errorf("error while creating update controller: %s", err)
+		return fmt.Errorf("error whilze creating update controller: %s", err)
 	}
 
 	err = c.Manager.UpdateController("trigger-update", "trigger", controller.Internal{
@@ -106,6 +106,66 @@ func (c *Controller) Stop() error {
 // the underlying store controller.
 func (c *Controller) Name() string {
 	return c.name
+}
+
+// InvokeTrigger invokes the trigger with the provided name
+func (c *Controller) InvokeTrigger(ctx context.Context, triggerName string) error {
+	if trig, ok := c.Triggers[triggerName]; ok {
+		return trig.RunPipelines(ctx, c.Manager)
+	}
+
+	if _, ok := c.DefaultTriggers[triggerName]; ok {
+		val, err := store.KVStore.Get(context.TODO(),
+			fmt.Sprintf("%s/%s", v1alpha1.TriggerKeyPrefix, triggerName))
+		if err != nil {
+			return fmt.Errorf("error getting trigger spec from the store: %s", err)
+		}
+
+		triggerSpec := &v1alpha1.TriggerSpecWithName{}
+		err = json.Unmarshal(val.Data, triggerSpec)
+		if err != nil {
+			return fmt.Errorf("error while unmarshaling trigger spec: %s", err)
+		}
+
+		t := &Trigger{
+			TriggerSpecWithName: triggerSpec,
+		}
+
+		// Start running piplines associated with the trigger
+		return t.RunPipelines(context.TODO(), c.Manager)
+	}
+
+	return fmt.Errorf("the trigger is currently not configured on the agent, wait for some time")
+}
+
+// TriggerPipelineRun invokes the trigger associated pipeline with the provided name
+func (c *Controller) TriggerPipelineRun(ctx context.Context, triggerName, pipelineName string) error {
+	if trig, ok := c.Triggers[triggerName]; ok {
+		return trig.RunPipeline(ctx, c.Manager, pipelineName)
+	}
+
+	if _, ok := c.DefaultTriggers[triggerName]; ok {
+		val, err := store.KVStore.Get(context.TODO(),
+			fmt.Sprintf("%s/%s", v1alpha1.TriggerKeyPrefix, triggerName))
+		if err != nil {
+			return fmt.Errorf("error getting trigger spec from the store: %s", err)
+		}
+
+		triggerSpec := &v1alpha1.TriggerSpecWithName{}
+		err = json.Unmarshal(val.Data, triggerSpec)
+		if err != nil {
+			return fmt.Errorf("error while unmarshaling trigger spec: %s", err)
+		}
+
+		t := &Trigger{
+			TriggerSpecWithName: triggerSpec,
+		}
+
+		// Start running piplines associated with the trigger
+		return t.RunPipeline(context.TODO(), c.Manager, pipelineName)
+	}
+
+	return fmt.Errorf("the trigger is currently not configured on the agent, wait for some time")
 }
 
 // newTriggerStoreInformer returns the trigger store controller for the agent.

@@ -74,6 +74,48 @@ func (t *Trigger) StopController(manager *controller.Manager) error {
 	return nil
 }
 
+func (t *Trigger) runPipeline(ctx context.Context, manager *controller.Manager, name string) error {
+	// set running pipelines to true, as the controller is running the pipelines.
+	t.RunningPipelines++
+
+	val, err := store.KVStore.Get(context.TODO(), fmt.Sprintf("%s/%s", v1alpha1.PipelineKeyPrefix, name))
+	if err != nil {
+		return fmt.Errorf("error while getting pipeline(%s) from kvstore: %s", name, err)
+	}
+
+	var pipeline v1alpha1.PipelineSpecWithName
+	err = json.Unmarshal(val.Data, &pipeline)
+	if err != nil {
+		return fmt.Errorf("error while unmarshaling pipeline(%s): %s", name, err)
+	}
+
+	pipelineID := utils.RandToken(defaults.PipelineIDSize)
+
+	statusKey := fmt.Sprintf("%s/%s/%s", v1alpha1.PipelineStatusKeyPrefix, name, pipelineID)
+	pipelineStatus := v1alpha1.GetDummyPipelineRunStatus(&pipeline)
+	pipelineStatus.RunID = pipelineID
+	pipelineStatus.Status = v1alpha1.StatusRunning
+	pipelineStatus.Agent = option.Config.Agent.Name
+
+	v, err := json.Marshal(&pipelineStatus)
+	if err != nil {
+		return fmt.Errorf("error while marshalling pipeline status: %s", err)
+	}
+
+	err = store.KVStore.Set(context.TODO(), statusKey, v)
+	if err != nil {
+		return fmt.Errorf("error while setting pipeline status key in kvstore: %s", err)
+	}
+
+	p := executor.NewPipelineExecutor(name, pipelineID, &pipeline)
+
+	// Runs the pipeline in a go routine
+	go p.Run(pipelineStatus)
+
+	t.RunningPipelines--
+	return nil
+}
+
 // RunPipelines runs the pipelines associated with the trigger.
 func (t *Trigger) RunPipelines(ctx context.Context, manager *controller.Manager) error {
 	if t.UpdateAvailable {
@@ -81,47 +123,34 @@ func (t *Trigger) RunPipelines(ctx context.Context, manager *controller.Manager)
 	}
 
 	errs := errors.NewMultiError()
-	// set running pipelines to true, as the controller is running the pipelines.
-	t.RunningPipelines++
 
 	log.Infof("starting to run pipelines: %v", t.Pipelines)
 	for _, name := range t.Pipelines {
-		val, err := store.KVStore.Get(context.TODO(), fmt.Sprintf("%s/%s", v1alpha1.PipelineKeyPrefix, name))
+		err := t.runPipeline(ctx, manager, name)
 		if err != nil {
-			errs.Append(fmt.Errorf("error while getting pipeline(%s) from kvstore: %s", name, err))
-			continue
+			errs.Append(err)
 		}
-
-		var pipeline v1alpha1.PipelineSpecWithName
-		err = json.Unmarshal(val.Data, &pipeline)
-		if err != nil {
-			errs.Append(fmt.Errorf("error while unmarshaling pipeline(%s): %s", name, err))
-		}
-
-		pipelineID := utils.RandToken(defaults.PipelineIDSize)
-
-		statusKey := fmt.Sprintf("%s/%s/%s", v1alpha1.PipelineStatusKeyPrefix, name, pipelineID)
-		pipelineStatus := v1alpha1.GetDummyPipelineRunStatus(&pipeline)
-		pipelineStatus.RunID = pipelineID
-		pipelineStatus.Status = v1alpha1.StatusRunning
-		pipelineStatus.Agent = option.Config.Agent.Name
-
-		v, err := json.Marshal(&pipelineStatus)
-		if err != nil {
-			return fmt.Errorf("error while marshalling pipeline status: %s", err)
-		}
-
-		err = store.KVStore.Set(context.TODO(), statusKey, v)
-		if err != nil {
-			return fmt.Errorf("error while setting pipeline status key in kvstore: %s", err)
-		}
-
-		p := executor.NewPipelineExecutor(name, pipelineID, &pipeline)
-		// Runs the pipeline
-		go p.Run(pipelineStatus)
 	}
 
-	t.RunningPipelines--
+	return errs.GetError()
+}
 
-	return nil
+// RunPipeline runs a single pipeline associated with the trigger.
+func (t *Trigger) RunPipeline(ctx context.Context, manager *controller.Manager, pipeline string) error {
+	if t.UpdateAvailable {
+		return fmt.Errorf("looking to update the pipeline specification, the Pipeline will be run next time")
+	}
+
+	for _, name := range t.Pipelines {
+		if name == pipeline {
+			err := t.runPipeline(ctx, manager, name)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("No pipeline with the name %q is associated with trigger %q", pipeline, t.Name)
 }

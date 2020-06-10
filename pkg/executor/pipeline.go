@@ -29,10 +29,6 @@ type PipelineExecutor struct {
 	// re contains the runtime executor for the pipeline.
 	re RuntimeExecutor
 
-	// useStore specifies wheather to use kvstore interaction during the execution
-	// of the pipeline.
-	useStore bool
-
 	// status contains the status of the pipeline execution
 	// This is only set to a value if we are not using the store
 	// for save run status.
@@ -122,7 +118,10 @@ func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 	}
 
 	status.EndTime = time.Now().Unix()
-	p.re.SaveStatusToStore()
+	err = p.re.SaveStatusToStore()
+	if err != nil {
+		p.log.Errorf("error while saving status to the store: %s", err)
+	}
 
 	err = p.re.Shutdown()
 	if err != nil {

@@ -952,7 +952,7 @@ paths:
       summary: Patches the specified workflow status from the store.
       tags:
       - registry
-  /api/v1/webhook/trigger/{workflow}/pipeline/{pipeline}:
+  /api/v1/webhook/trigger/{workflow}/{trigger}/{pipeline}:
     get:
       consumes:
       - application/json
@@ -967,9 +967,18 @@ paths:
         name: pipeline
         required: true
         type: string
+      - description: Name of the trigger associated with the pipeline
+        in: path
+        name: trigger
+        required: true
+        type: string
       produces:
       - application/json
       responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPMessage'
         "400":
           description: Bad Request
           schema:
