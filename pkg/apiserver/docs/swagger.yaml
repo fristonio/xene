@@ -998,14 +998,14 @@ paths:
       summary: Health route for Xene API server.
       tags:
       - health
-  /oauth/:provider:
+  /oauth/{provider}:
     get:
       consumes:
       - application/json
       description: Log in to xene using the configured oauth providers that xene supports.
       parameters:
       - description: Provider for oauth login
-        in: query
+        in: path
         name: provider
         required: true
         type: string
@@ -1019,14 +1019,14 @@ paths:
       summary: Handles login for xene
       tags:
       - auth
-  /oauth/:provider/redirect:
+  /oauth/{provider}/redirect:
     get:
       consumes:
       - application/json
       description: redirectHandler handles the redirect from the Oauth provider after the authentication process has
       parameters:
       - description: Provider for the oauth redirect
-        in: query
+        in: path
         name: provider
         required: true
         type: string

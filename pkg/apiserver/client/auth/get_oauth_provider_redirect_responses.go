@@ -55,7 +55,7 @@ type GetOauthProviderRedirectOK struct {
 }
 
 func (o *GetOauthProviderRedirectOK) Error() string {
-	return fmt.Sprintf("[GET /oauth/:provider/redirect][%d] getOauthProviderRedirectOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /oauth/{provider}/redirect][%d] getOauthProviderRedirectOK  %+v", 200, o.Payload)
 }
 
 func (o *GetOauthProviderRedirectOK) GetPayload() *models.ResponseJWTAuth {
@@ -88,7 +88,7 @@ type GetOauthProviderRedirectInternalServerError struct {
 }
 
 func (o *GetOauthProviderRedirectInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /oauth/:provider/redirect][%d] getOauthProviderRedirectInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /oauth/{provider}/redirect][%d] getOauthProviderRedirectInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetOauthProviderRedirectInternalServerError) GetPayload() *models.ResponseHTTPError {

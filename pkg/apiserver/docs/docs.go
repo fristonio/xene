@@ -1311,7 +1311,36 @@ var doc = `{
                 }
             }
         },
-        "/oauth/:provider": {
+        "/oauth/refresh/": {
+            "get": {
+                "description": "Handles authentication token refresh",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Handle authentication token refresh for the oauth provider.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.JWTAuth"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/oauth/{provider}": {
             "get": {
                 "description": "Log in to xene using the configured oauth providers that xene supports.",
                 "consumes": [
@@ -1329,7 +1358,7 @@ var doc = `{
                         "type": "string",
                         "description": "Provider for oauth login",
                         "name": "provider",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -1343,7 +1372,7 @@ var doc = `{
                 }
             }
         },
-        "/oauth/:provider/redirect": {
+        "/oauth/{provider}/redirect": {
             "get": {
                 "description": "redirectHandler handles the redirect from the Oauth provider after the authentication process has",
                 "consumes": [
@@ -1361,39 +1390,10 @@ var doc = `{
                         "type": "string",
                         "description": "Provider for the oauth redirect",
                         "name": "provider",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.JWTAuth"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/oauth/refresh/": {
-            "get": {
-                "description": "Handles authentication token refresh",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Handle authentication token refresh for the oauth provider.",
                 "responses": {
                     "200": {
                         "description": "OK",

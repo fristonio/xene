@@ -96,8 +96,8 @@ func refreshToken(ap *jwt.AuthProvider) func(*gin.Context) {
 // @Accept  json
 // @Produce json
 // @Success 200 {object} response.OauthLogin
-// @Param provider query string true "Provider for oauth login"
-// @Router /oauth/:provider [get]
+// @Param provider path string true "Provider for oauth login"
+// @Router /oauth/{provider} [get]
 func loginHandler(provider oauth.Provider) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		ctx.JSON(200, response.OauthLogin{
@@ -115,10 +115,10 @@ func loginHandler(provider oauth.Provider) func(*gin.Context) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param provider query string true "Provider for the oauth redirect"
+// @Param provider path string true "Provider for the oauth redirect"
 // @Success 200 {object} response.JWTAuth
 // @Failure 500 {object} response.HTTPError
-// @Router /oauth/:provider/redirect [get]
+// @Router /oauth/{provider}/redirect [get]
 func redirectHandler(provider oauth.Provider, ap *jwt.AuthProvider) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		u, code, err := provider.GetUser(ctx)

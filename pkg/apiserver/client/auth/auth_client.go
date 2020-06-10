@@ -50,7 +50,7 @@ func (a *Client) GetOauthProvider(params *GetOauthProviderParams) (*GetOauthProv
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "GetOauthProvider",
 		Method:             "GET",
-		PathPattern:        "/oauth/:provider",
+		PathPattern:        "/oauth/{provider}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -86,7 +86,7 @@ func (a *Client) GetOauthProviderRedirect(params *GetOauthProviderRedirectParams
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "GetOauthProviderRedirect",
 		Method:             "GET",
-		PathPattern:        "/oauth/:provider/redirect",
+		PathPattern:        "/oauth/{provider}/redirect",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},

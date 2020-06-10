@@ -123,13 +123,9 @@ func (o *GetOauthProviderParams) WriteToRequest(r runtime.ClientRequest, reg str
 	}
 	var res []error
 
-	// query param provider
-	qrProvider := o.Provider
-	qProvider := qrProvider
-	if qProvider != "" {
-		if err := r.SetQueryParam("provider", qProvider); err != nil {
-			return err
-		}
+	// path param provider
+	if err := r.SetPathParam("provider", o.Provider); err != nil {
+		return err
 	}
 
 	if len(res) > 0 {

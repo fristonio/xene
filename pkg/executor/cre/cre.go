@@ -219,6 +219,14 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) (*v1alpha1.Ta
 				w.Close()
 			}
 
+			for _, s := range task.Steps {
+				if _, ok := status.Steps[s.Name]; !ok {
+					status.Steps[s.Name] = &v1alpha1.StepRunStatus{
+						Status: v1alpha1.StatusNotExecuted,
+					}
+				}
+			}
+
 			return &status, err
 		}
 

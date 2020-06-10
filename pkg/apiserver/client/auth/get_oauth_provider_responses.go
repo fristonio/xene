@@ -49,7 +49,7 @@ type GetOauthProviderOK struct {
 }
 
 func (o *GetOauthProviderOK) Error() string {
-	return fmt.Sprintf("[GET /oauth/:provider][%d] getOauthProviderOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /oauth/{provider}][%d] getOauthProviderOK  %+v", 200, o.Payload)
 }
 
 func (o *GetOauthProviderOK) GetPayload() *models.ResponseOauthLogin {
