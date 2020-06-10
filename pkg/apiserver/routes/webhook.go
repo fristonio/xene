@@ -16,7 +16,7 @@ import (
 
 // WebhookGroupRoutes contains all the routes related to xene info.
 func WebhookGroupRoutes(r *gin.RouterGroup) {
-	r.GET("/trigger/workflow/:workflow/pipeline/:pipeline", webhookTriggerHandler)
+	r.GET("/trigger/:workflow/:trigger/:pipeline", webhookTriggerHandler)
 }
 
 // @Summary Webhook endpoints to trigger the pipelines of a particular workflow.

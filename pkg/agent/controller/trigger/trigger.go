@@ -142,7 +142,7 @@ func (t *Trigger) RunPipeline(ctx context.Context, manager *controller.Manager, 
 	}
 
 	for _, name := range t.Pipelines {
-		if name == pipeline {
+		if name == v1alpha1.GetWorkflowPrefixedName(t.Workflow, pipeline) {
 			err := t.runPipeline(ctx, manager, name)
 			if err != nil {
 				return err
