@@ -2,14 +2,17 @@ package cre
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/fristonio/xene/pkg/defaults"
 	"github.com/fristonio/xene/pkg/executor/cre/docker"
 	"github.com/fristonio/xene/pkg/executor/cre/runtime"
+	"github.com/fristonio/xene/pkg/store"
 	"github.com/fristonio/xene/pkg/templates"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
 	"github.com/fristonio/xene/pkg/utils"
@@ -48,10 +51,16 @@ type CRExecutor struct {
 
 	spec *v1alpha1.PipelineSpecWithName
 
+	status *v1alpha1.PipelineRunStatus
+
 	imageRef string
 
 	// log contains the logger for the pipeline executor
 	log *logrus.Entry
+
+	useStore bool
+
+	mux *sync.Mutex
 }
 
 // NewCRExecutor returns a new instance of the container runtime
@@ -66,12 +75,24 @@ func NewCRExecutor(runtime, id, name string, spec *v1alpha1.PipelineSpecWithName
 			"id":       id,
 			"runtime":  runtime,
 		}),
-		spec: spec,
+		spec:     spec,
+		useStore: true,
+		mux:      &sync.Mutex{},
 	}
 }
 
 func (c *CRExecutor) getResName() string {
 	return fmt.Sprintf("%s-%s", c.name, c.id)
+}
+
+// WithoutStore returns the CRExecutor disabling useStore option
+func (c *CRExecutor) WithoutStore() {
+	c.useStore = false
+}
+
+// WithStatus sets the status in the executor
+func (c *CRExecutor) WithStatus(status *v1alpha1.PipelineRunStatus) {
+	c.status = status
 }
 
 // Configure configures the container runtime executor
@@ -180,17 +201,25 @@ func (s *StepExecError) Error() string {
 }
 
 // RunTask runs the task defined by the spec in the container.
-func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) (*v1alpha1.TaskRunStatus, error) {
+func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 	c.log.Infof("Running task: %s", name)
 
-	status := v1alpha1.TaskRunStatus{
-		Steps: make(map[string]*v1alpha1.StepRunStatus),
-	}
+	c.mux.Lock()
+	c.status.Tasks[name].Status = v1alpha1.StatusRunning
+	c.SaveStatusToStore()
+	c.mux.Unlock()
 
 	for _, step := range task.Steps {
 		c.log.Infof("Running step: %s", step.Name)
+
 		l := newLogger(c.name, c.id, name, step.Name)
 		w := l.getLogWriter()
+
+		c.mux.Lock()
+		c.status.Tasks[name].Steps[step.Name].Status = v1alpha1.StatusRunning
+		c.status.Tasks[name].Steps[step.Name].LogFile = l.getLogFileName()
+		c.SaveStatusToStore()
+		c.mux.Unlock()
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute*30)
 		defer cancel()
@@ -210,50 +239,46 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) (*v1alpha1.Ta
 		}
 
 		if err != nil || res == nil {
-			status.Steps[step.Name] = &v1alpha1.StepRunStatus{
+			c.mux.Lock()
+			c.status.Tasks[name].Steps[step.Name] = &v1alpha1.StepRunStatus{
 				Status:  v1alpha1.StatusError,
 				LogFile: l.getLogFileName(),
 				Time:    time.Since(start),
 			}
+			c.status.Tasks[name].Status = v1alpha1.StatusError
+			c.SaveStatusToStore()
+			c.mux.Unlock()
 			if w != nil {
 				w.Close()
 			}
 
-			for _, s := range task.Steps {
-				if _, ok := status.Steps[s.Name]; !ok {
-					status.Steps[s.Name] = &v1alpha1.StepRunStatus{
-						Status: v1alpha1.StatusNotExecuted,
-					}
-				}
-			}
-
-			return &status, err
+			return err
 		}
 
 		if res.ExitCode != 0 {
-			status.Steps[step.Name] = &v1alpha1.StepRunStatus{
+			c.mux.Lock()
+			c.status.Tasks[name].Steps[step.Name] = &v1alpha1.StepRunStatus{
 				Status:  v1alpha1.StatusError,
 				LogFile: l.getLogFileName(),
 				Time:    time.Since(start),
 			}
+			c.status.Tasks[name].Status = v1alpha1.StatusError
+			c.SaveStatusToStore()
+			c.mux.Unlock()
 
-			for _, s := range task.Steps {
-				if _, ok := status.Steps[s.Name]; !ok {
-					status.Steps[s.Name] = &v1alpha1.StepRunStatus{
-						Status: v1alpha1.StatusNotExecuted,
-					}
-				}
-			}
-			return &status, &StepExecError{
+			return &StepExecError{
 				name: step.Name,
 			}
 		}
 
-		status.Steps[step.Name] = &v1alpha1.StepRunStatus{
+		c.mux.Lock()
+		c.status.Tasks[name].Steps[step.Name] = &v1alpha1.StepRunStatus{
 			Status:  v1alpha1.StatusSuccess,
 			LogFile: l.getLogFileName(),
 			Time:    time.Since(start),
 		}
+		c.SaveStatusToStore()
+		c.mux.Unlock()
 
 		if w != nil {
 			_ = w.Close()
@@ -261,7 +286,12 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) (*v1alpha1.Ta
 		c.log.Infof("Step completed: %s", step.Name)
 	}
 
-	return &status, nil
+	c.mux.Lock()
+	c.status.Tasks[name].Status = v1alpha1.StatusSuccess
+	c.SaveStatusToStore()
+	c.mux.Unlock()
+
+	return nil
 }
 
 // Shutdown shuts down the container runtime executor.
@@ -297,6 +327,27 @@ func (c *CRExecutor) Shutdown() error {
 
 	if err != nil {
 		return fmt.Errorf("error while removing image: %s", err)
+	}
+
+	return nil
+}
+
+// SaveStatusToStore saves the status in the store
+func (c *CRExecutor) SaveStatusToStore() error {
+	if !c.useStore {
+		return nil
+	}
+
+	statusKey := fmt.Sprintf("%s/%s/%s", v1alpha1.PipelineStatusKeyPrefix, c.name, c.id)
+
+	val, err := json.Marshal(c.status)
+	if err != nil {
+		return fmt.Errorf("error while marshalling status: %s", err)
+	}
+
+	err = store.KVStore.Set(context.TODO(), statusKey, val)
+	if err != nil {
+		return fmt.Errorf("error while setting status key in kvstore: %s", err)
 	}
 
 	return nil

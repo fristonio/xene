@@ -10,8 +10,17 @@ type RuntimeExecutor interface {
 	Configure() error
 
 	// RunTask runs the task provided in the specification
-	RunTask(string, *v1alpha1.TaskSpec) (*v1alpha1.TaskRunStatus, error)
+	RunTask(string, *v1alpha1.TaskSpec) error
 
 	// Shutdown shuts down the RuntimeExecutor instance and environment.
 	Shutdown() error
+
+	// Diables store usage in the executor.
+	WithoutStore()
+
+	// Executor with pipeline status
+	WithStatus(*v1alpha1.PipelineRunStatus)
+
+	// Saves the status in the store.
+	SaveStatusToStore() error
 }

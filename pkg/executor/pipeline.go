@@ -1,15 +1,12 @@
 package executor
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/fristonio/xene/pkg/dag"
 	"github.com/fristonio/xene/pkg/errors"
 	"github.com/fristonio/xene/pkg/executor/cre"
-	"github.com/fristonio/xene/pkg/store"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
 	"github.com/sirupsen/logrus"
 )
@@ -60,23 +57,26 @@ func NewPipelineExecutor(name, id string, spec *v1alpha1.PipelineSpecWithName) *
 		log: logrus.WithFields(logrus.Fields{
 			"pipeline": name,
 		}),
-		name:     name,
-		id:       id,
-		re:       re,
-		useStore: true,
+		name: name,
+		id:   id,
+		re:   re,
 	}
 }
 
 // WithoutStore sets the boolean useStore to false which will make the executor
 // not perform any KVStore interactions
 func (p *PipelineExecutor) WithoutStore() *PipelineExecutor {
-	p.useStore = false
+	p.re.WithoutStore()
 	return p
 }
 
 // Run starts running the pipeline.
+// Make sure that Pipeline status contains dummy information about all the tasks
+// and step in the pipeline
+// it should have a blueprint of the pipeline spec.
 func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 	p.log.Debugf("running PipelineExecutor")
+	p.status = &status
 
 	// Configure the pipeline runtime executor.
 	err := p.re.Configure()
@@ -91,6 +91,9 @@ func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 		p.log.Errorf("error while resolving pipeline: %s", err)
 	}
 
+	// Associate status with the runtime executor
+	p.re.WithStatus(&status)
+
 	// Walk each of task in the pipeline in the required order.
 	walkErrors := p.Spec.Dag.Walk(func(v dag.Vertex) *errors.MultiError {
 		errs := errors.NewMultiError()
@@ -102,40 +105,14 @@ func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 		}
 
 		// Run the task using the runtime executor.
-		tStatus, err := p.re.RunTask(task.Name(), task)
+		err := p.re.RunTask(task.Name(), task)
 		if err != nil {
 			errs.Append(fmt.Errorf("error while running the task: %s", err))
 			p.log.Errorf("error running task(%s): %s", task.Name(), err)
-			tStatus.Status = v1alpha1.StatusError
-		} else {
-			tStatus.Status = v1alpha1.StatusSuccess
 		}
 
-		tStatus.Dependencies = task.Dependencies
-
-		status.Tasks[task.Name()] = tStatus
 		return errs
 	})
-
-	// Put dummy information in the status for any task which might not have been
-	// executed
-	for name, task := range p.Spec.Tasks {
-		if _, ok := status.Tasks[name]; !ok {
-
-			stepStatus := make(map[string]*v1alpha1.StepRunStatus)
-			for _, step := range task.Steps {
-				stepStatus[step.Name] = &v1alpha1.StepRunStatus{
-					Status: v1alpha1.StatusNotExecuted,
-				}
-			}
-
-			status.Tasks[name] = &v1alpha1.TaskRunStatus{
-				Status:       v1alpha1.StatusNotExecuted,
-				Dependencies: task.Dependencies,
-				Steps:        stepStatus,
-			}
-		}
-	}
 
 	if len(walkErrors) > 0 {
 		status.Status = v1alpha1.StatusError
@@ -145,39 +122,13 @@ func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 	}
 
 	status.EndTime = time.Now().Unix()
-
-	// if we are using the store then store the status in the KVstore
-	// else store the status in the executor object
-	if p.useStore {
-		err = p.saveStatusToStore(&status)
-		if err != nil {
-			p.log.Error(err)
-		}
-	} else {
-		p.status = &status
-	}
+	p.re.SaveStatusToStore()
 
 	err = p.re.Shutdown()
 	if err != nil {
 		p.log.Errorf("error while shutting down runtime executor: %s", err)
 		return
 	}
-}
-
-func (p *PipelineExecutor) saveStatusToStore(status *v1alpha1.PipelineRunStatus) error {
-	statusKey := fmt.Sprintf("%s/%s/%s", v1alpha1.PipelineStatusKeyPrefix, p.name, p.id)
-
-	val, err := json.Marshal(status)
-	if err != nil {
-		return fmt.Errorf("error while marshalling status: %s", err)
-	}
-
-	err = store.KVStore.Set(context.TODO(), statusKey, val)
-	if err != nil {
-		return fmt.Errorf("error while setting status key in kvstore: %s", err)
-	}
-
-	return nil
 }
 
 // GetStatus returns the status of the pipeline run.

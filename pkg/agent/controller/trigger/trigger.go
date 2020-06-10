@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/fristonio/xene/pkg/controller"
 	"github.com/fristonio/xene/pkg/defaults"
@@ -102,15 +101,11 @@ func (t *Trigger) RunPipelines(ctx context.Context, manager *controller.Manager)
 		pipelineID := utils.RandToken(defaults.PipelineIDSize)
 
 		statusKey := fmt.Sprintf("%s/%s/%s", v1alpha1.PipelineStatusKeyPrefix, name, pipelineID)
-		pipelineStatus := v1alpha1.PipelineRunStatus{
-			Name:      name,
-			RunID:     pipelineID,
-			Status:    v1alpha1.StatusRunning,
-			Agent:     option.Config.Agent.Name,
-			StartTime: time.Now().Unix(),
-			EndTime:   0,
-			Tasks:     make(map[string]*v1alpha1.TaskRunStatus),
-		}
+		pipelineStatus := v1alpha1.GetDummyPipelineRunStatus(&pipeline)
+		pipelineStatus.RunID = pipelineID
+		pipelineStatus.Status = v1alpha1.StatusRunning
+		pipelineStatus.Agent = option.Config.Agent.Name
+
 		v, err := json.Marshal(&pipelineStatus)
 		if err != nil {
 			return fmt.Errorf("error while marshalling pipeline status: %s", err)
