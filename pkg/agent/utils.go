@@ -49,7 +49,7 @@ func GetPipelineRunLogReader(
 		}
 
 		taskStatus := pipelineStatus.Tasks[task.Name()]
-		if taskStatus.Steps == nil {
+		if taskStatus == nil || taskStatus.Steps == nil {
 			return errs
 		}
 		for stepName, step := range taskStatus.Steps {
