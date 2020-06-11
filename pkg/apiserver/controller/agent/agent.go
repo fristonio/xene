@@ -199,7 +199,10 @@ func (a *Controller) GetBlacklistedAgentsWithInfo() map[string]*v1alpha1.Agent {
 func (a *Controller) AgentConnection(agent string) *grpc.ClientConn {
 	ag, ok := a.Nodes[agent]
 	if !ok {
-		return nil
+		ag, ok = a.blacklistedNodes[agent]
+		if !ok {
+			return nil
+		}
 	}
 
 	if ag.conn == nil {
