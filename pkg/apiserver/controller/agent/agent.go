@@ -344,8 +344,11 @@ func (a *Controller) blacklistedNodesController(_ctx context.Context) error {
 	for name, node := range a.blacklistedNodes {
 		conn, err := GetAgentConnection(node.Agent)
 		if err != nil {
+			log.Warnf("Error getting agent connection from blacklisted nodes: %s", err)
 			continue
 		}
+
+		node.conn = conn
 		err = node.CheckHealth()
 		if err == nil {
 			log.Infof("node %s back online", name)
@@ -365,6 +368,8 @@ func (a *Controller) blacklistedNodesController(_ctx context.Context) error {
 			}
 			a.Nodes[name] = node
 			delete(a.blacklistedNodes, name)
+		} else {
+			log.Debugf("Error checking the health of the agent")
 		}
 	}
 

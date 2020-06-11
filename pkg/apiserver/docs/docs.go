@@ -1266,15 +1266,15 @@ var doc = `{
                     },
                     {
                         "type": "string",
-                        "description": "Name of the pipeline to be triggered.",
-                        "name": "pipeline",
+                        "description": "Name of the trigger associated with the pipeline",
+                        "name": "trigger",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Name of the trigger associated with the pipeline",
-                        "name": "trigger",
+                        "description": "Name of the pipeline to be triggered.",
+                        "name": "pipeline",
                         "in": "path",
                         "required": true
                     }

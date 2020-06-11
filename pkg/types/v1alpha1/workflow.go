@@ -122,12 +122,18 @@ func (w *WorkflowSpec) Validate() error {
 		return fmt.Errorf("at least one pipeline and one trigger must be mentioned")
 	}
 	for name, trigger := range w.Triggers {
+		if !IsValidDNSSubdomainName(name) {
+			return ErrInvalidDNSSubdomainName
+		}
 		if err := trigger.Validate(name); err != nil {
 			return err
 		}
 	}
 
 	for name, pipeline := range w.Pipelines {
+		if !IsValidDNSSubdomainName(name) {
+			return ErrInvalidDNSSubdomainName
+		}
 		if err := pipeline.Validate(name); err != nil {
 			return err
 		}

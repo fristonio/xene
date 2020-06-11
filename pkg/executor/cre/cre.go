@@ -49,6 +49,9 @@ type CRExecutor struct {
 	// for each of the CRExecutor instance.
 	id string
 
+	// conainerID contains the ID of the conainer running in the current environment
+	containerID string
+
 	spec *v1alpha1.PipelineSpecWithName
 
 	status *v1alpha1.PipelineRunStatus
@@ -180,6 +183,8 @@ func (c *CRExecutor) Configure() error {
 	if err != nil {
 		return fmt.Errorf("error while creating container: %s", err)
 	}
+
+	c.containerID = resp.ContainerID
 
 	ctx, cancel = context.WithTimeout(context.Background(), defaults.CreateContainerTimeout)
 	defer cancel()
@@ -321,7 +326,7 @@ func (c *CRExecutor) Shutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), defaults.CreateContainerTimeout)
 	defer cancel()
 	err := c.cre.StopContainer(ctx, &runtime.StopContainerRequest{
-		ContainerID: c.getResName(),
+		ContainerID: c.containerID,
 		Timeout:     int64(defaults.CreateContainerTimeout / time.Second),
 	})
 	if err != nil {
@@ -331,7 +336,7 @@ func (c *CRExecutor) Shutdown() error {
 	ctx, cancel = context.WithTimeout(context.Background(), defaults.CreateContainerTimeout)
 	defer cancel()
 	err = c.cre.RemoveContainer(ctx, &runtime.RemoveContainerRequest{
-		ContainerID: c.getResName(),
+		ContainerID: c.containerID,
 	})
 	if err != nil {
 		return fmt.Errorf("error while removing container: %s", err)

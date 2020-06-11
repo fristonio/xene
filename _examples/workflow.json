@@ -2,15 +2,11 @@
     "kind": "Workflow",
     "apiVersion": "v1alpha1",
     "metadata": {
-        "name": "Test-Workflow",
-        "description": "A test temporary workflow"
+        "name": "Test Workflow",
+        "description": "A workflow definition to test xene workflows"
     },
     "spec": {
         "triggers": {
-            "github-trigger": {
-                "type": "cron",
-                "cronConfig": "*/5 * * * *"
-            },
             "cron-trigger": {
                 "type": "cron",
                 "cronConfig": "*/5 * * * *"
@@ -19,7 +15,7 @@
         "pipelines": {
             "firstonio-ping-github": {
                 "trigger": "cron-trigger",
-                "description": "github.com/fristonio/ping pipeline",
+                "description": "Runs CI for https://github.com/fristonio/ping every 5 minutes",
                 "executor": {
                     "type": "container",
                     "containerConfig": {
@@ -92,61 +88,7 @@
             },
             "firstonio-docker-rs-cron": {
                 "trigger": "cron-trigger",
-                "description": "github.com/fristonio/docker.rs pipeline",
-                "executor": {
-                    "type": "container",
-                    "containerConfig": {
-                        "image": "rust"
-                    }
-                },
-                "tasks": {
-                    "setup-task": {
-                        "description": "Setup docker rs environment",
-                        "workingDir": "/docker-rs",
-                        "steps": [
-                            {
-                                "name": "update",
-                                "type": "shell",
-                                "cmd": "apt-get -y update"
-                            },
-                            {
-                                "name": "install-deps",
-                                "type": "shell",
-                                "cmd": "apt-get -y install git curl make"
-                            }
-                        ]
-                    },
-                    "checkout-task": {
-                        "description": "Checkout docker rust source code",
-                        "workingDir": "/",
-                        "dependencies": ["setup-task"],
-                        "steps": [
-                            {
-                                "name": "checkout",
-                                "type": "shell",
-                                "cmd": "git clone https://github.com/fristonio/docker.rs docker-rs"
-                            }
-                        ]
-                    },
-                    "build-task": {
-                        "description": "Build docker rust",
-                        "workingDir": "/docker-rs/",
-                        "dependencies": [
-                            "checkout-task"
-                        ],
-                        "steps": [
-                            {
-                                "name": "build",
-                                "type": "shell",
-                                "cmd": "cargo build"
-                            }
-                        ]
-                    }
-                }
-            },
-            "firstonio-docker-rs-github": {
-                "trigger": "github-trigger",
-                "description": "github.com/fristonio/docker.rs pipeline",
+                "description": "Runs CI pipeline for https://github.com/fristonio/docker.rs every 5 minutes.",
                 "executor": {
                     "type": "container",
                     "containerConfig": {

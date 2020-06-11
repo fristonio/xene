@@ -67,8 +67,8 @@ type Metadata struct {
 
 // Validate validates the information present in metadata.
 func (m *Metadata) Validate() error {
-	if m.ObjectMeta.Name == "" {
-		return fmt.Errorf("name is a required parameter in object manifest")
+	if !IsValidDNSSubdomainName(m.Name) {
+		return ErrInvalidDNSSubdomainName
 	}
 
 	return nil

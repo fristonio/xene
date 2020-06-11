@@ -962,14 +962,14 @@ paths:
         name: workflow
         required: true
         type: string
-      - description: Name of the pipeline to be triggered.
-        in: path
-        name: pipeline
-        required: true
-        type: string
       - description: Name of the trigger associated with the pipeline
         in: path
         name: trigger
+        required: true
+        type: string
+      - description: Name of the pipeline to be triggered.
+        in: path
+        name: pipeline
         required: true
         type: string
       produces:

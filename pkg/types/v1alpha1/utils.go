@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/fristonio/xene/pkg/defaults"
@@ -44,4 +45,13 @@ func GetDummyPipelineRunStatus(p *PipelineSpecWithName) PipelineRunStatus {
 	}
 
 	return status
+}
+
+// NameRegex is the regex for any ID/Name used by xene.
+// Matches any DNS Subdomain Names
+var NameRegex = regexp.MustCompile(`^[a-zA-Z0-9]+[a-zA-Z0-9-._]*[a-zA-Z0-9]+$`)
+
+// IsValidDNSSubdomainName checks if the provided string is a valid DNS subdomain name
+func IsValidDNSSubdomainName(name string) bool {
+	return NameRegex.Match([]byte(name)) && len(name) < 254
 }

@@ -2,7 +2,7 @@
 
 > A distributed workflow runner with focus on performance and simplicity.
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/f3adc406-ad04-4059-ad21-6a54f4be6771/deploy-status)](https://app.netlify.com/sites/sad-thompson-bcaa9a/deploys) ![Travis Status](https://travis-ci.com/fristonio/xene.svg?token=xvk2YsyqhEExfPszH3rV&branch=master)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f3adc406-ad04-4059-ad21-6a54f4be6771/deploy-status)](https://app.netlify.com/sites/sad-thompson-bcaa9a/deploys) ![Travis Status](https://travis-ci.com/fristonio/xene.svg?token=xvk2YsyqhEExfPszH3rV&branch=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
 Xene is a high performance, distributed workflow execution platform. It lets you create custom workflows in the form of a Directed Acyclic Graph which can then be executed based on a trigger configured with the workflow.
@@ -14,3 +14,7 @@ Xene is built in Golang with focus on performance, resiliency and simplicity. Xe
 - [Roadmap](/ROADMAP)
 - [API Docs](https://xene-api-docs.netlify.app/apidocs.html)
 - [Xene Documentation](https://xene-api-docs.netlify.app/)
+
+## License
+
+Xene is licensed under [MIT License](https://github.com/fristonio/xene/blob/master/LICENSE.md).
