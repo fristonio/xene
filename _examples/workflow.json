@@ -2,7 +2,7 @@
     "kind": "Workflow",
     "apiVersion": "v1alpha1",
     "metadata": {
-        "name": "Test Workflow",
+        "name": "TestWorkflow",
         "description": "A workflow definition to test xene workflows"
     },
     "spec": {
