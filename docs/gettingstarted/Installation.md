@@ -11,7 +11,7 @@ operating system:
 
 Pick a release of your choice from the [release page](https://github.com/fristonio/xene/releases) and download the binaries.
 
-```
+```bash
 # Download xene and xenectl binaries
 $ curl -fsSLO https://github.com/fristonio/xene/releases/download/v0.1.0/xene-linux-amd64
 $ curl -fsSLO https://github.com/fristonio/xene/releases/download/v0.1.0/xenectl-linux-amd64
@@ -53,11 +53,13 @@ Template for `xenectl` config is present [here](/_examples/sample.xenectl.yaml)
 **NOTE** For a distributed steup of Xene you can deploy agents on different machines each with it's own config. In such cases make
 sure that your agents are able to reach your API server for initial registration.
 
+If you want to disable authentication on either of APIService or Agent you can configure it using the config file.
+
 Jump to [Configure Services](###ConfigureServices) if you don't want to set up authentication between agent and APIServer.
 
 For all the agents, generate certificates using the below commands
 
-```
+```bash
 $ git clone https://github.com/fristonio/xene && cd xene/contrib/certs/
 
 $ make certs && \
@@ -70,3 +72,43 @@ request to the APIServer for which we need authentication token for agent. To ge
 use the JWTSecret provided in the xene agent config and sign a token.
 
 ### Configure Services
+
+Create systemd services on your host system using the templates below:
+
+- [APIServer Service](/contrib/systemd/xene-apiserver.service)
+- [Agent Service](/contrib/systemd/xene-agent.service)
+
+```bash
+$ mv contrib/systemd/* /etc/systemd/system/
+
+$ systemctl start xene-apiserver
+$ systemctl start xene-agent
+```
+
+**NOTE:** Run commands on different nodes if you want to set up a distributed system.
+
+Your APIServer should be up and running at this point ready to run workflows. If want a visual interface for Xene,
+you can take a look at the [setting up Xene UI](/UI.md).
+
+You can also interact with the APIServer using our command line tool `xenectl`. A few xenectl command examples is shown
+below:
+
+```bash
+$ xenectl workflow create --file _examples/workflow.json
+INFO[0000] TestWorkflow workflow created/updated
+
+$ xenectl workflow get --name TestWorkflow
+{
+    "kind": "Workflow",
+    "apiVersion": "v1alpha1",
+    "metadata": {
+        "name": "TestWorkflow",
+        "description": "A workflow definition to test xene workflows"
+    }
+    ...
+    ...
+}
+
+$ xenectl workflow delete --name TestWorkflow
+store item(TestWorkflow) has been deleted
+```
