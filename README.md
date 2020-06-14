@@ -48,7 +48,7 @@ You can start with setting up Xene on your system and try solving a few bugs lis
 ## Documentation
 
 - [API Docs](https://xene-api-docs.netlify.app/apidocs.html)
-- [Roadmap](/ROADMAP)
+- [Roadmap](/ROADMAP.md)
 - [Xene Documentation](https://xene-api-docs.netlify.app/)
 - [Go Doc](https://pkg.go.dev/github.com/fristonio/xene)
 - [Getting Started](/docs/GettingStarted.md)

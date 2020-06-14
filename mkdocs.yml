@@ -2,11 +2,11 @@ site_name: Xene
 
 nav:
   - Home: README.md
-  - CmdRef: cmdref/xene.md
-  - xenectl: cmdref/xenectl/xenectl.md
-  - Design: design/README.md
+  - Architecture: design/README.md
   - APIDocs: /apidocs.html
   - GoDoc: http://pkg.go.dev/github.com/fristonio/xene
+  - xene: cmdref/xene.md
+  - xenectl: cmdref/xenectl/xenectl.md
 
 theme: bootstrap4
 

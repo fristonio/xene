@@ -1,7 +1,14 @@
 agent:
+    name: default.agent.xene
     host: "127.0.0.1"
     apiServer: "http://localhost:6060"
-    apiAuthToken: xxxxxxxxxxx
+    apiAuthToken: "xxx"
     address: "http://127.0.0.1:6061"
-    insecure: true
+    insecure: false
+    serverName: agent.xene.io
     jwtSecret: xxxxxxxxxxx
+    keyFile: ./contrib/certs/server.gen/server-key.pem
+    certFile: ./contrib/certs/server.gen/server.pem
+    rootCACert: ./contrib/certs/ca.gen/ca.pem
+    clientKeyFile: ./contrib/certs/client.gen/client-key.pem
+    clientCertFile: ./contrib/certs/client.gen/client.pem

@@ -14,3 +14,4 @@
 
 - [ ] Secret embedding in workflow specification.
 - [ ] Executor pool for running pipeline executors.
+- [ ] Introduce logging plugins to agents, like save log to S3 lake.

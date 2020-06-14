@@ -1,13 +1,15 @@
 apiserver:
     host: "127.0.0.1"
     verboseLogs: true
-    jwtSecret: xxxxxxxx
+    jwtSecret: "xxxxx"
+    allowedDomains:
+      - "ec.iitr.ac.in"
     oauth:
         google:
             name: google
-            clientID: xxxxxx
-            clientSecret: xxxxxxx
-            redirectURL: "http://localhost:6060/oauth/google/redirect"
+            clientID: "xxxx.apps.googleusercontent.com"
+            clientSecret: "xxxx"
+            redirectURL: "http://localhost:3000/oauth/callback"
             scopes:
                 - profile
                 - email
