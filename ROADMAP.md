@@ -9,3 +9,8 @@
 - [x] Workflow creation and running on top of Docker based container runtime executor on the agent.
 - [x] Secrets management
 - [x] Workflow run live log streaming and status feed.
+
+# v0.2
+
+- [ ] Secret embedding in workflow specification.
+- [ ] Executor pool for running pipeline executors.
