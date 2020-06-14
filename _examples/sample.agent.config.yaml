@@ -7,8 +7,8 @@ agent:
     insecure: false
     serverName: agent.xene.io
     jwtSecret: xxxxxxxxxxx
-    keyFile: ./contrib/certs/server.gen/server-key.pem
-    certFile: ./contrib/certs/server.gen/server.pem
-    rootCACert: ./contrib/certs/ca.gen/ca.pem
-    clientKeyFile: ./contrib/certs/client.gen/client-key.pem
-    clientCertFile: ./contrib/certs/client.gen/client.pem
+    keyFile: /etc/xene/certs/server.gen/server-key.pem
+    certFile: /etc/xene/certs/server.gen/server.pem
+    rootCACert: /etc/xene/certs/ca.gen/ca.pem
+    clientKeyFile: /etc/xene/certs/client.gen/client-key.pem
+    clientCertFile: /etc/xene/certs/client.gen/client.pem

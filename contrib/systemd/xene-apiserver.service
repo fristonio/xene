@@ -1,0 +1,12 @@
+[Unit]
+Description=Xene APIServer
+Documentation=https://github.com/fristonio/xene
+
+[Service]
+Environment=INITSYSTEM=SYSTEMD
+Type=simple
+ExecStart=/usr/local/bin/xene apiserver
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
