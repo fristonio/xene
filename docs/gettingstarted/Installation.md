@@ -2,7 +2,7 @@
 
 Xene can be deployed in multiple ways, the choice of the method depends on the use case of the user.
 
-## Manual
+## Manual Installation
 
 For manual installation make sure that you have the following packages already installed on the host
 operating system:
@@ -112,3 +112,23 @@ $ xenectl workflow get --name TestWorkflow
 $ xenectl workflow delete --name TestWorkflow
 store item(TestWorkflow) has been deleted
 ```
+
+## Docker Compose Install
+
+For docker compose installation make sure that you have the following packages already installed on the host
+operating system:
+
+1. [Docker](https://docs.docker.com/get-docker/)
+2. [Docker Compose](https://docs.docker.com/compose/install/)
+
+```bash
+$ git clone https://github.com/fristonio/xene && cd xene
+
+$ make docker
+$ make docker-compose-up
+```
+
+**NOTE:** Do not use this method in production, its for local usage only.
+
+Your APIServer should be up and running at this point ready to run workflows. If want a visual interface for Xene,
+you can take a look at the [setting up Xene UI](/UI.md).
