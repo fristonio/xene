@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -56,8 +57,6 @@ type CRExecutor struct {
 
 	status *v1alpha1.PipelineRunStatus
 
-	imageRef string
-
 	// log contains the logger for the pipeline executor
 	log *logrus.Entry
 
@@ -87,7 +86,7 @@ func NewCRExecutor(runtime, id, name string, spec *v1alpha1.PipelineSpecWithName
 }
 
 func (c *CRExecutor) getResName() string {
-	return fmt.Sprintf("%s-%s", c.name, c.id)
+	return strings.ToLower(fmt.Sprintf("%s-%s", c.name, c.id))
 }
 
 // WithoutStore returns the CRExecutor disabling useStore option
@@ -143,12 +142,35 @@ func (c *CRExecutor) Configure() error {
 		Image: &runtime.ImageSpec{
 			Image: img,
 		},
-	})
+	}, c.getResName())
 	if err != nil {
 		return fmt.Errorf("error while pulling pipeline image: %s", err)
 	}
 
-	c.imageRef = res.ImageRef
+	// PullImage also tags the image we have just pulled, here remove the original tag
+	// from the pulled image.
+	err = cre.RemoveImage(context.TODO(), &runtime.RemoveImageRequest{
+		Image: &runtime.ImageSpec{
+			Tag: res.ImageRef,
+		},
+	})
+
+	if err != nil && !runtime.IsImageNotFoundError(err) {
+		return fmt.Errorf("error removing original tag from the image: %s", err)
+	}
+
+	// Also remove the image tag with the original name
+	err = cre.RemoveImage(context.TODO(), &runtime.RemoveImageRequest{
+		Image: &runtime.ImageSpec{
+			Tag: img,
+		},
+	})
+
+	if err != nil && !runtime.IsImageNotFoundError(err) {
+		return fmt.Errorf("error removing original image name from the image: %s", err)
+	}
+
+	c.log.Debugf("original image tag name has been removed")
 
 	envs := make([]*runtime.KeyValue, 0)
 	for key, val := range c.spec.Envs {
@@ -167,7 +189,7 @@ func (c *CRExecutor) Configure() error {
 				Name: c.getResName(),
 			},
 			Image: &runtime.ImageSpec{
-				Image: res.ImageRef,
+				Image: c.getResName(),
 			},
 			Command:    []string{"sleep", fmt.Sprintf("%d", int64(defaults.GlobalPipelineTimeout/time.Second))},
 			WorkingDir: "/",
@@ -358,11 +380,11 @@ func (c *CRExecutor) Shutdown() error {
 	defer cancel()
 	err = c.cre.RemoveImage(ctx, &runtime.RemoveImageRequest{
 		Image: &runtime.ImageSpec{
-			Image: c.imageRef,
+			Image: c.getResName(),
 		},
 	})
 
-	if err != nil {
+	if err != nil && !runtime.IsImageNotFoundError(err) {
 		return fmt.Errorf("error while removing image: %s", err)
 	}
 

@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"time"
 
@@ -57,7 +58,7 @@ func (e *RuntimeExecutor) ImageStatus(ctx context.Context,
 
 	imageInspect, _, err := e.client.ImageInspectWithRaw(ctx, image.Image)
 	if err != nil {
-		if isImageNotFoundError(err) {
+		if runtime.IsImageNotFoundError(err) {
 			return &runtime.ImageStatusResponse{}, nil
 		}
 		return nil, err
@@ -77,7 +78,7 @@ func (e *RuntimeExecutor) ImageStatus(ctx context.Context,
 
 // PullImage pulls an image with authentication config.
 func (e *RuntimeExecutor) PullImage(ctx context.Context,
-	r *runtime.PullImageRequest) (*runtime.PullImageResponse, error) {
+	r *runtime.PullImageRequest, tag string) (*runtime.PullImageResponse, error) {
 	image := r.Image
 	auth := r.Auth
 	authConfig := dockertypes.AuthConfig{}
@@ -129,6 +130,11 @@ func (e *RuntimeExecutor) PullImage(ctx context.Context,
 		return nil, err
 	}
 
+	err = e.client.ImageTag(ctx, imageRef, tag)
+	if err != nil {
+		return nil, fmt.Errorf("error while tagging image: %s", err)
+	}
+
 	return &runtime.PullImageResponse{ImageRef: imageRef}, nil
 }
 
@@ -137,18 +143,35 @@ func (e *RuntimeExecutor) PullImage(ctx context.Context,
 // already been removed.
 func (e *RuntimeExecutor) RemoveImage(ctx context.Context, r *runtime.RemoveImageRequest) error {
 	image := r.Image
-	// If the image has multiple tags, we need to remove all the tags
-	// TODO: We assume image.Image is image ID here, which is true in the current implementation
-	// of kubelet, but we should still clarify this in CRI.
+
+	if image.Tag != "" {
+		_, err := e.client.ImageRemove(ctx, image.Tag, dockertypes.ImageRemoveOptions{
+			PruneChildren: true,
+			Force:         true,
+		})
+		if ctxErr := contextError(ctx); ctxErr != nil {
+			return ctxErr
+		}
+		if dockerapi.IsErrNotFound(err) {
+			return runtime.ImageNotFoundError{ID: image.Tag}
+		}
+
+		if err != nil && !runtime.IsImageNotFoundError(err) {
+			return err
+		}
+
+		return nil
+	}
+
 	imageInspect, _, err := e.client.ImageInspectWithRaw(ctx, image.Image)
 
 	// dockerclient.InspectImageByID doesn't work with digest and repoTags,
 	// it is safe to continue removing it since there is another check below.
-	if err != nil && !isImageNotFoundError(err) {
+	if err != nil && !runtime.IsImageNotFoundError(err) {
 		return err
 	}
 
-	if isImageNotFoundError(err) {
+	if runtime.IsImageNotFoundError(err) {
 		// image is nil, assuming it doesn't exist.
 		return nil
 	}
@@ -170,10 +193,10 @@ func (e *RuntimeExecutor) RemoveImage(ctx context.Context, r *runtime.RemoveImag
 			return ctxErr
 		}
 		if dockerapi.IsErrNotFound(err) {
-			return imageNotFoundError{ID: image}
+			return runtime.ImageNotFoundError{ID: image}
 		}
 
-		if err != nil && !isImageNotFoundError(err) {
+		if err != nil && !runtime.IsImageNotFoundError(err) {
 			return err
 		}
 	}

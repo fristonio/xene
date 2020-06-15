@@ -67,7 +67,7 @@ type ImageService interface {
 	ImageStatus(context.Context, *ImageStatusRequest) (*ImageStatusResponse, error)
 
 	// PullImage pulls an image with authentication config.
-	PullImage(context.Context, *PullImageRequest) (*PullImageResponse, error)
+	PullImage(context.Context, *PullImageRequest, string) (*PullImageResponse, error)
 
 	// RemoveImage removes the image.
 	// This call is idempotent, and must not return an error if the image has

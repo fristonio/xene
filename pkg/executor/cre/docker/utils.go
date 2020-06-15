@@ -137,23 +137,6 @@ type operationTimeout struct {
 	err error
 }
 
-// imageNotFoundError is the error returned by InspectImage when image not found.
-// Expose this to inject error in dockershim for testing.
-type imageNotFoundError struct {
-	ID string
-}
-
-func (e imageNotFoundError) Error() string {
-	return fmt.Sprintf("no such image: %q", e.ID)
-}
-
-// IsImageNotFoundError checks whether the error is image not found error. This is exposed
-// to share with dockershim.
-func isImageNotFoundError(err error) bool {
-	_, ok := err.(imageNotFoundError)
-	return ok
-}
-
 func (e operationTimeout) Error() string {
 	return fmt.Sprintf("operation timeout: %v", e.err)
 }

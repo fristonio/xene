@@ -3,6 +3,7 @@
 package runtime
 
 import (
+	"fmt"
 	"io"
 	"time"
 )
@@ -99,6 +100,8 @@ type ContainerMetadata struct {
 // future it will include more detailed information about the different image types.
 type ImageSpec struct {
 	Image string `json:"image,omitempty"`
+
+	Tag string `json:"tag,omitempty"`
 }
 
 // KeyValue contains a key value pair of strings.
@@ -560,3 +563,20 @@ var (
 	// NetworkReady means the runtime network is up and ready to accept containers which require network.
 	NetworkReady = "NetworkReady"
 )
+
+// ImageNotFoundError is the error returned by InspectImage when image not found.
+// Expose this to inject error in dockershim for testing.
+type ImageNotFoundError struct {
+	ID string
+}
+
+func (e ImageNotFoundError) Error() string {
+	return fmt.Sprintf("no such image: %q", e.ID)
+}
+
+// IsImageNotFoundError checks whether the error is image not found error. This is exposed
+// to share with dockershim.
+func IsImageNotFoundError(err error) bool {
+	_, ok := err.(ImageNotFoundError)
+	return ok
+}

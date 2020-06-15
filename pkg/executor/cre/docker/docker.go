@@ -179,8 +179,7 @@ func (e *RuntimeExecutor) StopContainer(ctx context.Context, r *runtime.StopCont
 // runtime.
 func (e *RuntimeExecutor) RemoveContainer(ctx context.Context, r *runtime.RemoveContainerRequest) error {
 	err := e.client.ContainerRemove(ctx, r.ContainerID, dockertypes.ContainerRemoveOptions{
-		Force:       true,
-		RemoveLinks: true,
+		Force: true,
 	})
 	if ctxErr := contextError(ctx); ctxErr != nil {
 		return ctxErr
@@ -262,17 +261,17 @@ func (e *RuntimeExecutor) ContainerStatus(ctx context.Context,
 	}
 	if err != nil {
 		if dockerapi.IsErrNotFound(err) {
-			err = imageNotFoundError{ID: r.Image}
+			err = runtime.ImageNotFoundError{ID: r.Image}
 		}
 		return nil, err
 	}
 
 	if !matchImageIDOnly(resp, r.Image) {
-		return nil, imageNotFoundError{ID: r.Image}
+		return nil, runtime.ImageNotFoundError{ID: r.Image}
 	}
 
 	if err != nil {
-		if !isImageNotFoundError(err) {
+		if !runtime.IsImageNotFoundError(err) {
 			return nil, fmt.Errorf("unable to inspect docker image %q while inspecting docker container %q: %v",
 				r.Image, containerID, err)
 		}
