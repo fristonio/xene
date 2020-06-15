@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"time"
 
 	"github.com/fristonio/xene/pkg/agent"
 	"github.com/fristonio/xene/pkg/apiserver/client/registry"
@@ -165,14 +164,11 @@ var workflowRunCmd = &cobra.Command{
 
 			log.Infof("PIPELINE_RUN_ID: %s", id)
 			exec := executor.NewPipelineExecutor(name, id, spec).WithoutStore()
-			status := v1alpha1.PipelineRunStatus{
-				Name:      name,
-				RunID:     id,
-				Status:    "Running",
-				Agent:     "XENECTL",
-				StartTime: time.Now().Unix(),
-				Tasks:     make(map[string]*v1alpha1.TaskRunStatus),
-			}
+			status := v1alpha1.GetDummyPipelineRunStatus(spec)
+			status.Status = "Running"
+			status.Agent = "XENECTL"
+			status.RunID = id
+
 			exec.Run(status)
 
 			data, err := json.Marshal(exec.GetStatus())

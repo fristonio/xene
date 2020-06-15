@@ -212,10 +212,12 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 	c.log.Infof("Running task: %s", name)
 
 	c.mux.Lock()
-	c.status.Tasks[name].Status = v1alpha1.StatusRunning
-	err := c.SaveStatusToStore()
-	if err != nil {
-		c.log.Errorf("error while saving status to the store: %s", err)
+	if c.status != nil {
+		c.status.Tasks[name].Status = v1alpha1.StatusRunning
+		err := c.SaveStatusToStore()
+		if err != nil {
+			c.log.Errorf("error while saving status to the store: %s", err)
+		}
 	}
 	c.mux.Unlock()
 
@@ -226,11 +228,13 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 		w := l.getLogWriter()
 
 		c.mux.Lock()
-		c.status.Tasks[name].Steps[step.Name].Status = v1alpha1.StatusRunning
-		c.status.Tasks[name].Steps[step.Name].LogFile = l.getLogFileName()
-		err := c.SaveStatusToStore()
-		if err != nil {
-			c.log.Errorf("error while saving status to the store: %s", err)
+		if c.status != nil {
+			c.status.Tasks[name].Steps[step.Name].Status = v1alpha1.StatusRunning
+			c.status.Tasks[name].Steps[step.Name].LogFile = l.getLogFileName()
+			err := c.SaveStatusToStore()
+			if err != nil {
+				c.log.Errorf("error while saving status to the store: %s", err)
+			}
 		}
 		c.mux.Unlock()
 
@@ -253,15 +257,17 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 
 		if err != nil || res == nil {
 			c.mux.Lock()
-			c.status.Tasks[name].Steps[step.Name] = &v1alpha1.StepRunStatus{
-				Status:  v1alpha1.StatusError,
-				LogFile: l.getLogFileName(),
-				Time:    time.Since(start),
-			}
-			c.status.Tasks[name].Status = v1alpha1.StatusError
-			err := c.SaveStatusToStore()
-			if err != nil {
-				c.log.Errorf("error while saving status to the store: %s", err)
+			if c.status != nil {
+				c.status.Tasks[name].Steps[step.Name] = &v1alpha1.StepRunStatus{
+					Status:  v1alpha1.StatusError,
+					LogFile: l.getLogFileName(),
+					Time:    time.Since(start),
+				}
+				c.status.Tasks[name].Status = v1alpha1.StatusError
+				err := c.SaveStatusToStore()
+				if err != nil {
+					c.log.Errorf("error while saving status to the store: %s", err)
+				}
 			}
 			c.mux.Unlock()
 			if w != nil {
@@ -273,15 +279,17 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 
 		if res.ExitCode != 0 {
 			c.mux.Lock()
-			c.status.Tasks[name].Steps[step.Name] = &v1alpha1.StepRunStatus{
-				Status:  v1alpha1.StatusError,
-				LogFile: l.getLogFileName(),
-				Time:    time.Since(start),
-			}
-			c.status.Tasks[name].Status = v1alpha1.StatusError
-			err := c.SaveStatusToStore()
-			if err != nil {
-				c.log.Errorf("error while saving status to the store: %s", err)
+			if c.status != nil {
+				c.status.Tasks[name].Steps[step.Name] = &v1alpha1.StepRunStatus{
+					Status:  v1alpha1.StatusError,
+					LogFile: l.getLogFileName(),
+					Time:    time.Since(start),
+				}
+				c.status.Tasks[name].Status = v1alpha1.StatusError
+				err := c.SaveStatusToStore()
+				if err != nil {
+					c.log.Errorf("error while saving status to the store: %s", err)
+				}
 			}
 			c.mux.Unlock()
 
@@ -291,14 +299,16 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 		}
 
 		c.mux.Lock()
-		c.status.Tasks[name].Steps[step.Name] = &v1alpha1.StepRunStatus{
-			Status:  v1alpha1.StatusSuccess,
-			LogFile: l.getLogFileName(),
-			Time:    time.Since(start),
-		}
-		err = c.SaveStatusToStore()
-		if err != nil {
-			c.log.Errorf("error while saving status to the store: %s", err)
+		if c.status != nil {
+			c.status.Tasks[name].Steps[step.Name] = &v1alpha1.StepRunStatus{
+				Status:  v1alpha1.StatusSuccess,
+				LogFile: l.getLogFileName(),
+				Time:    time.Since(start),
+			}
+			err = c.SaveStatusToStore()
+			if err != nil {
+				c.log.Errorf("error while saving status to the store: %s", err)
+			}
 		}
 		c.mux.Unlock()
 
@@ -309,10 +319,12 @@ func (c *CRExecutor) RunTask(name string, task *v1alpha1.TaskSpec) error {
 	}
 
 	c.mux.Lock()
-	c.status.Tasks[name].Status = v1alpha1.StatusSuccess
-	err = c.SaveStatusToStore()
-	if err != nil {
-		c.log.Errorf("error while saving status to the store: %s", err)
+	if c.status != nil {
+		c.status.Tasks[name].Status = v1alpha1.StatusSuccess
+		err := c.SaveStatusToStore()
+		if err != nil {
+			c.log.Errorf("error while saving status to the store: %s", err)
+		}
 	}
 	c.mux.Unlock()
 
