@@ -38,6 +38,7 @@ Some of the main features of Xene are:
 - Workflow creation and running on top of Docker based container runtime executor on the agent.
 - Secrets management for agents.
 - Workflow pipelines run live log streaming and status feed.
+- Google based OAuth for APIServer with domain filtered authorization.
 
 ## Contributing
 

@@ -88,7 +88,7 @@ $ systemctl start xene-agent
 **NOTE:** Run commands on different nodes if you want to set up a distributed system.
 
 Your APIServer should be up and running at this point ready to run workflows. If want a visual interface for Xene,
-you can take a look at the [setting up Xene UI](/UI.md).
+you can take a look at the [setting up Xene UI](UI.md).
 
 You can also interact with the APIServer using our command line tool `xenectl`. A few xenectl command examples is shown
 below:
@@ -131,4 +131,4 @@ $ make docker-compose-up
 **NOTE:** Do not use this method in production, its for local usage only.
 
 Your APIServer should be up and running at this point ready to run workflows. If want a visual interface for Xene,
-you can take a look at the [setting up Xene UI](/UI.md).
+you can take a look at the [setting up Xene UI](UI.md).
