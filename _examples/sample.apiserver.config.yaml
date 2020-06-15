@@ -1,15 +1,32 @@
+# Config of Xene APIServer
 apiserver:
-    host: "127.0.0.1"
+    # Host to use for running the API server.
+    host: "0.0.0.0"
+
+    # Prints verbose logs for the APIserver for each request.
     verboseLogs: true
+
+    # jwtSecret is the secret used for authentication purposes in Xene.
     jwtSecret: "xxxxx"
+
+    # allowedDomains contains a list of domains allowed for login to the platform
+    # when using OAuth.
     allowedDomains:
       - "ec.iitr.ac.in"
+
+    # OAuth configuration for the APIServer
     oauth:
+        # Name of the authentication provider
         google:
             name: google
+
+            # Parameters from Google OAuth application.
             clientID: "xxxx.apps.googleusercontent.com"
             clientSecret: "xxxx"
-            redirectURL: "http://localhost:3000/oauth/callback"
+
+            # This redirectURL should either corresponds to the React route or
+            # the redirect route handler on the APIServer.
+            redirectURL: "http://0.0.0.0:3000/oauth/callback"
             scopes:
                 - profile
                 - email

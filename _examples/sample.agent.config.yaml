@@ -1,12 +1,29 @@
+# Agent Configuration
 agent:
+    # Name contains the name of the agent
     name: default.agent.xene
-    host: "127.0.0.1"
-    apiServer: "http://localhost:6060"
+
+    # Host to run the Agent on
+    host: "0.0.0.0"
+
+    # Address of the API server, make sure that the APIServer is reachable
+    # from the agent.
+    apiServer: "http://0.0.0.0:6060"
+
+    # Auth Token to use when registrering with the APIServer.
     apiAuthToken: "xxx"
-    address: "http://127.0.0.1:6061"
+
+    # Address of the agent.
+    address: "http://0.0.0.0:6061"
+
+    # Whether to run Xene in insecure mode with no authentication.
     insecure: false
+
+    # Server Name of the agent for mTLS between APIServer and agent.
     serverName: agent.xene.io
-    jwtSecret: xxxxxxxxxxx
+
+    # Parameters for running a sercure cluster, make sure these are correct
+    # certificates.
     keyFile: /etc/xene/certs/server.gen/server-key.pem
     certFile: /etc/xene/certs/server.gen/server.pem
     rootCACert: /etc/xene/certs/ca.gen/ca.pem

@@ -1,2 +1,5 @@
+# Address of the APIServer
 apiServerAddr: 'http://127.0.0.1:6060'
+
+# AuthToken to use when communicating with the APIServer.
 authToken: "xxxxxxx"
