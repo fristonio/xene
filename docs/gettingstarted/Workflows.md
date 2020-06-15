@@ -118,6 +118,59 @@ Create a new file with the above workflow manifest(workflow.json) and simply run
 $ xenectl workflow run -f workflow.json --local
 ```
 
-<img src="https://asciinema.org/a/339665.png" href="https://asciinema.org/a/339665" style="display: block; width: 80%; float: none; margin-left: auto; margin-right: auto">
+<img src="https://asciinema.org/a/339665.png" href="https://asciinema.org/a/339665" style="display: block; width: 95%; float: none; margin-left: auto; margin-right: auto">
 
 All the log files are store relative to the xene agent logs directory(default: /var/run/xene/agent/logs/).
+
+## Distributed Xene Setup with xenectl
+
+This is is the most common use case when using xene for running workflow. For this you need to have Xene up and running.
+Configure your `xenectl` configuration so that it can access the APIServer.
+
+To run the workflow, create a workflow manifest and run the following command
+
+```bash
+$ xenectl workflow create -f workflow.json
+INFO[0000] TestWorkflow workflow created/updated
+```
+
+At this point the workflow has been created and xene will soon start a controller to watch for the state of this object.
+You can see the status of the workflow using the below command.
+
+To run the workflow, create a workflow manifest and run the following command
+
+```bash
+$ xenectl workflowstatus get --name TestWorkflow
+
+{
+  "apiVersion": "v1alpha1",
+  "kind": "WorkflowStatus",
+  "metadata": {
+    "name": "TestWorkflow"
+  },
+  "pipelines": {
+    "firstonio-ping-github": {
+      "executor": "default.agent.xene",
+      "previousExecutors": [],
+      "status": "Scheduled"
+    }
+  },
+  "workflowSpec": "SPEC"
+}
+```
+
+## Distributed Xene Setup with UI
+
+You can also use the UI to manage the cluster, in this case you can also create workflow manifest. For this first make sure
+that your xene setup is up and running. Run the UI server and check if the UI is able to connect to the cluster. Login using
+Google OAuth configured for Xene and go to [workflow list page](http://localhost:3000/dashboard/workflows)
+
+Click on the Edit Icon at the bottom right of the webpage
+
+![Edit Icon](images/edit-icon.png)
+
+Write the manifest in the provided text editor and then Click on OK.
+
+![Workflow Create Page](images/CreateWorkflowPage.png)
+
+The workflow object is created at the APIServer and one can use the UI to view the pipelines status and run informations.
