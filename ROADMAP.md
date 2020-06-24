@@ -15,3 +15,9 @@
 - [ ] Secret embedding in workflow specification.
 - [ ] Executor pool for running pipeline executors.
 - [ ] Introduce logging plugins to agents, like save log to S3 lake.
+- [ ] Pipeline level interaction using xenectl
+- [ ] Connectors between tasks to exchange metadata.
+- [ ] Custom integrable steps like - Artifact Pull
+- [ ] Versioned Workflows
+- [ ] Workflow orchestration using code.
+
