@@ -2,4 +2,3 @@
   base    = "."
   publish = "site/"
   command = "make docs"
-

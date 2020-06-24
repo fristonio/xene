@@ -11,7 +11,7 @@ Xene is built with Golang with a focus on performance, resiliency, and simplicit
 
 ## Documentation
 
-- [Getting Started](/GettingStarted)
+- [Getting Started](/GettingStarted.md)
 - [API Docs](https://xene-api-docs.netlify.app/apidocs.html)
 - [Go Doc](https://pkg.go.dev/github.com/fristonio/xene)
 
