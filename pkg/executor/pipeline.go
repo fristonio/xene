@@ -74,10 +74,24 @@ func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 	p.log.Debugf("running PipelineExecutor")
 	p.status = &status
 
+	// Associate status with the runtime executor
+	p.re.WithStatus(&status)
+
 	// Configure the pipeline runtime executor.
-	err := p.re.Configure()
+	p.status.Status = v1alpha1.StatusConfiguring
+	err := p.re.SaveStatusToStore()
+	if err != nil {
+		p.log.Errorf("error while saving configuring status to the store: %s", err)
+	}
+
+	err = p.re.Configure()
 	if err != nil {
 		p.log.Errorf("error while setting up runtime executor: %s", err)
+		p.status.Status = v1alpha1.StatusErrorConfiguring
+		err = p.re.SaveStatusToStore()
+		if err != nil {
+			p.log.Errorf("error while saving configuration error status to the store: %s", err)
+		}
 		return
 	}
 
@@ -86,9 +100,6 @@ func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 	if err != nil {
 		p.log.Errorf("error while resolving pipeline: %s", err)
 	}
-
-	// Associate status with the runtime executor
-	p.re.WithStatus(&status)
 
 	// Walk each of task in the pipeline in the required order.
 	walkErrors := p.Spec.Dag.Walk(func(v dag.Vertex) *errors.MultiError {
@@ -123,9 +134,21 @@ func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 		p.log.Errorf("error while saving status to the store: %s", err)
 	}
 
+	// Cleanup the runtime executor for the pipeline.
+	p.status.Status = v1alpha1.StatusCleaningUp
+	err = p.re.SaveStatusToStore()
+	if err != nil {
+		p.log.Errorf("error while saving configuring status to the store: %s", err)
+	}
+
 	err = p.re.Shutdown()
 	if err != nil {
 		p.log.Errorf("error while shutting down runtime executor: %s", err)
+		p.status.Status = v1alpha1.StatusErrorCleaningUp
+		err = p.re.SaveStatusToStore()
+		if err != nil {
+			p.log.Errorf("error while saving cleaningup error status to the store: %s", err)
+		}
 		return
 	}
 }

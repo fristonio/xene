@@ -86,6 +86,26 @@ var (
 	// StatusRunning contains the running  status
 	StatusRunning string = "Running"
 
+	// StatusConfiguring contains the status while configuring the runtime
+	// executor environment
+	StatusConfiguring string = "Configuring"
+
+	// StatusCleaningUp contains the status while we are cleaning the runtime
+	// executor environment
+	StatusCleaningUp string = "CleaningUp"
+
+	// StatusErrorConfiguring contains the status while configuring the runtime
+	// executor environment and an error occured.
+	StatusErrorConfiguring string = "ErrorConfiguring"
+
+	// StatusErrorCleaningUp contains the status while we are cleaning the runtime
+	// executor environment and an error occured
+	StatusErrorCleaningUp string = "ErrorCleaningUp"
+
+	// StatusWaitingForExecutor contains the status for when the pipeline executor
+	// is waiting for an executor on the agent.
+	StatusWaitingForExecutor string = "WaitingForExecutor"
+
 	// StatusNotExecuted contais the status when a component is not executed.
 	StatusNotExecuted string = "NotExecuted"
 )
