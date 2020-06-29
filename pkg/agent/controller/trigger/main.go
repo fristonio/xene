@@ -82,7 +82,7 @@ func (c *Controller) Configure() {
 func (c *Controller) Run() error {
 	f, err := controller.NewControllerFunction(c.triggerUpdateControllerFunc)
 	if err != nil {
-		return fmt.Errorf("error whilze creating update controller: %s", err)
+		return fmt.Errorf("error while creating update controller: %s", err)
 	}
 
 	err = c.Manager.UpdateController("trigger-update", "trigger", controller.Internal{

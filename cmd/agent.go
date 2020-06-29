@@ -121,6 +121,8 @@ func init() {
 		true, "Run xene agent with embedded log server for handling log files.")
 	agentFlags.Uint32VarP(&option.Config.Agent.LogServerPort, "log-server-port", "",
 		defaults.AgentLogServerPort, "Run xene agent with embedded log server for handling log files.")
+	agentFlags.IntVarP(&option.Config.Agent.ConcurrentExecutors, "concurrent-executors", "",
+		defaults.AgentConcurrentExecutors, "Run xene agent with embedded log server for handling log files.")
 
 	_ = agentCmd.MarkPersistentFlagRequired("name")
 	_ = agentCmd.MarkPersistentFlagRequired("address")

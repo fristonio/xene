@@ -55,4 +55,8 @@ type AgentOpts struct {
 
 	// LogServerPort is the port to run the log server
 	LogServerPort uint32 `yaml:"logServerPort"`
+
+	// ConcurrentExecutors is the number of concurrent executions that a particular
+	// agent can support.
+	ConcurrentExecutors int `yaml:"concurrentExecutors"`
 }

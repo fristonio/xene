@@ -2,6 +2,7 @@ package defaults
 
 import (
 	"fmt"
+	"runtime"
 	"time"
 )
 
@@ -41,4 +42,8 @@ var (
 
 	// AgentLogServerPort is the port to bind the agent log server on.
 	AgentLogServerPort uint32 = 6062
+
+	// AgentConcurrentExecutors is the default number of concurrent executor
+	// that the agent supports.
+	AgentConcurrentExecutors int = runtime.GOMAXPROCS(0)
 )

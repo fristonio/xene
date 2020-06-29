@@ -1,14 +1,21 @@
 package executor
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/fristonio/xene/pkg/dag"
 	"github.com/fristonio/xene/pkg/errors"
 	"github.com/fristonio/xene/pkg/executor/cre"
+	"github.com/fristonio/xene/pkg/option"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/sync/semaphore"
+)
+
+var (
+	executorSemaphore = semaphore.NewWeighted(int64(option.Config.Agent.ConcurrentExecutors))
 )
 
 // PipelineExecutor is the type for executing pipelines.
@@ -77,9 +84,25 @@ func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 	// Associate status with the runtime executor
 	p.re.WithStatus(&status)
 
+	// Acquire an executor to run the pipeline
+	p.status.Status = v1alpha1.StatusWaitingForExecutor
+	err := p.re.SaveStatusToStore()
+	if err != nil {
+		p.log.Errorf("error while saving executor waiting status to the store: %s", err)
+		return
+	}
+
+	if err := executorSemaphore.Acquire(context.TODO(), 1); err != nil {
+		p.log.Errorf("Failed to acquire semaphore for executor: %v", err)
+		return
+	}
+	defer executorSemaphore.Release(1)
+
+	p.log.Debugf("Executor acquired for pipeline execution")
+
 	// Configure the pipeline runtime executor.
 	p.status.Status = v1alpha1.StatusConfiguring
-	err := p.re.SaveStatusToStore()
+	err = p.re.SaveStatusToStore()
 	if err != nil {
 		p.log.Errorf("error while saving configuring status to the store: %s", err)
 	}
