@@ -9,9 +9,12 @@ import (
 	"time"
 
 	"github.com/fristonio/xene/pkg/controller"
+	"github.com/fristonio/xene/pkg/executor"
+	"github.com/fristonio/xene/pkg/option"
 	"github.com/fristonio/xene/pkg/store"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/sync/semaphore"
 )
 
 var (
@@ -74,6 +77,8 @@ func (c *Controller) Type() string {
 
 // Configure sets up the trigger controller and all its required components.
 func (c *Controller) Configure() {
+	log.Infof("xxxxxxxxxxxxxxx: %d", option.Config.Agent.ConcurrentExecutors)
+	executor.ExecutorSemaphore = semaphore.NewWeighted(int64(option.Config.Agent.ConcurrentExecutors))
 	c.storeInformer = c.newTriggerStoreInformer()
 	c.name = c.storeInformer.Name()
 }

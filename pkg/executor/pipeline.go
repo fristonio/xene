@@ -8,15 +8,14 @@ import (
 	"github.com/fristonio/xene/pkg/dag"
 	"github.com/fristonio/xene/pkg/errors"
 	"github.com/fristonio/xene/pkg/executor/cre"
-	"github.com/fristonio/xene/pkg/option"
 	"github.com/fristonio/xene/pkg/types/v1alpha1"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/semaphore"
 )
 
-var (
-	executorSemaphore = semaphore.NewWeighted(int64(option.Config.Agent.ConcurrentExecutors))
-)
+// ExecutorSemaphore is the semaphore for pooling executors on xene
+// agent.
+var ExecutorSemaphore *semaphore.Weighted
 
 // PipelineExecutor is the type for executing pipelines.
 type PipelineExecutor struct {
@@ -92,11 +91,11 @@ func (p *PipelineExecutor) Run(status v1alpha1.PipelineRunStatus) {
 		return
 	}
 
-	if err := executorSemaphore.Acquire(context.TODO(), 1); err != nil {
+	if err := ExecutorSemaphore.Acquire(context.TODO(), 1); err != nil {
 		p.log.Errorf("Failed to acquire semaphore for executor: %v", err)
 		return
 	}
-	defer executorSemaphore.Release(1)
+	defer ExecutorSemaphore.Release(1)
 
 	p.log.Debugf("Executor acquired for pipeline execution")
 

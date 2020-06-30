@@ -76,8 +76,6 @@ func (s *Server) JoinAPIServer(apiServerAddr, agentName, agentAddr, authToken st
 		agentManifest.Spec.ServerName = option.Config.Agent.ServerName
 	}
 
-	log.Infof("%v", a)
-	log.Infof("%v", agentManifest)
 	if a.DeepEquals(&agentManifest) {
 		log.Infof("agent information is already up to date in apiserver")
 		return nil
