@@ -1,4 +1,4 @@
-mkdocs==1.0.4
+mkdocs==1.2.3
 mkdocs-bootstrap4
 PyYAML
 
