@@ -12,13 +12,13 @@ require (
 	github.com/docker/docker v1.13.1
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/gin-contrib/cors v1.3.1
-	github.com/gin-gonic/gin v1.6.3
+	github.com/gin-gonic/gin v1.9.0
 	github.com/go-openapi/errors v0.19.4
 	github.com/go-openapi/runtime v0.19.15
 	github.com/go-openapi/spec v0.19.8 // indirect
 	github.com/go-openapi/strfmt v0.19.5
 	github.com/go-openapi/swag v0.19.9
-	github.com/golang/protobuf v1.4.1
+	github.com/golang/protobuf v1.5.0
 	github.com/gorilla/mux v1.7.4 // indirect
 	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
@@ -30,13 +30,10 @@ require (
 	github.com/spf13/viper v1.6.3
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.7
-	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	golang.org/x/text v0.3.3 // indirect
-	golang.org/x/tools v0.0.0-20200624060801-dcbf2a9ed15d // indirect
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	google.golang.org/grpc v1.29.1
-	google.golang.org/protobuf v1.22.0
+	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.3.0
 	gotest.tools v2.2.0+incompatible // indirect
 )
